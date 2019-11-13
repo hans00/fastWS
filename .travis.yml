@@ -45,5 +45,5 @@ script:
 - >
  if [ -n "$TRAVIS_TAG" ]; then
    echo "building and uploading binaries"
-   npm run prebuild-ci;
+   npm run prebuild-ci -t "$TRAVIS_TAG";
  fi;
