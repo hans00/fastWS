@@ -8,7 +8,7 @@ notifications:
 branches:
   only:
     - master
-    # - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
+    - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
 
 cache:
   directories:
