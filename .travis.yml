@@ -42,9 +42,8 @@ script:
   fi;
 # do it by hand on testing VMs
 # if publishing, do it
-- echo $TRAVIS_TAG
 - >
- if [ -n $TRAVIS_TAG ]; then
+ if [ -n "$TRAVIS_TAG" ]; then
    echo "building and uploading binaries"
    npm run prebuild-ci;
  fi;

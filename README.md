@@ -1,6 +1,10 @@
 fastWS
 =====
 
+[![npm](https://img.shields.io/npm/v/fast-ws.svg)](https://www.npmjs.com/package/fast-ws)
+[![Node version](https://img.shields.io/node/v/fast-ws.svg)](https://www.npmjs.com/package/fast-ws)
+[![Travis](https://img.shields.io/travis/hans00/fastWS.svg)](https://travis-ci.org/hans00/fastWS)
+
 Simple Node.js server based on uWebSockets
 
 ---
