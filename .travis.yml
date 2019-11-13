@@ -1,12 +1,6 @@
 sudo: required
 language: node_js
-os:
-  - linux
-  - osx
 node_js: 12
-
-env:
-  - CC=clang CXX=clang++ npm_config_clang=1
 
 notifications:
   email: false
@@ -20,10 +14,18 @@ cache:
   directories:
   - node_modules
 
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
+matrix:
+  include:
+    - os: osx
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+          env:
+            - CC=gcc-7 CXX=g++-7
 
 install:
   - npm run update
