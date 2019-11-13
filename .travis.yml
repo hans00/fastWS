@@ -28,12 +28,6 @@ before_install:
 - npm config set spin false
 - npm install -g node-gyp
 
-- PUBLISH_BINARY=false
-- echo $TRAVIS_BRANCH
-- echo `git describe --tags --always HEAD`
-- if [[ $TRAVIS_BRANCH == `git describe --tags --always HEAD` ]]; then PUBLISH_BINARY=true; fi;
-- echo "Publishing native platform Binary Package? ->" $PUBLISH_BINARY
-
 install:
 - npm run update
 - npm install --build-from-source
@@ -49,7 +43,7 @@ script:
 # do it by hand on testing VMs
 # if publishing, do it
 - >
- if [[ $PUBLISH_BINARY == true ]]; then
+ if [ -n $TRAVIS_TAG ]; then
    echo "building and uploading binaries"
    npm run prebuild-ci;
  fi;
