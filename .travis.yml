@@ -24,8 +24,8 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-7
-          env:
-            - CC=gcc-7 CXX=g++-7
+      env:
+        - CC=gcc-7 CXX=g++-7
 
 install:
   - npm run update
