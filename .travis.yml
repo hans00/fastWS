@@ -18,17 +18,6 @@ env:
   - TRAVIS_NODE_VERSION="12"
   - TRAVIS_NODE_VERSION="13"
 
-matrix:
-  exclude:
-  - os: osx
-    env: TRAVIS_NODE_VERSION="10"
-  - os: osx
-    env: TRAVIS_NODE_VERSION="11"
-  - os: osx
-    env: TRAVIS_NODE_VERSION="12"
-  - os: osx
-    env: TRAVIS_NODE_VERSION="13"
-
 before_install:
 
 - nvm install $TRAVIS_NODE_VERSION
