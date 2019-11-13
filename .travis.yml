@@ -1,0 +1,69 @@
+sudo: required
+before_install:
+  - npm install -g node-gyp
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-7
+
+# Build matrix
+os:
+- linux
+- osx
+env:
+  matrix:
+  - TRAVIS_NODE_VERSION="10"
+  - TRAVIS_NODE_VERSION="11"
+  - TRAVIS_NODE_VERSION="12"
+  - TRAVIS_NODE_VERSION="13"
+
+matrix:
+  exclude:
+  - os: osx
+    env: TRAVIS_NODE_VERSION="10"
+  - os: osx
+    env: TRAVIS_NODE_VERSION="11"
+  - os: osx
+    env: TRAVIS_NODE_VERSION="12"
+  - os: osx
+    env: TRAVIS_NODE_VERSION="13"
+
+before_install:
+
+- nvm install $TRAVIS_NODE_VERSION
+- if [[ $TRAVIS_OS_NAME == "linux" ]]; then export CXX=g++-7; fi
+- $CXX --version
+
+- npm config set progress false
+- npm config set spin false
+- npm install -g node-gyp
+
+- PUBLISH_BINARY=false
+- echo $TRAVIS_BRANCH
+- echo `git describe --tags --always HEAD`
+- if [[ $TRAVIS_BRANCH == `git describe --tags --always HEAD` ]]; then PUBLISH_BINARY=true; fi;
+- echo "Publishing native platform Binary Package? ->" $PUBLISH_BINARY
+
+install:
+- npm run update
+- npm install --build-from-source
+
+script:
+- npm test
+
+# inspect library dependencies
+- >
+  if [[ $TRAVIS_OS_NAME == "linux" ]]; then
+    ldd ./build/Release/uWS.node
+  else
+    otool -L ./build/Release/uWS.node
+  fi;
+# do it by hand on testing VMs
+# if publishing, do it
+- >
+ if [[ $PUBLISH_BINARY == true ]]; then
+   echo "building and uploading binaries"
+   npm run prebuild-ci;
+ fi;
