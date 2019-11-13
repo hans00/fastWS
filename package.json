@@ -10,15 +10,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "update": "git submodule update --init",
     "install": "prebuild-install || node-gyp rebuild",
-    "prebuild": "prebuild --all --verbose --include-regex \"uWS.*node$\"",
-    "prebuild-upload": "prebuild --upload-all",
-    "prebuild-ci": "prebuild-ci",
-    "gypclean": "node-gyp clean",
-    "gypconfigure": "node-gyp configure",
-    "gypbuild": "node-gyp build",
-    "gyprebuild": "node-gyp rebuild",
+    "prebuild-node": "prebuild -t 10.11.0 -t 11.9.0 -t 12.0.0 --strip",
+    "prebuild-upload": "prebuild --upload-all ${PREBUILD_TOKEN}",
     "clean": "rimraf build node_modules prebuilds",
-    "distclean": "npm run clean"
+    "distclean": "npm run clean",
+    "postpublish": "git push --follow-tags"
   },
   "repository": {
     "type": "git",
@@ -41,8 +37,8 @@
   },
   "gypfile": true,
   "devDependencies": {
+    "node-gyp": "^6.0.1",
     "prebuild": "^9.1.1",
-    "prebuild-ci": "^3.1.0",
     "rimraf": "^3.0.0"
   }
 }
