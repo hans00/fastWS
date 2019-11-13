@@ -50,8 +50,6 @@ install:
 - npm install --build-from-source
 
 script:
-- npm test
-
 # inspect library dependencies
 - >
   if [[ $TRAVIS_OS_NAME == "linux" ]]; then
