@@ -1,6 +1,6 @@
 {
   "name": "fast-ws",
-  "version": "1.0.1-rc.3",
+  "version": "1.0.1-rc.4",
   "description": "Simple Node.js server based on uWebSockets",
   "main": "index.js",
   "engines": {
@@ -14,7 +14,8 @@
     "prebuild-upload": "prebuild --upload-all ${PREBUILD_TOKEN}",
     "clean": "rimraf build node_modules prebuilds",
     "distclean": "npm run clean",
-    "postpublish": "git tag v${npm_package_version} && git push --follow-tags"
+    "tag-version": "git tag -a v${npm_package_version} -m 'release v${npm_package_version}'",
+    "postpublish": "npm run tag-version && git push --follow-tags"
   },
   "repository": {
     "type": "git",
