@@ -1,23 +1,8 @@
-const { inet_ntop } = require('inet_xtoy')
+const inet = require('./inet')
 const { EventEmitter } = require('events')
 const ServerError = require('./errors')
 
 const builtinEvents = [ 'disconnect', 'drained', 'message', 'binary', 'ping', 'pong' ]
-
-class WSEvent {
-  constructor(ws, { event, data, reply_id }) {
-    this.event = event
-    this.data = data
-    this.reply_id = reply_id
-    this._ws = ws
-  }
-
-  reply(data) {
-    if (this.reply_id) {
-      this._ws._send('R:'+this.reply_id+';'+WSClient.getPayload(data))
-    }
-  }
-}
 
 class WSClient extends EventEmitter {
   constructor(session, request) {
@@ -31,29 +16,36 @@ class WSClient extends EventEmitter {
     if (payload[1] !== ':') {
       throw new ServerError({ code: 'INVALID_WS_PAYLOAD' })
     }
-    if (payload[0] === 's') {
-      return { type: 'string', data: payload.slice(2) }
-    } else if (payload[0] === 'b') {
-      return { type: 'boolean', data: ayload.slice(2) === '1' }
-    } else if (payload[0] === 'n') {
-      return { type: 'number', data: Number(payload.slice(2)) }
-    } else if (payload[0] === 'o') {
-      return { type: 'object', data: JSON.parse(payload.slice(2)) }
-    } else if (payload[0] === 'e') {
-      const expand = payload.slice(2).split(/;/g)
-      if (expand.length < 3) {
+    const type = payload[0], content = payload.slice(2)
+    if (type === 's') {
+      return { type: 'string', data: content }
+    } else if (type === 'b') {
+      return { type: 'boolean', data: content === '1' }
+    } else if (type === 'n') {
+      return { type: 'number', data: Number(content) }
+    } else if (type === 'o') {
+      return { type: 'object', data: JSON.parse(content) }
+    } else if (type === 'e') {
+      const eventSplitIndex = content.indexOf(';')
+      if (eventSplitIndex === -1) {
         throw new ServerError({ code: 'INVALID_WS_PAYLOAD' })
       }
-      const event = expand[0]
-      const replyId = expand[1]
+      const event = content.slice(0, eventSplitIndex)
+      const replySplitIndex = content.slice(eventSplitIndex+1).indexOf(';')
+      const replyId = content.slice(eventSplitIndex+1, eventSplitIndex+replySplitIndex+1)
+      const dataPayload = content.slice(eventSplitIndex+replySplitIndex+2)
       if (!event) {
         throw new ServerError({ code: 'INVALID_WS_PAYLOAD' })
       }
-      const dataPayload = expand.slice(2).join(';')
       if (dataPayload[0] === 'e') {
         throw new ServerError({ code: 'INVALID_WS_PAYLOAD' })
       }
-      return { type: 'event', name: event, data: WSEvent.parsePayload(dataPayload).data }
+      return {
+        type: 'event',
+        name: event,
+        reply_id: replyId,
+        data: WSClient.parsePayload(dataPayload).data
+      }
     } else {
       return { type: 'unknown', data: '' }
     }
@@ -62,7 +54,12 @@ class WSClient extends EventEmitter {
   emitPayload(payload) {
     const incoming = WSClient.parsePayload(payload)
     if (incoming.type === 'event') {
-      this.emit(incoming.name, new WSEvent(this, incoming))
+      incoming.reply = (data) => {
+        if (incoming.reply_id) {
+          this._send('R:'+incoming.reply_id+';'+WSClient.getPayload(data))
+        }
+      }
+      this.emit(incoming.name, incoming)
     } else {
       this.emit('message', incoming)
     }
@@ -92,7 +89,7 @@ class WSClient extends EventEmitter {
   }
 
   get remoteAddress() {
-    return inet_ntop(Buffer.from(this.session.getRemoteAddress()))
+    return inet.ntop(Buffer.from(this.session.getRemoteAddress()))
   }
 
   callback_wrapper(event, callback) {
@@ -118,7 +115,7 @@ class WSClient extends EventEmitter {
   }
 
   drain() {
-    if (!this.session.getBufferedAmount()) {
+    if (this.session.getBufferedAmount() === 0) {
       this.emit('drained')
     }
   }
@@ -128,8 +125,8 @@ class WSClient extends EventEmitter {
   }
 
   async _send(data, isBinary, compress) {
-    if (this.session.send(data, isBinary, compress)) {
-      return
+    if (this.session.getBufferedAmount() === 0) {
+      return this.session.send(data, isBinary, compress)
     } else {
       await new Promise((resolve) => {
         super.once('drained', async () => {
@@ -181,4 +178,4 @@ class WSClient extends EventEmitter {
   }
 }
 
-module.exports = { WSClient, WSEvent }
+module.exports = WSClient

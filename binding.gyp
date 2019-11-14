@@ -3,12 +3,12 @@
     {
       'target_name': 'uWS',
       'sources': [
-        'uWebSockets.js/src/addon.cpp'
+        'src/uWebSockets.js/src/addon.cpp'
       ],
       'dependencies': [ 'uWebSockets' ],
       'include_dirs': [
-        'uWebSockets.js/uWebSockets/uSockets/src',
-        'uWebSockets.js/uWebSockets/src',
+        'src/uWebSockets.js/uWebSockets/uSockets/src',
+        'src/uWebSockets.js/uWebSockets/src',
       ],
       'defines': [
         'LIBUS_USE_LIBUV',
@@ -40,11 +40,11 @@
       'target_name': 'uWebSockets',
       'type': 'static_library',
       'sources': [
-        '<!@(ls -1 uWebSockets.js/uWebSockets/uSockets/src/*.c)',
-        '<!@(ls -1 uWebSockets.js/uWebSockets/uSockets/src/eventing/*.c)'
+        '<!@(ls -1 src/uWebSockets.js/uWebSockets/uSockets/src/*.c)',
+        '<!@(ls -1 src/uWebSockets.js/uWebSockets/uSockets/src/eventing/*.c)'
       ],
       'include_dirs': [
-        'uWebSockets.js/uWebSockets/uSockets/src',
+        'src/uWebSockets.js/uWebSockets/uSockets/src',
       ],
       'defines': [
         'LIBUS_USE_LIBUV',

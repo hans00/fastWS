@@ -1,3 +1,6 @@
-[submodule "uWebSockets.js"]
-	path = uWebSockets.js
+[submodule "src/node-inet-xtoy"]
+	path = src/node-inet-xtoy
+	url = https://github.com/sjinks/node-inet-xtoy.git
+[submodule "src/uWebSockets.js"]
+	path = src/uWebSockets.js
 	url = https://github.com/uNetworking/uWebSockets.js.git

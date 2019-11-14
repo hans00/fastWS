@@ -16,7 +16,7 @@ Simple Node.js server based on uWebSockets
 ```js
 const fastWS = require('fast-ws')
 
-const app = fastWS({ /* options */ })
+const app = new fastWS({ /* options */ })
 
 app.ws('/ws', ws => {
   console.log(`Connected ${ws.remoteAddress}`)
@@ -119,7 +119,7 @@ options = {
 
 - `remoteAddress`
 
-> Remote IP address. (IPv6 format)
+> Remote IP address. (Full length)
 
 - `headers`
 
@@ -189,7 +189,7 @@ options = {
 
 - `remoteAddress`
 
-> Remote IP address. (IPv6 format)
+> Remote IP address. (Full length)
 
 - `requestHeaders`
 

@@ -1,4 +1,4 @@
-const { inet_ntop } = require('inet_xtoy')
+const inet = require('./inet')
 const ServerError = require('./errors')
 
 const with_body_methods = [ 'POST', 'PUT', 'PATCH' ]
@@ -48,7 +48,7 @@ class Request {
   }
 
   get remoteAddress() {
-    return inet_ntop(Buffer.from(this.request.getRemoteAddress()))
+    return inet.ntop(Buffer.from(this.response.getRemoteAddress()))
   }
 
   get url() {

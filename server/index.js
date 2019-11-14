@@ -1,5 +1,5 @@
 const uWS = require('bindings')('uWS')
-const { WSClient, WSEvent } = require('./ws')
+const WSClient = require('./ws')
 const Request = require('./request')
 const Response = require('./response')
 const ServerError = require('./errors')
@@ -32,7 +32,7 @@ class fastWS {
 
   listen(port, callback=null) {
     if (!port && !this._port) {
-      throw new ServerError({ code: 'INVALID_NO_PORT', message: 'Must specify port' })
+      throw new ServerError({ code: 'INVALID_NO_PORT', message: 'Invalid, must specify port' })
     } else if (!port) {
       port = this._port
     } else {
