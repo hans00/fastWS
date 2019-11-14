@@ -23,6 +23,8 @@ app.get('/ip', (req, res) => {
   res.send(req.remoteAddress)
 })
 
+app.serve('/*')
+
 app.listen(3000, err => {
   if (!err) {
     console.log('Listen on 3000')
