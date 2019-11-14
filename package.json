@@ -14,7 +14,7 @@
     "prebuild-upload": "prebuild --upload-all ${PREBUILD_TOKEN}",
     "clean": "rimraf build node_modules prebuilds",
     "distclean": "npm run clean",
-    "postpublish": "git push --follow-tags"
+    "postpublish": "git tag v${npm_package_version} && git push --follow-tags"
   },
   "repository": {
     "type": "git",
