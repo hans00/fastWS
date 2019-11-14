@@ -24,7 +24,11 @@ class fastWS {
     this._socket = null
     this._port = null
     this._routes = []
-    this._cache = new LRU(cache)
+    if (typeof cache === 'object' && !(cache instanceof Object)) {
+      this._cache = cache
+    } else {
+      this._cache = new LRU(cache)
+    }
     process.on('SIGINT', () => this.gracefulStop())
     process.on('SIGTERM', () => this.gracefulStop())
     process.on('SIGHUP', () => this.reload())
@@ -79,7 +83,7 @@ class fastWS {
     } else {
       this._routes[path][method] = async (response, request) => {
         const req = new Request(request, response)
-        const res = new Response(request, response)
+        const res = new Response(request, response, this._cache)
         try {
           await callbacks(req, res)
         } catch (e) {
@@ -207,14 +211,14 @@ class fastWS {
     this.route('any', path, callback)
   }
 
-  serve(path, targetPath) {
+  serve(path, { targetPath, cache='max-age=86400' }) {
     if (targetPath) {
       this.route('get', path, (req, res) => {
-        res.staticFile(targetPath, this._cache)
+        res.staticFile(targetPath, cache)
       })
     } else {
       this.route('get', path, (req, res) => {
-        res.staticFile(req.url, this._cache)
+        res.staticFile(req.url, cache)
       })
     }
   }

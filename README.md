@@ -69,6 +69,11 @@ app.listen(3000, err => {
 
 > SSL cert
 
+- `cache`
+
+> LRU cache option or any other cache object.
+> Note: cache object must have `get`, `has` and `set` methods.
+
 # Methods
 
 ## `fastWS`
@@ -87,12 +92,20 @@ app.listen(3000, err => {
 
 > Basic HTTP methods
 
-- `serve(path[, target path])`
+- `serve(path[, options])`
 
 > Serve static file(s)
 > The file must in `/static`
+```js
+options = {
+  targetPath: 'some/path/in/static', // If real path is not equal to request path.
+  cache: 'max-age=86400', // cache control string
+  cache: { public: true, 'max-age': 31536000 }, // cache control as object
+  cache: null, // Turn off cache control
+}
+```
 
-- `ws(path, ws => { /**/ }[, options])`
+- `ws(path, ws => { /* your code */ }[, options])`
 
 > WebSocket
 ```js
@@ -153,17 +166,22 @@ options = {
 
 ## `Response`
 
-- `cork( callback )`
+- `cork(callback)`
 
 > Mapping to uWebSockets `experimental_cork`
 
-- `status(code number)`
+- `status(code_number)`
 
 > HTTP status
 
-- `staticFile(file path[, cache object])`
+- `staticFile(file_path[, cache_control='max-age=86400'])`
 
 > Send static file.
+```js
+cache_control = 'max-age=86400', // cache control string
+cache_control = { public: true, 'max-age': 31536000 }, // cache control as object
+cache_control = null // Turn off Cache-Control
+```
 
 - `send(data)`
 
@@ -177,11 +195,11 @@ options = {
 
 > Set header
 
-- `location(path or url[, status])`
+- `location(path_or_url[, status])`
 
 > Redirect, default 302
 
-- `end(data[, content type])`
+- `end(data[, content_type])`
 
 > End response, content type default `text/plain`.
 
@@ -195,16 +213,16 @@ options = {
 
 > Request headers
 
-- `on(event name, callback)`
+- `on(event_name, callback)`
 
 > Listen on builtin event or custom event.
 > Builtin events: `disconnect`, `drained`, `message`, `binary`, `ping`, `pong`
 
-- `off(event name, callback)`
+- `off(event_name, callback)`
 
 > Remove listener
 
-- `removeAllListeners(event name)`
+- `removeAllListeners(event_name)`
 
 > Remove all listener
 

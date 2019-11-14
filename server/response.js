@@ -49,7 +49,7 @@ const http_status_code = {
 }
 
 class Response {
-  constructor(request, response) {
+  constructor(request, response, cache) {
     this.request = request
     this.response = response
     this._status = 200
@@ -57,6 +57,7 @@ class Response {
       'content-type': 'text/plain'
     }
     this.isEnd = false
+    this._cache = cache
   }
 
   cork(callback) {
@@ -68,35 +69,69 @@ class Response {
     return this
   }
 
-  staticFile(file_path, cache) {
+  staticFile(file_path, cache='max-age=86400') {
     if (file_path.endsWith('/')) {
       file_path += 'index.html'
     }
-    let contentType = 'text/plain'
-    if (file_path.endsWith('.html')) {
-      contentType = 'text/html'
+    let cache_control = undefined
+    if (typeof cache === 'string') {
+      cache_control = cache
+    } else if (typeof cache === 'object') {
+      cache = Object.keys(cache).map(key => {
+        if (cache[key]) {
+          if (['number', 'string'].includes(typeof cache[key])) {
+            return key + '=' + cache[key]
+          } else {
+            return cache[key]
+          }
+        }
+      }).filter(x => x).join(', ')
     }
-    if (cache.has(file_path)) {
-      return this.end(cache.get(file_path), contentType)
+    const check_modify_time = this.request.getHeader('if-modified-since')
+    if (this.cache.has(file_path)) {
+      const file = this.cache.get(file_path)
+      if (check_modify_time && check_modify_time === file.mtime) {
+        return this.state(304).end('', undefined)
+      } else {
+        this.set('Last-Modified', file.mtime)
+          .set('Cache-Control', cache_control)
+          .end(file.content, file.contentType)
+      }
     }
     const full_path = path.resolve('static', file_path)
     const isInStatic = full_path.startsWith(path.resolve('static'))
-    if (isInStatic && fs.existsSync(full_path)) {
+    const file_name = full_path.split('/').pop()
+    if (isInStatic && fs.existsSync(full_path) && file_name[0] === '.') {
+      let contentType = 'text/plain'
+      if (file_path.endsWith('.html')) {
+        contentType = 'text/html'
+      }
+      const mtime = new Date(fs.statSync(full_path).mtime).toGMTString()
       const content = fs.readFileSync(full_path)
-      cache.set(file_path, content)
-      this.end(content, contentType)
+      this.cache.set(file_path, { content, contentType, mtime })
+      if (check_modify_time && check_modify_time === mtime) {
+        return this.state(304).end('', undefined)
+      } else {
+        this.set('Last-Modified', mtime)
+          .set('Cache-Control', cache_control)
+          .end(content, contentType)
+      }
     } else {
       throw new ServerError({ code: 'SERVER_STATIC_FILE_NOT_FOUND', suggestCode: 404 })
     }
   }
 
-  end(data='', contentType) {
-    if (contentType) {
+  end(data='', contentType=null) {
+    if (contentType !== null) {
       this._headers['content-type'] = contentType
     }
     this.cork(() => {
       if (this._status !== 200) {
-        this.response.writeStatus(this._status+' '+http_status_code[this._status])
+        if (http_status_code[this._status]) {
+          this.response.writeStatus(this._status + ' ' + http_status_code[this._status])
+        } else {
+          this.response.writeStatus(this._status.toString())
+        }
       }
       Object.keys(this._headers).forEach(key => {
         this.response.writeHeader(key, this._headers[key])
