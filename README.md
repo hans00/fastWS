@@ -14,7 +14,7 @@ Simple Node.js server based on uWebSockets
 `npm i fast-ws`
 
 ```js
-const fastWS = require('fast-ws')
+const fastWS = require('fast-ws/server')
 
 const app = new fastWS({ /* options */ })
 
