@@ -1,6 +1,6 @@
 {
   "name": "fast-ws",
-  "version": "1.0.1-rc.2",
+  "version": "1.0.1-rc.3",
   "description": "Simple Node.js server based on uWebSockets",
   "main": "index.js",
   "engines": {
