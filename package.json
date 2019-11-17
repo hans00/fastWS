@@ -8,9 +8,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "update": "git submodule update --init",
     "install": "prebuild-install || node-gyp rebuild",
-    "prebuild-node": "prebuild -t 10.11.0 -t 11.9.0 -t 12.0.0 --strip",
+    "prebuild-node": "prebuild -t 10.13.0 -t 11.9.0 -t 12.10.0 --strip",
     "prebuild-upload": "prebuild --upload-all ${PREBUILD_TOKEN}",
     "clean": "rimraf build node_modules prebuilds",
     "distclean": "npm run clean",

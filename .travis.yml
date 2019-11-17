@@ -28,8 +28,8 @@ matrix:
         - CC=gcc-7 CXX=g++-7
 
 install:
-  - npm run update
-  - npm install --build-from-source
+  - npm install
+  - ldd build/Release/uWS.node || otool -L build/Release/uWS.node
 
 script:
   - npm run prebuild-node

@@ -38,7 +38,7 @@
     },
     {
       'target_name': 'uWebSockets',
-      'type': 'shared_library',
+      'type': 'static_library',
       'sources': [
         '<!@(ls -1 src/uWebSockets.js/uWebSockets/uSockets/src/*.c)',
         '<!@(ls -1 src/uWebSockets.js/uWebSockets/uSockets/src/eventing/*.c)'

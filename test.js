@@ -9,7 +9,8 @@ app.ws('/ws', ws => {
     ws.sendMessage(data)
   })
 
-  ws.on('echo', ({ reply, data }) => {
+  ws.on('echo', async ({ reply, data }) => {
+    console.log(data)
     reply(data)
   })
 })
