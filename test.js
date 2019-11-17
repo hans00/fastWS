@@ -23,6 +23,10 @@ app.get('/ip', (req, res) => {
   res.send(req.remoteAddress)
 })
 
+app.get('/xml/:message', (req, res, { message }) => {
+  res.render('<message>${escape(message)}</message>', { message })
+})
+
 app.serve('/*')
 
 app.listen(3000, err => {

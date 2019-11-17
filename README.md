@@ -35,6 +35,10 @@ app.post('/post', async (req, res) => {
   res.json(data)
 })
 
+app.post('/hello/:name', async (req, res, params) => {
+  res.render('Hello, ${name}', params)
+})
+
 app.serve('/*') // auto serve project /static/*
 
 app.listen(3000, err => {
@@ -52,6 +56,8 @@ app.listen(3000, err => {
 - [x] Auto reload SSL when signal(1)
 - [x] Auto graceful shutdown
 - [x] Auto parse message
+- [x] URL params to object
+- [x] Can use built-in template engine or custom template engine
 - [ ] Response from pipe stream
 
 # Recommends
@@ -68,11 +74,32 @@ app.listen(3000, err => {
 - `ssl`
 
 > SSL cert
+```js
+{
+  cert_file_name: 'path/to/cert',
+  key_file_name: 'path/to/key',
+}
+```
 
 - `cache`
 
 > LRU cache option or any other cache object.
 > Note: cache object must have `get`, `has` and `set` methods.
+
+- `templateRender`
+
+> Pass template render function, or default is base on eval and template literals.
+
+```js
+// default render function
+function render(_template, _data) {
+  return eval(
+    'const '
+    + Object.keys(_data).map(key => `${key} = ${JSON.stringify(_data[key])}`).join()
+    + ';(`' + _template.replace(/\\/g, '\\\\').replace(/`/g, '\\`') + '`)'
+  )
+}
+```
 
 # Methods
 
@@ -202,6 +229,16 @@ cache_control = null // Turn off Cache-Control
 - `end(data[, content_type])`
 
 > End response, content type default `text/plain`.
+
+- `render(content, data)`
+
+> Render data into content and send.
+
+- `renderFile(file_path, data)`
+
+> Render data into file content and send.
+> The content of file will be cached.
+> And file must in `template`
 
 ## `WSClient`
 

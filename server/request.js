@@ -74,10 +74,6 @@ class Request {
   header(name) {
     return this.request.getHeader(name.toLowerCase())
   }
-
-  params(index) {
-    return this.request.getParameter(index)
-  }
 }
 
 module.exports = Request

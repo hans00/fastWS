@@ -15,7 +15,7 @@ if (!process.nextTick) {
 process.on('exit', uWS.free)
 
 class fastWS {
-  constructor({ ssl=null, verbose=false, cache=50 }={}) {
+  constructor({ ssl=null, verbose=false, cache=50, templateRender }={}) {
     this.options = {
       ssl,
       verbose
@@ -24,6 +24,17 @@ class fastWS {
     this._socket = null
     this._port = null
     this._routes = []
+    if (typeof templateRender === 'function') {
+      this._template_render = templateRender
+    } else {
+      this._template_render = function (_template, _data) {
+        return eval(
+          'const '
+          + Object.keys(_data).map(key => `${key} = ${JSON.stringify(_data[key])}`).join()
+          + ';(`' + _template.replace(/\\/g, '\\\\').replace(/`/g, '\\`') + '`)'
+        )
+      }
+    }
     if (typeof cache === 'object' && !(cache instanceof Object)) {
       this._cache = cache
     } else {
@@ -78,14 +89,24 @@ class fastWS {
     if (!this._routes[path]) {
       this._routes[path] = {}
     }
+    let url_params = path.match(/:\w+/g)
+    if (url_params) {
+      url_params = url_params.map(key => key.slice(1))
+    }
     if (method === 'ws') {
       this._routes[path][method] = callbacks
     } else {
       this._routes[path][method] = async (response, request) => {
+        const params = {}
+        if (url_params) {
+          url_params.forEach((key, index) => {
+            params[key] = decodeURIComponent(request.getParameter(index))
+          })
+        }
         const req = new Request(request, response)
-        const res = new Response(request, response, this._cache)
+        const res = new Response(this, request, response)
         try {
-          await callbacks(req, res)
+          await callbacks(req, res, params)
         } catch (e) {
           if (e instanceof ServerError && e.suggestCode) {
             if (e.originError) {

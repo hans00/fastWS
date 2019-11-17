@@ -1,6 +1,7 @@
 const ServerError = require('./errors')
 const fs = require('fs')
 const path = require('path')
+const mime = require('mime-types')
 
 const http_status_code = {
   // Informational
@@ -49,15 +50,14 @@ const http_status_code = {
 }
 
 class Response {
-  constructor(request, response, cache) {
+  constructor({ _cache, _template_render }, request, response) {
     this.request = request
     this.response = response
     this._status = 200
-    this._headers = {
-      'content-type': 'text/plain'
-    }
+    this._headers = {}
     this.isEnd = false
-    this._cache = cache
+    this._cache = _cache
+    this._template_render = _template_render
   }
 
   cork(callback) {
@@ -73,56 +73,87 @@ class Response {
     if (file_path.endsWith('/')) {
       file_path += 'index.html'
     }
-    let cache_control = undefined
-    if (typeof cache === 'string') {
-      cache_control = cache
-    } else if (typeof cache === 'object') {
-      cache = Object.keys(cache).map(key => {
-        if (cache[key]) {
-          if (['number', 'string'].includes(typeof cache[key])) {
-            return key + '=' + cache[key]
-          } else {
-            return cache[key]
-          }
-        }
-      }).filter(x => x).join(', ')
-    }
-    const check_modify_time = this.request.getHeader('if-modified-since')
-    if (this.cache.has(file_path)) {
-      const file = this.cache.get(file_path)
-      if (check_modify_time && check_modify_time === file.mtime) {
-        return this.state(304).end('', undefined)
-      } else {
-        this.set('Last-Modified', file.mtime)
-          .set('Cache-Control', cache_control)
-          .end(file.content, file.contentType)
-      }
-    }
     const full_path = path.resolve('static', file_path)
     const isInStatic = full_path.startsWith(path.resolve('static'))
     const file_name = full_path.split('/').pop()
-    if (isInStatic && fs.existsSync(full_path) && file_name[0] === '.') {
-      let contentType = 'text/plain'
-      if (file_path.endsWith('.html')) {
-        contentType = 'text/html'
+    const check_modify_time = this.request.getHeader('if-modified-since')
+    if (isInStatic && fs.existsSync(full_path) && full_path.match(/\/\./)) {
+      // cache control
+      let cache_control = undefined
+      if (typeof cache === 'string') {
+        cache_control = cache
+      } else if (typeof cache === 'object') {
+        cache = Object.keys(cache).map(key => {
+          if (cache[key]) {
+            if (['number', 'string'].includes(typeof cache[key])) {
+              return key + '=' + cache[key]
+            } else {
+              return cache[key]
+            }
+          }
+        }).filter(x => x).join(', ')
       }
-      const mtime = new Date(fs.statSync(full_path).mtime).toGMTString()
-      const content = fs.readFileSync(full_path)
-      this.cache.set(file_path, { content, contentType, mtime })
-      if (check_modify_time && check_modify_time === mtime) {
-        return this.state(304).end('', undefined)
+      // if cache found file, send file in cache
+      if (this._cache.has(full_path)) {
+        const file = this._cache.get(full_path)
+        if (check_modify_time && check_modify_time === file.mtime) {
+          return this.state(304).end('', undefined)
+        } else {
+          this.set('Last-Modified', file.mtime)
+            .set('Cache-Control', cache_control)
+            .end(file.content, file.contentType)
+        }
       } else {
-        this.set('Last-Modified', mtime)
-          .set('Cache-Control', cache_control)
-          .end(content, contentType)
+        const contentType = mime.lookup(full_path)
+        const mtime = new Date(fs.statSync(full_path).mtime).toGMTString()
+        const content = fs.readFileSync(full_path)
+        this._cache.set(full_path, { content, contentType, mtime })
+        if (check_modify_time && check_modify_time === mtime) {
+          return this.state(304).end('', false)
+        } else {
+          this.set('Last-Modified', mtime)
+            .set('Cache-Control', cache_control)
+            .end(content, contentType)
+        }
       }
     } else {
-      throw new ServerError({ code: 'SERVER_STATIC_FILE_NOT_FOUND', suggestCode: 404 })
+      throw new ServerError({ code: 'SERVER_NOT_FOUND', message: 'The static file not found.', suggestCode: 404 })
+    }
+  }
+
+  renderFile(file_path, data) {
+    if (!this._template_render) {
+      throw new ServerError({ code: 'SERVER_ERROR', message: 'The render function is disabled.', suggestCode: 500 })
+    }
+    const full_path = path.resolve('template', file_path)
+    const isInTemplate = full_path.startsWith(path.resolve('template'))
+    const file_name = full_path.split('/').pop()
+    if (isInTemplate && fs.existsSync(full_path)) {
+      // if cache found file, send file in cache
+      if (this._cache.has(full_path)) {
+        const file = this._cache.get(full_path)
+        this.end(this._template_render(file.content, data), file.contentType)
+      } else {
+        const contentType = mime.lookup(full_path)
+        const content = fs.readFileSync(full_path)
+        this._cache.set(full_path, { content, contentType })
+        this.end(this._template_render(content, data), contentType)
+      }
+    } else {
+      throw new ServerError({ code: 'SERVER_NOT_FOUND', message: 'The template file not found.', suggestCode: 404 })
+    }
+  }
+
+  render(content, data) {
+    if (!this._template_render) {
+      throw new ServerError({ code: 'SERVER_ERROR', message: 'The render function is disabled.', suggestCode: 500 })
+    } else {
+      this.send(this._template_render(content, data))
     }
   }
 
   end(data='', contentType=null) {
-    if (contentType !== null) {
+    if (typeof contentType === 'string') {
       this._headers['content-type'] = contentType
     }
     this.cork(() => {
@@ -142,9 +173,10 @@ class Response {
 
   send(data) {
     if (data.includes('<html>')) {
-      this._headers['content-type'] = 'text/html'
+      this.end(data.toString(), 'text/html')
+    } else {
+      this.end(data.toString(), 'text/plain')
     }
-    this.end(data.toString())
   }
 
   json(data) {
