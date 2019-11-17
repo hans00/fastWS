@@ -141,7 +141,7 @@ class WSClient extends EventEmitter {
     return this.session.subscribe(channel)
   }
 
-  quit() {
+  quit(channel) {
     return this.session.unsubscribe(channel)
   }
 
