@@ -19,9 +19,6 @@ matrix:
   include:
     - os: osx
     - os: windows
-      before_script:
-        - echo ${PREBUILD_TOKEN}
-        - echo $TRAVIS_TAG
     - os: linux
       dist: bionic
       arch: amd64
