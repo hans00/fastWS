@@ -9,6 +9,7 @@ branches:
   only:
     - master
     - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
+    - /^test-\w+$/
 
 cache:
   directories:
@@ -18,6 +19,9 @@ matrix:
   include:
     - os: osx
     - os: windows
+      before_script:
+        - echo ${PREBUILD_TOKEN}
+        - echo $TRAVIS_TAG
     - os: linux
       dist: bionic
       arch: amd64
