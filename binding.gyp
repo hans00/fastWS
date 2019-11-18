@@ -37,7 +37,7 @@
             'VCCLCompilerTool': {
               'AdditionalOptions': [
                 '/std:c++17',
-                '/0x',
+                '/Ox',
               ]
             }
           },
@@ -86,7 +86,7 @@
             'VCCLCompilerTool': {
               'AdditionalOptions': [
                 '/std:c++17',
-                '/0x',
+                '/Ox',
               ]
             }
           },
