@@ -2,10 +2,6 @@
   'targets': [
     {
       'target_name': 'uWS',
-      'sources': [
-        'src/uWebSockets.js/src/addon.cpp'
-      ],
-      'dependencies': [ 'uWebSockets' ],
       'include_dirs': [
         'src/uWebSockets.js/uWebSockets/uSockets/src',
         'src/uWebSockets.js/uWebSockets/src',
@@ -20,9 +16,26 @@
       ],
       'conditions': [
         [ 'OS!="win"', {
+          'sources': [
+            'src/uWebSockets.js/src/addon.cpp',
+          ],
+          'dependencies': [ 'uWebSockets' ],
+        } ],
+        [ 'OS=="linux"', {
+            'cflags+': [ '-std=c++17', '-flto', '-O3' ],
+            'cflags_c+': [ '-std=c++17', '-flto', '-O3' ],
+            'cflags_cc+': [ '-std=c++17', '-flto', '-O3' ],
+        } ],
+        [ 'OS=="win"', {
+          'sources': [
+            '<!@(ls -1 src/uWebSockets.js/uWebSockets/uSockets/src/*.c)',
+            '<!@(ls -1 src/uWebSockets.js/uWebSockets/uSockets/src/eventing/*.c)',
+            'src/uWebSockets.js/src/addon.cpp',
+          ],
+          'dependencies': [ 'uWebSockets' ],
           'msvs_settings': {
             'VCCLCompilerTool': {
-              'AdditionalOptions!': [
+              'AdditionalOptions': [
                 '/std:c++17',
                 '/0x',
               ]
@@ -63,10 +76,15 @@
         '-O3',
       ],
       'conditions': [
-        [ 'OS!="win"', {
+        [ 'OS=="linux"', {
+            'cflags+': [ '-flto', '-O3' ],
+            'cflags_c+': [ '-flto', '-O3' ],
+            'cflags_cc+': [ '-flto', '-O3' ],
+        } ],
+        [ 'OS=="win"', {
           'msvs_settings': {
             'VCCLCompilerTool': {
-              'AdditionalOptions!': [
+              'AdditionalOptions': [
                 '/std:c++17',
                 '/0x',
               ]
