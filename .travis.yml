@@ -17,14 +17,17 @@ cache:
 matrix:
   include:
     - os: osx
+    - os: windows
+      env: PATH=/c/Python27:/c/Python27/Scripts:$PATH
+      before_install:
+        - choco install python2
+        - npm install -g node-gyp
     - os: linux
       dist: bionic
       arch: amd64
       compiler: g++-8
       addons:
         apt:
-          sources:
-            - ubuntu-toolchain-r-test
           packages:
             - g++-8
       env:
@@ -37,8 +40,6 @@ matrix:
       compiler: g++-8
       addons:
         apt:
-          sources:
-            - ubuntu-toolchain-r-test
           packages:
             - g++-8
       env:
