@@ -17,9 +17,11 @@ cache:
 matrix:
   include:
     - os: osx
-    - os: windows
     - os: linux
       dist: bionic
+      arch:
+        - amd64
+        - arm64
       compiler: g++-8
       addons:
         apt:
