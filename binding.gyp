@@ -20,9 +20,14 @@
       ],
       'conditions': [
         [ 'OS!="win"', {
-            'cflags+': [ '-std=c++17', '-flto', '-O3' ],
-            'cflags_c+': [ '-std=c++17', '-flto', '-O3' ],
-            'cflags_cc+': [ '-std=c++17', '-flto', '-O3' ],
+          'msvs_settings': {
+            'VCCLCompilerTool': {
+              'AdditionalOptions!': [
+                '/std:c++17',
+                '/0x',
+              ]
+            }
+          },
         } ],
         [ 'OS=="mac"', {
           'xcode_settings': {
@@ -59,9 +64,14 @@
       ],
       'conditions': [
         [ 'OS!="win"', {
-            'cflags+': [ '-flto', '-O3' ],
-            'cflags_c+': [ '-flto', '-O3' ],
-            'cflags_cc+': [ '-flto', '-O3' ],
+          'msvs_settings': {
+            'VCCLCompilerTool': {
+              'AdditionalOptions!': [
+                '/std:c++17',
+                '/0x',
+              ]
+            }
+          },
         } ],
         [ 'OS=="mac"', {
           'xcode_settings': {
