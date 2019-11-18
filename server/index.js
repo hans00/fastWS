@@ -145,7 +145,7 @@ class fastWS {
       open: async (ws, req) => {
         const client = new WSClient(ws, new Request(req))
         this.options.verbose && console.log('[open]', client.remoteAddress)
-        ws._emitter = client
+        ws._client = client
         try {
           await callback(client)
           ws.send('\x00', 0, 0)
@@ -159,7 +159,7 @@ class fastWS {
         if (!isBinary) {
           try {
             // decode message
-            ws._emitter.emitPayload(Buffer.from(message).toString())
+            ws._client.emitPayload(Buffer.from(message).toString())
           } catch (error) {
             if (error === 'INVALID_PAYLOAD') {
               this.options.verbose && console.log('[error]', 'Invalid message payload')
@@ -170,20 +170,21 @@ class fastWS {
             ws.close()
           }
         } else {
-          ws._emitter.emit('binary', message)
+          ws._client.emit('binary', message)
         }
       },
       drain: (ws) => {
-        ws._emitter.drain()
+        ws._client.drain()
       },
       ping: (ws) => {
-        ws._emitter.emit('ping')
+        ws._client.emit('ping')
       },
       pong: (ws) => {
-        ws._emitter.emit('pong')
+        ws._client.emit('pong')
       },
       close: (ws, code, message) => {
-        ws._emitter.emit('disconnect')
+        ws._client.emit('disconnect')
+        setImmediate(() => delete ws._client)
       },
     })
   }

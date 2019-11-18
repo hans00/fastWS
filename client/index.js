@@ -123,7 +123,7 @@ class WSClient extends EventEmitter {
       this.client.send(WSClient.getPayload({ event, data, replyId }, 'event'))
       if (waitReturn) {
         const timeOut = setTimeout(() => {
-          reject({ error: { code: 'WAIT_REPLY_TIMEOUT' } })
+          reject({ code: 'WAIT_REPLY_TIMEOUT', message: 'Response timeout.' })
           delete this._event_return[replyId]
         }, this.options.replyTimeout||5000)
         const getData = (payload) => {

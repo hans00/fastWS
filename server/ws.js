@@ -2,8 +2,6 @@ const inet = require('./inet')
 const { EventEmitter } = require('events')
 const ServerError = require('./errors')
 
-const builtinEvents = [ 'disconnect', 'drained', 'message', 'binary', 'ping', 'pong' ]
-
 class WSClient extends EventEmitter {
   constructor(session, request) {
     super()
@@ -92,28 +90,6 @@ class WSClient extends EventEmitter {
     return inet.ntop(Buffer.from(this.session.getRemoteAddress()))
   }
 
-  callback_wrapper(event, callback) {
-    return (payload) => {
-      const result = callback(payload)
-      if (result && result instanceof Promise) {
-        const id = this.messageCounter++
-        if (this.messageCounter >> 8) {
-          this.messageCounter = 0
-        }
-        this._send(WSClient.getPayload({ event, id }, 'returnId'), false, false)
-        result.then(result => {
-          this._send(WSClient.getPayload({ id, data: result }, 'returnData'), false, true)
-        }).catch(error => {
-          console.error(error)
-          // kick user when error
-          this.close()
-        })
-      } else if (result !== undefined) {
-        this._send(WSClient.getPayload({ id: event, data: result }, 'returnData'), false, true)
-      }
-    }
-  }
-
   drain() {
     if (this.session.getBufferedAmount() === 0) {
       this.emit('drained')
@@ -171,10 +147,6 @@ class WSClient extends EventEmitter {
 
   close() {
     return this.session.close()
-  }
-
-  end() {
-    return this.session.end()
   }
 }
 
