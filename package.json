@@ -11,6 +11,7 @@
     "install": "prebuild-install || node-gyp rebuild",
     "prebuild-node": "prebuild -t 10.17.0 -t 11.15.0 -t 12.13.0 --strip",
     "prebuild-upload": "prebuild --upload-all $PREBUILD_TOKEN",
+    "prebuild-upload:win": "prebuild --upload-all %PREBUILD_TOKEN%",
     "clean": "rimraf build node_modules prebuilds",
     "distclean": "npm run clean",
     "tag-version": "git tag -a v${npm_package_version} -m \"release v${npm_package_version}\"",
