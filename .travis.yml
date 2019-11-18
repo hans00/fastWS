@@ -19,9 +19,21 @@ matrix:
     - os: osx
     - os: linux
       dist: bionic
-      arch:
-        - amd64
-        - arm64
+      arch: amd64
+      compiler: g++-8
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-8
+      env:
+        - CC=gcc-8
+        - CXX=g++-8
+        - AR=gcc-ar-8
+    - os: linux
+      dist: bionic
+      arch: arm64
       compiler: g++-8
       addons:
         apt:
