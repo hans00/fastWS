@@ -9,7 +9,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "install": "prebuild-install || node-gyp rebuild",
-    "prebuild-node": "prebuild -t 10.13.0 -t 11.9.0 -t 12.10.0 --strip",
+    "prebuild-node": "prebuild -t 10.17.0 -t 11.15.0 -t 12.13.0 -t 13.1.0 --strip",
     "prebuild-upload": "prebuild --upload-all ${PREBUILD_TOKEN}",
     "clean": "rimraf build node_modules prebuilds",
     "distclean": "npm run clean",
