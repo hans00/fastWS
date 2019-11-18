@@ -19,6 +19,8 @@ matrix:
   include:
     - os: osx
     - os: windows
+      env:
+        - UPLOAD_POSTFIX=:win
     - os: linux
       dist: bionic
       arch: amd64
@@ -49,4 +51,4 @@ install:
 
 script:
   - npm run prebuild-node
-  - if [[ -n "$TRAVIS_TAG" ]]; then npm run prebuild-upload; fi
+  - if [[ -n "$TRAVIS_TAG" ]]; then npm run prebuild-upload$UPLOAD_POSTFIX; fi
