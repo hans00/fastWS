@@ -7,6 +7,9 @@ class WSClient extends EventEmitter {
     this.options = options
     this.connectState = 0
     this.client = new WebSocket(endpoint)
+    this.client.on('error', error => {
+      this.emit('error', error)
+    })
     this.client.on('open', () => {
       this.connectState = 1
       this._heartbeat = setInterval(() => {
