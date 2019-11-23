@@ -14,8 +14,7 @@
     "prebuild-upload:win": "prebuild --upload-all %GITHUB_TOKEN%",
     "clean": "rimraf build node_modules prebuilds",
     "distclean": "npm run clean",
-    "tag-version": "git tag -a v${npm_package_version} -m \"release v${npm_package_version}\"",
-    "ci-publish": "ci-publish"
+    "tag-version": "git tag -a v${npm_package_version} -m \"release v${npm_package_version}\""
   },
   "repository": {
     "type": "git",
@@ -40,7 +39,6 @@
   },
   "gypfile": true,
   "devDependencies": {
-    "ci-publish": "^1.3.1",
     "node-gyp": "^6.0.1",
     "prebuild": "^9.1.1",
     "rimraf": "^3.0.0"
