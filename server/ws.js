@@ -12,7 +12,7 @@ class WSClient extends EventEmitter {
 
   static parsePayload(payload) {
     if (payload[1] !== ':') {
-      throw new ServerError({ code: 'INVALID_WS_PAYLOAD' })
+      throw new ServerError({ code: 'WS_INVALID_PAYLOAD' })
     }
     const type = payload[0], content = payload.slice(2)
     if (type === 's') {
@@ -26,17 +26,17 @@ class WSClient extends EventEmitter {
     } else if (type === 'e') {
       const eventSplitIndex = content.indexOf(';')
       if (eventSplitIndex === -1) {
-        throw new ServerError({ code: 'INVALID_WS_PAYLOAD' })
+        throw new ServerError({ code: 'WS_INVALID_PAYLOAD' })
       }
       const event = content.slice(0, eventSplitIndex)
       const replySplitIndex = content.slice(eventSplitIndex+1).indexOf(';')
       const replyId = content.slice(eventSplitIndex+1, eventSplitIndex+replySplitIndex+1)
       const dataPayload = content.slice(eventSplitIndex+replySplitIndex+2)
       if (!event) {
-        throw new ServerError({ code: 'INVALID_WS_PAYLOAD' })
+        throw new ServerError({ code: 'WS_INVALID_PAYLOAD' })
       }
       if (dataPayload[0] === 'e') {
-        throw new ServerError({ code: 'INVALID_WS_PAYLOAD' })
+        throw new ServerError({ code: 'WS_INVALID_PAYLOAD' })
       }
       return {
         type: 'event',

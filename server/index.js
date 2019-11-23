@@ -64,11 +64,11 @@ class fastWS {
       this._socket = listenSocket
       if (listenSocket) {
         this.options.verbose && console.log('Started')
-        if (callback) {
-          callback()
-        }
       } else {
         this.options.verbose && console.log('Failed')
+      }
+      if (callback) {
+        callback(!!listenSocket)
       }
     })
   }

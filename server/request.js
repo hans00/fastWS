@@ -10,18 +10,20 @@ class Request {
   }
 
   // default limit in 4MB
-  body(limit=4096) {
+  body(limit=4194304) {
     if (!with_body_methods.includes(this.method)) {
       throw new ServerError({ code: 'SERVER_NOT_ALLOWED', message: 'The method never with data.', suggestCode: 405 })
     }
     const contentType = this.header('Content-Type')
-    const contentLength = this.header('Content-Length')
-    if (!contentLength) {
+    const content_length = this.header('Content-Length')
+    if (!content_length) {
       throw new ServerError({ code: 'CLIENT_NO_LENGTH', message: '', suggestCode: 411 })
-    }
-    if (limit && contentLength > limit) {
+    } else if (!/^[1-9]\d*$/.test(content_length)) {
+      throw new ServerError({ code: 'CLIENT_LENGTH_INVALID', message: '', suggestCode: 400 })
+    } else if (limit && Number(content_length) > limit) {
       throw new ServerError({ code: 'CLIENT_LENGTH_TOO_LARGE', message: '', suggestCode: 413 })
     }
+    const contentLength = Number(content_length)
     return new Promise((resolve, reject) => {
       let data = null, body_length = 0
       this.response.onData((chunk, isLast) => {
@@ -30,7 +32,7 @@ class Request {
         if (body_length >= contentLength) {
           try {
             if (contentType.startsWith('text/')) {
-              resolve(data.slice(0, contentLength).toString())
+              resolve(data.slice(0, dataLength).toString())
             } else if (contentType === 'application/json') {
               resolve(JSON.parse(data.slice(0, contentLength)))
             } else {
