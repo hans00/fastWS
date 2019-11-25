@@ -45,7 +45,7 @@ install:
 - npm ci
 script:
 - npm run prebuild-node
-- if [[ -n "$TRAVIS_TAG" ]]; then npm run prebuild-upload$UPLOAD_POSTFIX; f
+- if [[ -n "$TRAVIS_TAG" ]]; then npm run prebuild-upload$UPLOAD_POSTFIX; fi
 env:
   global:
     secure: PsU+ejWC7xgJicykVwgkP4h/GYFZ3PIgfbRpa3p6/WZu6aeLSYGzxQSbaXt2cR+hc8Y3O8ZFDTPKYMb3y6cgDHb9RyjfvWnylbibncQuiIYk3f3QidXCAplEs7ePdNabP8vPtX1+bKQ7S7Yw1FB+0b3n1dDMP1FwFKov/OfZfm8497mDAPjp6CzHSATSCGKQPmlnGSrzQnDEY/i2wQzqgpadgsXl0dObXlRAqT5AykjMP/TLXvjbnIbGPCOBUcY8bn4YrXmeokUyXiO7ioGTHHFFkIKg5teTvbx9GW72ID1mKm+HitZlT58YewxsIyu1EgBCtLYBF8L86lr8WceMhcRAacCVp1gQoG5Rp8s/jhaAjUKV011mKIgieuKqN5flY9LVCriTbLou0ubx+c2dy+mfwny1d0P5ofzISOtugwPlP+8TyZ1mFhD7v8N9Af5bXTfdo4XqkqaBKpedrBKdinVEoUbzwJ5dlsI5DQwKfUuF9UQrlNuB6YCZRX7MCcsMMWMPjKpei5+x95JzAmjXt2NVu59L/3Wf8CuHQrwIzoGpZ+klZe4XTCEsIbmg9DN9+55A1pBYUQSZ5RqmmTq4xeBNCxJ9KbzdARHL/UwtR+ZKDuBR46lu5Ldxd/XAXhmygO/AT2H36p9HmiHcl3TPdt2WlXg9CpZmIVW0svuiSJA=
