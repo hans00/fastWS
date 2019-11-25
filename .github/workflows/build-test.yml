@@ -1,9 +1,6 @@
 name: build and test
 
-on:
-  push:
-    tags-ignore:
-      - v**
+on: [push]
 
 jobs:
   build:
