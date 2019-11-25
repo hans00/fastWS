@@ -77,7 +77,7 @@ class Response {
     const isInStatic = full_path.startsWith(path.resolve('static'))
     const file_name = full_path.split('/').pop()
     const check_modify_time = this.request.getHeader('if-modified-since')
-    if (isInStatic && fs.existsSync(full_path) && full_path.match(/\/\./)) {
+    if (isInStatic && fs.existsSync(full_path) && !full_path.match(/\/\./)) {
       // cache control
       let cache_control = undefined
       if (typeof cache === 'string') {
