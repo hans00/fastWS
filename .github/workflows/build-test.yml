@@ -21,6 +21,9 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 12.x
+    - name: Downgrade to VS2017
+      if: runner.os == 'Windows'
+      run: npm install --global --production windows-build-tools --vs2017
     - name: npm install, build, and test
       shell: bash
       run: |
