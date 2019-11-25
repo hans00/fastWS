@@ -7,7 +7,6 @@
     "node": ">=10.0.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "install": "prebuild-install || node-gyp rebuild",
     "prebuild-node": "prebuild -t 10.17.0 -t 11.15.0 -t 12.13.0 --strip",
     "prebuild-upload": "prebuild --upload-all $GITHUB_TOKEN",
