@@ -8,7 +8,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos, windows]
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
     - uses: actions/checkout@v1
@@ -18,5 +18,6 @@ jobs:
         node-version: 12.x
     - name: npm install, build, and test
       run: |
+        git submodule update --init --recursive
         npm ci
         npm run prebuild-node
