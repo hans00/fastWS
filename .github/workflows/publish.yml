@@ -1,4 +1,4 @@
-name: Publish Package
+name: publish package
 
 on:
   release:
@@ -18,7 +18,7 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 12.x
-    - name: npm install, build, and test
+    - name: npm install, build, test, and publish
       shell: bash
       env:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -31,27 +31,31 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
-          registry-url: https://registry.npmjs.org/
-      - run: npm ci
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+    - uses: actions/checkout@v1
+      with:
+        submodules: recursive
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 12
+        registry-url: https://registry.npmjs.org/
+    - run: npm ci
+    - run: npm publish
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.npm_token}}
 
   publish-gpr:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
-          registry-url: https://npm.pkg.github.com/
-          scope: '@hans00'
-      - run: npm ci
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    - uses: actions/checkout@v1
+      with:
+        submodules: recursive
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 12
+        registry-url: https://npm.pkg.github.com/
+        scope: '@hans00'
+    - run: npm ci
+    - run: npm publish
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
