@@ -19,6 +19,7 @@ jobs:
       with:
         node-version: 12.x
     - name: npm install, build, and test
+      shell: bash
       run: |
         npm ci
         npm run prebuild-node
