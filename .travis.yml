@@ -59,7 +59,7 @@ jobs:
 
   # npm Publish
   - stage: deploy
-    os: osx
+    script: skip
     deploy:
       provider: npm
       email: admin@itsrv.tw
