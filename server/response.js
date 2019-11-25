@@ -97,7 +97,7 @@ class Response {
       if (this._cache.has(full_path)) {
         const file = this._cache.get(full_path)
         if (check_modify_time && check_modify_time === file.mtime) {
-          return this.state(304).end('', undefined)
+          return this.status(304).end('', undefined)
         } else {
           this.set('Last-Modified', file.mtime)
             .set('Cache-Control', cache_control)
@@ -109,7 +109,7 @@ class Response {
         const content = fs.readFileSync(full_path)
         this._cache.set(full_path, { content, contentType, mtime })
         if (check_modify_time && check_modify_time === mtime) {
-          return this.state(304).end('', false)
+          return this.status(304).end('', false)
         } else {
           this.set('Last-Modified', mtime)
             .set('Cache-Control', cache_control)
