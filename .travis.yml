@@ -60,6 +60,15 @@ jobs:
   # npm Publish
   - stage: deploy
     script: skip
+    compiler: g++-8
+    addons:
+      apt:
+        packages:
+        - g++-8
+    env:
+    - CC=gcc-8
+    - CXX=g++-8
+    - AR=gcc-ar-8
     deploy:
       provider: npm
       email: admin@itsrv.tw
