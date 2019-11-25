@@ -7,7 +7,6 @@ branches:
   only:
   - master
   - "/^v\\d+\\.\\d+(\\.\\d+)?(-\\S*)?$/"
-  - "/^test-\\w+$/"
 cache:
   directories:
   - node_modules
