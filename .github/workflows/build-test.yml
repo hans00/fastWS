@@ -20,7 +20,7 @@ jobs:
         node-version: 12.x
     - name: Downgrade to VS2017
       if: runner.os == 'Windows'
-      run: npm install --global --production windows-build-tools --vs2017
+      run: npm config set msbuild_path "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe"
     - name: npm install, build, and test
       shell: bash
       run: |
