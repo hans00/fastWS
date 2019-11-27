@@ -92,11 +92,32 @@ app.listen(3000, err => {
 
 ```js
 // default render function
-function render(_template, _data) {
+function render (_template, _data) {
+  /* eslint no-unused-vars: 0 */
+  function quote (data, type) {
+    if (type) {
+      if (type === String) {
+        return '"' + data.toString().replace(/("|\\)/g, '\\$1') + '"'
+      } else if (type === Number) {
+        return Number(data)
+      } else {
+        return JSON.stringify(data)
+      }
+    } else {
+      return JSON.stringify(data)
+    }
+  }
+  function escapeHTML (data) {
+    return data.toString().replace(/[\u00A0-\u9999<>&]/gim, (i) => `&#${i.charCodeAt(0)};`)
+  }
+  function escapeURL (data) {
+    return encodeURI(data.toString())
+  }
+  /* eslint no-eval: 0 */
   return eval(
-    'const '
-    + Object.keys(_data).map(key => `${key} = ${JSON.stringify(_data[key])}`).join()
-    + ';(`' + _template.toString().replace(/\\/g, '\\\\').replace(/`/g, '\\`') + '`)'
+    'const ' +
+    Object.keys(_data).map(key => `${key} = ${JSON.stringify(_data[key])}`).join() + ';' +
+    '(`' + _template.toString().replace(/(`|\\)/g, '\\$1') + '`)'
   )
 }
 ```
