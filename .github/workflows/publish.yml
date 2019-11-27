@@ -24,6 +24,7 @@ jobs:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       run: |
         npm ci
+        npm run lint
         npm run prebuild-node
         npx prebuild --upload-all $GITHUB_TOKEN
 

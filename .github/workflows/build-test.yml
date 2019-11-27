@@ -26,4 +26,5 @@ jobs:
       shell: bash
       run: |
         npm ci
+        npm run lint
         npm run prebuild-node

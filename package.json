@@ -13,8 +13,13 @@
     "prebuild-upload:win": "prebuild --upload-all %GITHUB_TOKEN%",
     "clean": "rimraf build node_modules prebuilds",
     "distclean": "npm run clean",
-    "tag-version": "git tag -a v${npm_package_version} -m \"release v${npm_package_version}\""
+    "tag-version": "git tag -a v${npm_package_version} -m \"release v${npm_package_version}\"",
+    "lint": "eslint server/*.js client/*.js",
+    "lint:fix": "eslint --fix server/*.js client/*.js"
   },
+  "pre-commit": [
+    "lint:fix"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hans00/fastWS.git"
@@ -38,7 +43,14 @@
   },
   "gypfile": true,
   "devDependencies": {
+    "eslint": "^6.7.1",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "node-gyp": "^6.0.1",
+    "pre-commit": "^1.2.2",
     "prebuild": "^9.1.1",
     "rimraf": "^3.0.0"
   }

@@ -3,7 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const mime = require('mime-types')
 
-const http_status_code = {
+const httpStatusCode = {
   // Informational
   100: 'Continue',
   101: 'Switching Protocols',
@@ -46,42 +46,40 @@ const http_status_code = {
   500: 'Internal Server Error',
   501: 'Not Implemented',
   502: 'Bad Gateway',
-  503: 'Service Unavailable',
+  503: 'Service Unavailable'
 }
 
 class Response {
-  constructor({ _cache, _template_render }, request, response) {
+  constructor ({ _cache, _templateRender }, request, response) {
     this.request = request
     this.response = response
     this._status = 200
     this._headers = {}
-    this.isEnd = false
     this._cache = _cache
-    this._template_render = _template_render
+    this._templateRender = _templateRender
   }
 
-  cork(callback) {
+  cork (callback) {
     this.response.experimental_cork(callback)
   }
 
-  status(code) {
+  status (code) {
     this._status = code
     return this
   }
 
-  staticFile(file_path, encoding='utf8', cache='max-age=86400') {
-    if (file_path.endsWith('/')) {
-      file_path += 'index.html'
+  staticFile (filePath, encoding = 'utf8', cache = 'max-age=86400') {
+    if (filePath.endsWith('/')) {
+      filePath += 'index.html'
     }
-    const full_path = path.resolve(path.join('static', file_path))
-    const isInStatic = full_path.startsWith(path.resolve('static'))
-    const file_name = full_path.split('/').pop()
-    const check_modify_time = this.request.getHeader('if-modified-since')
-    if (isInStatic && fs.existsSync(full_path) && !full_path.match(/\/\./)) {
+    const fullPath = path.resolve(path.join('static', filePath))
+    const isInStatic = fullPath.startsWith(path.resolve('static'))
+    const checkModifyTime = this.request.getHeader('if-modified-since')
+    if (isInStatic && fs.existsSync(fullPath) && !fullPath.match(/\/\./)) {
       // cache control
-      let cache_control = undefined
+      let cacheControl
       if (typeof cache === 'string') {
-        cache_control = cache
+        cacheControl = cache
       } else if (typeof cache === 'object') {
         cache = Object.keys(cache).map(key => {
           if (cache[key]) {
@@ -94,72 +92,71 @@ class Response {
         }).filter(x => x).join(', ')
       }
       // if cache found file, send file in cache
-      if (this._cache.has(full_path)) {
-        const file = this._cache.get(full_path)
-        if (check_modify_time && check_modify_time === file.mtime) {
+      if (this._cache.has(fullPath)) {
+        const file = this._cache.get(fullPath)
+        if (checkModifyTime && checkModifyTime === file.mtime) {
           return this.status(304).end('', undefined)
         } else {
           this.set('Last-Modified', file.mtime)
-            .set('Cache-Control', cache_control)
+            .set('Cache-Control', cacheControl)
             .end(file.content, file.contentType)
         }
       } else {
-        const contentType = mime.lookup(full_path)
-        const mtime = new Date(fs.statSync(full_path).mtime).toGMTString()
-        const content = fs.readFileSync(full_path, { encoding })
-        this._cache.set(full_path, { content, contentType, mtime })
-        if (check_modify_time && check_modify_time === mtime) {
+        const contentType = mime.lookup(fullPath)
+        const mtime = new Date(fs.statSync(fullPath).mtime).toGMTString()
+        const content = fs.readFileSync(fullPath, { encoding })
+        this._cache.set(fullPath, { content, contentType, mtime })
+        if (checkModifyTime && checkModifyTime === mtime) {
           return this.status(304).end('', false)
         } else {
           this.set('Last-Modified', mtime)
-            .set('Cache-Control', cache_control)
+            .set('Cache-Control', cacheControl)
             .end(content, contentType)
         }
       }
     } else {
-      throw new ServerError({ code: 'SERVER_NOT_FOUND', message: 'The static file not found.', suggestCode: 404 })
+      throw new ServerError({ code: 'SERVER_NOT_FOUND', message: 'The static file not found.', httpCode: 404 })
     }
   }
 
-  renderFile(file_path, data, encoding='utf8') {
-    if (!this._template_render) {
-      throw new ServerError({ code: 'SERVER_ERROR', message: 'The render function is disabled.', suggestCode: 500 })
+  renderFile (filePath, data, encoding = 'utf8') {
+    if (!this._templateRender) {
+      throw new ServerError({ code: 'SERVER_ERROR', message: 'The render function is disabled.', httpCode: 500 })
     }
-    const full_path = path.resolve(path.join('template', file_path))
-    const isInTemplate = full_path.startsWith(path.resolve('template'))
-    const file_name = full_path.split('/').pop()
-    if (isInTemplate && fs.existsSync(full_path)) {
+    const fullPath = path.resolve(path.join('template', filePath))
+    const isInTemplate = fullPath.startsWith(path.resolve('template'))
+    if (isInTemplate && fs.existsSync(fullPath)) {
       // if cache found file, send file in cache
-      if (this._cache.has(full_path)) {
-        const file = this._cache.get(full_path)
-        this.end(this._template_render(file.content, data), file.contentType)
+      if (this._cache.has(fullPath)) {
+        const file = this._cache.get(fullPath)
+        this.end(this._templateRender(file.content, data), file.contentType)
       } else {
-        const contentType = mime.lookup(full_path)
-        const content = fs.readFileSync(full_path, { encoding })
-        this._cache.set(full_path, { content, contentType })
-        this.end(this._template_render(content, data), contentType)
+        const contentType = mime.lookup(fullPath)
+        const content = fs.readFileSync(fullPath, { encoding })
+        this._cache.set(fullPath, { content, contentType })
+        this.end(this._templateRender(content, data), contentType)
       }
     } else {
-      throw new ServerError({ code: 'SERVER_NOT_FOUND', message: 'The template file not found.', suggestCode: 404 })
+      throw new ServerError({ code: 'SERVER_NOT_FOUND', message: 'The template file not found.', httpCode: 404 })
     }
   }
 
-  render(content, data) {
-    if (!this._template_render) {
-      throw new ServerError({ code: 'SERVER_ERROR', message: 'The render function is disabled.', suggestCode: 500 })
+  render (content, data) {
+    if (!this._templateRender) {
+      throw new ServerError({ code: 'SERVER_ERROR', message: 'The render function is disabled.', httpCode: 500 })
     } else {
-      this.send(this._template_render(content, data))
+      this.send(this._templateRender(content, data))
     }
   }
 
-  end(data='', contentType=null) {
+  end (data = '', contentType = null) {
     if (typeof contentType === 'string') {
       this._headers['content-type'] = contentType
     }
     this.cork(() => {
       if (this._status !== 200) {
-        if (http_status_code[this._status]) {
-          this.response.writeStatus(this._status + ' ' + http_status_code[this._status])
+        if (httpStatusCode[this._status]) {
+          this.response.writeStatus(this._status + ' ' + httpStatusCode[this._status])
         } else {
           this.response.writeStatus(this._status.toString())
         }
@@ -171,7 +168,7 @@ class Response {
     })
   }
 
-  send(data) {
+  send (data) {
     if (data.includes('<html>')) {
       this.end(data.toString(), 'text/html')
     } else {
@@ -179,16 +176,16 @@ class Response {
     }
   }
 
-  json(data) {
+  json (data) {
     this.end(JSON.stringify(data), 'application/json')
   }
 
-  set(key, value) {
+  set (key, value) {
     this._headers[key.toLowerCase()] = value
     return this
   }
 
-  location(loc, code=302) {
+  location (loc, code = 302) {
     this.set('Location', loc).status(code)
     return this
   }

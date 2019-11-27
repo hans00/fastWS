@@ -3,18 +3,18 @@ const { EventEmitter } = require('events')
 const ServerError = require('./errors')
 
 class WSClient extends EventEmitter {
-  constructor(session, request) {
+  constructor (session, request) {
     super()
     this.session = session
     this.requestHeaders = request.headers
     this.messageCounter = 0
   }
 
-  static parsePayload(payload) {
+  static parsePayload (payload) {
     if (payload[1] !== ':') {
       throw new ServerError({ code: 'WS_INVALID_PAYLOAD' })
     }
-    const type = payload[0], content = payload.slice(2)
+    const type = payload[0]; const content = payload.slice(2)
     if (type === 's') {
       return { type: 'string', data: content }
     } else if (type === 'b') {
@@ -29,9 +29,9 @@ class WSClient extends EventEmitter {
         throw new ServerError({ code: 'WS_INVALID_PAYLOAD' })
       }
       const event = content.slice(0, eventSplitIndex)
-      const replySplitIndex = content.slice(eventSplitIndex+1).indexOf(';')
-      const replyId = content.slice(eventSplitIndex+1, eventSplitIndex+replySplitIndex+1)
-      const dataPayload = content.slice(eventSplitIndex+replySplitIndex+2)
+      const replySplitIndex = content.slice(eventSplitIndex + 1).indexOf(';')
+      const replyId = content.slice(eventSplitIndex + 1, eventSplitIndex + replySplitIndex + 1)
+      const dataPayload = content.slice(eventSplitIndex + replySplitIndex + 2)
       if (!event) {
         throw new ServerError({ code: 'WS_INVALID_PAYLOAD' })
       }
@@ -49,12 +49,12 @@ class WSClient extends EventEmitter {
     }
   }
 
-  emitPayload(payload) {
+  emitPayload (payload) {
     const incoming = WSClient.parsePayload(payload)
     if (incoming.type === 'event') {
       incoming.reply = (data) => {
         if (incoming.reply_id) {
-          this._send('R:'+incoming.reply_id+';'+WSClient.getPayload(data))
+          this._send('R:' + incoming.reply_id + ';' + WSClient.getPayload(data))
         }
       }
       this.emit(incoming.name, incoming)
@@ -63,13 +63,13 @@ class WSClient extends EventEmitter {
     }
   }
 
-  static getPayload(data, type='') {
+  static getPayload (data, type = '') {
     if (type === 'returnId') {
-      return 'r:'+data.event+';n:'+data.id
+      return 'r:' + data.event + ';n:' + data.id
     } else if (type === 'returnData') {
-      return 'R:'+data.id+';'+WSClient.getPayload(data.data)
+      return 'R:' + data.id + ';' + WSClient.getPayload(data.data)
     } else if (type === 'event') {
-      return 'e:'+data.event+';'+WSClient.getPayload(data.data)
+      return 'e:' + data.event + ';' + WSClient.getPayload(data.data)
     } else {
       const type = typeof data
       if (type === 'string') {
@@ -86,21 +86,21 @@ class WSClient extends EventEmitter {
     }
   }
 
-  get remoteAddress() {
+  get remoteAddress () {
     return inet.ntop(Buffer.from(this.session.getRemoteAddress()))
   }
 
-  drain() {
+  drain () {
     if (this.session.getBufferedAmount() === 0) {
       this.emit('drained')
     }
   }
 
-  _publish(topic, data, isBinary, compress) {
+  _publish (topic, data, isBinary, compress) {
     this.session.publish(topic, data, isBinary, compress)
   }
 
-  async _send(data, isBinary, compress) {
+  async _send (data, isBinary, compress) {
     if (this.session.getBufferedAmount() === 0) {
       return this.session.send(data, isBinary, compress)
     } else {
@@ -113,39 +113,39 @@ class WSClient extends EventEmitter {
     }
   }
 
-  join(channel) {
+  join (channel) {
     return this.session.subscribe(channel)
   }
 
-  quit(channel) {
+  quit (channel) {
     return this.session.unsubscribe(channel)
   }
 
-  send(event, data, compress=true) {
+  send (event, data, compress = true) {
     return this._send(WSClient.getPayload({ event, data }, 'event'), false, compress)
   }
 
-  sendMessage(data, compress=true) {
+  sendMessage (data, compress = true) {
     return this._send(WSClient.getPayload(data), false, compress)
   }
 
-  sendBinary(data, compress=true) {
+  sendBinary (data, compress = true) {
     return this._send(data, true, compress)
   }
 
-  broadcast(channel, event, data, compress=true) {
+  broadcast (channel, event, data, compress = true) {
     this._publish(channel, WSClient.getPayload({ event, data }, 'event'), false, compress)
   }
 
-  broadcastMessage(channel, data, compress=true) {
+  broadcastMessage (channel, data, compress = true) {
     this._publish(channel, WSClient.getPayload(data), false, compress)
   }
 
-  broadcastBinary(channel, data, compress=true) {
+  broadcastBinary (channel, data, compress = true) {
     this._publish(channel, data, true, compress)
   }
 
-  close() {
+  close () {
     return this.session.close()
   }
 }

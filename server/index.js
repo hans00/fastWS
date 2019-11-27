@@ -1,9 +1,9 @@
 const uWS = require('bindings')('uWS')
+const LRU = require('lru-cache')
 const WSClient = require('./ws')
 const Request = require('./request')
 const Response = require('./response')
 const ServerError = require('./errors')
-const LRU = require('lru-cache')
 
 if (!process.nextTick) {
   process.nextTick = (f, ...args) => {
@@ -15,7 +15,12 @@ if (!process.nextTick) {
 process.on('exit', uWS.free)
 
 class fastWS {
-  constructor({ ssl=null, verbose=false, cache=50, templateRender }={}) {
+  constructor ({
+    ssl = null,
+    verbose = false,
+    cache = 50,
+    templateRender
+  } = {}) {
     this.options = {
       ssl,
       verbose
@@ -25,13 +30,14 @@ class fastWS {
     this._port = null
     this._routes = []
     if (typeof templateRender === 'function') {
-      this._template_render = templateRender
+      this._templateRender = templateRender
     } else {
-      this._template_render = function (_template, _data) {
-        return eval(
-          'const '
-          + Object.keys(_data).map(key => `${key} = ${JSON.stringify(_data[key])}`).join()
-          + ';(`' + _template.toString().replace(/\\/g, '\\\\').replace(/`/g, '\\`') + '`)'
+      this._templateRender = function (_template, _data) {
+        /* eslint no-eval: 0 */
+        return global.eval(
+          'const ' +
+          Object.keys(_data).map(key => `${key} = ${JSON.stringify(_data[key])}`).join() +
+          ';(`' + _template.toString().replace(/\\/g, '\\\\').replace(/`/g, '\\`') + '`)'
         )
       }
     }
@@ -45,7 +51,7 @@ class fastWS {
     process.on('SIGHUP', () => this.reload())
   }
 
-  listen(port, callback=null) {
+  listen (port, callback) {
     if (!port && !this._port) {
       throw new ServerError({ code: 'INVALID_NO_PORT', message: 'Invalid, must specify port' })
     } else if (!port) {
@@ -68,38 +74,38 @@ class fastWS {
         this.options.verbose && console.log('Failed')
       }
       if (callback) {
-        callback(!!listenSocket)
+        callback(listenSocket)
       }
     })
   }
 
-  broadcast(channel, event, data, compress=true) {
+  broadcast (channel, event, data, compress = true) {
     this._server.publish(channel, WSClient.getPayload({ event, data }, 'event'), false, compress)
   }
 
-  broadcastMessage(channel, data, compress=true) {
+  broadcastMessage (channel, data, compress = true) {
     this._server.publish(channel, WSClient.getPayload(data), false, compress)
   }
 
-  broadcastBinary(channel, data, compress=true) {
+  broadcastBinary (channel, data, compress = true) {
     this._server.publish(channel, data, true, compress)
   }
 
-  route(method, path, callbacks) {
+  route (method, path, callbacks) {
     if (!this._routes[path]) {
       this._routes[path] = {}
     }
-    let url_params = path.match(/:\w+/g)
-    if (url_params) {
-      url_params = url_params.map(key => key.slice(1))
+    let URLParams = path.match(/:\w+/g)
+    if (URLParams) {
+      URLParams = URLParams.map(key => key.slice(1))
     }
     if (method === 'ws') {
       this._routes[path][method] = callbacks
     } else {
       this._routes[path][method] = async (response, request) => {
         const params = {}
-        if (url_params) {
-          url_params.forEach((key, index) => {
+        if (URLParams) {
+          URLParams.forEach((key, index) => {
             params[key] = decodeURIComponent(request.getParameter(index))
           })
         }
@@ -108,11 +114,11 @@ class fastWS {
         try {
           await callbacks(req, res, params)
         } catch (e) {
-          if (e instanceof ServerError && e.suggestCode) {
+          if (e instanceof ServerError && e.httpCode) {
             if (e.originError) {
               console.error(e.originError)
             }
-            res.status(e.suggestCode).end(e.message)
+            res.status(e.httpCode).end(e.message)
           } else {
             console.error(e)
             res.status(500).end('Server Internal Error')
@@ -122,13 +128,13 @@ class fastWS {
     }
   }
 
-  ws(path, callback, options={}) {
+  ws (path, callback, options = {}) {
     if (options.compression) {
-      if (options.compression == false || options.compression === 'disable') {
+      if (options.compression === false || options.compression === 'disable') {
         options.compression = 0
-      } else if ([ 'default', 'shared' ].includes(options.compression)) {
+      } else if (['default', 'shared'].includes(options.compression)) {
         options.compression = 1
-      } else if ([ 'dedicated' ].includes(options.compression)) {
+      } else if (['dedicated'].includes(options.compression)) {
         options.compression = 2
       } else {
         throw new ServerError({ code: 'INVALID_OPTIONS', message: 'Invalid websocket option' })
@@ -185,55 +191,55 @@ class fastWS {
       close: (ws, code, message) => {
         ws._client.emit('disconnect')
         setImmediate(() => delete ws._client)
-      },
+      }
     })
   }
 
-  get(path, callback) {
+  get (path, callback) {
     this.route('get', path, callback)
   }
 
-  post(path, callback) {
+  post (path, callback) {
     this.route('post', path, callback)
   }
 
-  patch(path, callback) {
+  patch (path, callback) {
     this.route('patch', path, callback)
   }
 
-  del(path, callback) {
+  del (path, callback) {
     this.route('del', path, callback)
   }
 
-  delete(path, callback) {
+  delete (path, callback) {
     this.route('del', path, callback)
   }
 
-  put(path, callback) {
+  put (path, callback) {
     this.route('put', path, callback)
   }
 
-  head(path, callback) {
+  head (path, callback) {
     this.route('head', path, callback)
   }
 
-  trace(path, callback) {
+  trace (path, callback) {
     this.route('trace', path, callback)
   }
 
-  connect(path, callback) {
+  connect (path, callback) {
     this.route('connect', path, callback)
   }
 
-  options(path, callback) {
+  options (path, callback) {
     this.route('options', path, callback)
   }
 
-  any(path, callback) {
+  any (path, callback) {
     this.route('any', path, callback)
   }
 
-  serve(path, { targetPath, cache='max-age=86400', encoding='utf8' }={}) {
+  serve (path, { targetPath, cache = 'max-age=86400', encoding = 'utf8' } = {}) {
     if (targetPath) {
       this.route('get', path, (req, res) => {
         res.staticFile(targetPath, encoding, cache)
@@ -245,7 +251,7 @@ class fastWS {
     }
   }
 
-  gracefulStop() {
+  gracefulStop () {
     if (this._socket) {
       this.options.verbose && console.log('Shutting down...')
       uWS.us_listen_socket_close(this._socket)
@@ -253,7 +259,7 @@ class fastWS {
     }
   }
 
-  reload() {
+  reload () {
     if (this._server) {
       this.options.verbose && console.log('Reloading...')
       this.listen()

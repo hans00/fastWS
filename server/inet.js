@@ -1,7 +1,7 @@
-const v4_prefix = Buffer.from([00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 0xff, 0xff])
+const V4Prefix = Buffer.from([0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff, 0xff])
 
 exports.ntop = (buf) => {
-  if (!Buffer.compare(buf.slice(0, 12), v4_prefix)) {
+  if (!Buffer.compare(buf.slice(0, 12), V4Prefix)) {
     return buf.slice(12).join('.')
   } else {
     return buf.reduce((str, num, i) => {

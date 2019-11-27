@@ -1,45 +1,45 @@
 const inet = require('./inet')
 const ServerError = require('./errors')
 
-const with_body_methods = [ 'POST', 'PUT', 'PATCH' ]
+const methodsWithBody = ['POST', 'PUT', 'PATCH']
 
 class Request {
-  constructor(request, response) {
+  constructor (request, response) {
     this.request = request
     this.response = response
   }
 
   // default limit in 4MB
-  body(limit=4194304) {
-    if (!with_body_methods.includes(this.method)) {
-      throw new ServerError({ code: 'SERVER_NOT_ALLOWED', message: 'The method never with data.', suggestCode: 405 })
+  body (limit = 4194304) {
+    if (!methodsWithBody.includes(this.method)) {
+      throw new ServerError({ code: 'SERVER_NOT_ALLOWED', message: 'The method never with data.', httpCode: 405 })
     }
     const contentType = this.header('Content-Type')
-    const content_length = this.header('Content-Length')
-    if (!content_length) {
-      throw new ServerError({ code: 'CLIENT_NO_LENGTH', message: '', suggestCode: 411 })
-    } else if (!/^[1-9]\d*$/.test(content_length)) {
-      throw new ServerError({ code: 'CLIENT_LENGTH_INVALID', message: '', suggestCode: 400 })
-    } else if (limit && Number(content_length) > limit) {
-      throw new ServerError({ code: 'CLIENT_LENGTH_TOO_LARGE', message: '', suggestCode: 413 })
+    const _contentLength = this.header('Content-Length')
+    if (!_contentLength) {
+      throw new ServerError({ code: 'CLIENT_NO_LENGTH', message: '', httpCode: 411 })
+    } else if (!/^[1-9]\d*$/.test(_contentLength)) {
+      throw new ServerError({ code: 'CLIENT_LENGTH_INVALID', message: '', httpCode: 400 })
+    } else if (limit && Number(_contentLength) > limit) {
+      throw new ServerError({ code: 'CLIENT_LENGTH_TOO_LARGE', message: '', httpCode: 413 })
     }
-    const contentLength = Number(content_length)
+    const contentLength = Number(_contentLength)
     return new Promise((resolve, reject) => {
-      let data = null, body_length = 0
+      let data = null; let bodyLength = 0
       this.response.onData((chunk, isLast) => {
-        data = data !== null ? Buffer.concat([ data, Buffer.from(chunk) ]) : Buffer.from(chunk)
-        body_length += chunk.byteLength
-        if (body_length >= contentLength) {
+        data = data !== null ? Buffer.concat([data, Buffer.from(chunk)]) : Buffer.from(chunk)
+        bodyLength += chunk.byteLength
+        if (bodyLength >= contentLength) {
           try {
             if (contentType.startsWith('text/')) {
-              resolve(data.slice(0, dataLength).toString())
+              resolve(data.slice(0, contentLength).toString())
             } else if (contentType === 'application/json') {
               resolve(JSON.parse(data.slice(0, contentLength)))
             } else {
               resolve(data.slice(0, contentLength))
             }
           } catch (e) {
-            reject(new ServerError({ code: 'SERVER_BODY_PARSE', originError: e, suggestCode: 400 }))
+            reject(new ServerError({ code: 'SERVER_BODY_PARSE', originError: e, httpCode: 400 }))
           }
         }
       })
@@ -49,23 +49,23 @@ class Request {
     })
   }
 
-  get remoteAddress() {
+  get remoteAddress () {
     return inet.ntop(Buffer.from(this.response.getRemoteAddress()))
   }
 
-  get url() {
+  get url () {
     return this.request.getUrl()
   }
 
-  get method() {
+  get method () {
     return this.request.getMethod().toUpperCase()
   }
 
-  get query() {
+  get query () {
     return this.request.getQuery()
   }
 
-  get headers() {
+  get headers () {
     const headers = {}
     this.request.forEach((k, v) => {
       headers[k] = v
@@ -73,7 +73,7 @@ class Request {
     return headers
   }
 
-  header(name) {
+  header (name) {
     return this.request.getHeader(name.toLowerCase())
   }
 }
