@@ -69,11 +69,11 @@ class Response {
     return this
   }
 
-  staticFile(file_path, cache='max-age=86400') {
+  staticFile(file_path, encoding='utf8', cache='max-age=86400') {
     if (file_path.endsWith('/')) {
       file_path += 'index.html'
     }
-    const full_path = path.resolve('static', file_path)
+    const full_path = path.resolve(path.join('static', file_path))
     const isInStatic = full_path.startsWith(path.resolve('static'))
     const file_name = full_path.split('/').pop()
     const check_modify_time = this.request.getHeader('if-modified-since')
@@ -106,7 +106,7 @@ class Response {
       } else {
         const contentType = mime.lookup(full_path)
         const mtime = new Date(fs.statSync(full_path).mtime).toGMTString()
-        const content = fs.readFileSync(full_path)
+        const content = fs.readFileSync(full_path, { encoding })
         this._cache.set(full_path, { content, contentType, mtime })
         if (check_modify_time && check_modify_time === mtime) {
           return this.status(304).end('', false)
@@ -121,11 +121,11 @@ class Response {
     }
   }
 
-  renderFile(file_path, data) {
+  renderFile(file_path, data, encoding='utf8') {
     if (!this._template_render) {
       throw new ServerError({ code: 'SERVER_ERROR', message: 'The render function is disabled.', suggestCode: 500 })
     }
-    const full_path = path.resolve('template', file_path)
+    const full_path = path.resolve(path.join('template', file_path))
     const isInTemplate = full_path.startsWith(path.resolve('template'))
     const file_name = full_path.split('/').pop()
     if (isInTemplate && fs.existsSync(full_path)) {
@@ -135,7 +135,7 @@ class Response {
         this.end(this._template_render(file.content, data), file.contentType)
       } else {
         const contentType = mime.lookup(full_path)
-        const content = fs.readFileSync(full_path)
+        const content = fs.readFileSync(full_path, { encoding })
         this._cache.set(full_path, { content, contentType })
         this.end(this._template_render(content, data), contentType)
       }

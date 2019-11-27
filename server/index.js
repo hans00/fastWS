@@ -31,7 +31,7 @@ class fastWS {
         return eval(
           'const '
           + Object.keys(_data).map(key => `${key} = ${JSON.stringify(_data[key])}`).join()
-          + ';(`' + _template.replace(/\\/g, '\\\\').replace(/`/g, '\\`') + '`)'
+          + ';(`' + _template.toString().replace(/\\/g, '\\\\').replace(/`/g, '\\`') + '`)'
         )
       }
     }
@@ -233,14 +233,14 @@ class fastWS {
     this.route('any', path, callback)
   }
 
-  serve(path, { targetPath, cache='max-age=86400' }={}) {
+  serve(path, { targetPath, cache='max-age=86400', encoding='utf8' }={}) {
     if (targetPath) {
       this.route('get', path, (req, res) => {
-        res.staticFile(targetPath, cache)
+        res.staticFile(targetPath, encoding, cache)
       })
     } else {
       this.route('get', path, (req, res) => {
-        res.staticFile(req.url, cache)
+        res.staticFile(req.url, encoding, cache)
       })
     }
   }
