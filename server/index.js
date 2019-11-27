@@ -19,14 +19,14 @@ function render (_template, _data) {
   function quote (data, type) {
     if (type) {
       if (type === String) {
-        return '"' + data.toString().replace(/("|\\)/g, '\\$1') + '"'
+        return '"' + data.toString().replace(/("|\\|\/)/g, '\\$1') + '"'
       } else if (type === Number) {
         return Number(data)
       } else {
-        return JSON.stringify(data)
+        return JSON.stringify(data).replace(/\//g, '\\/')
       }
     } else {
-      return JSON.stringify(data)
+      return JSON.stringify(data).replace(/\//g, '\\/')
     }
   }
   function escapeHTML (data) {
