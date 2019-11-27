@@ -96,7 +96,7 @@ function render(_template, _data) {
   return eval(
     'const '
     + Object.keys(_data).map(key => `${key} = ${JSON.stringify(_data[key])}`).join()
-    + ';(`' + _template.replace(/\\/g, '\\\\').replace(/`/g, '\\`') + '`)'
+    + ';(`' + _template.toString().replace(/\\/g, '\\\\').replace(/`/g, '\\`') + '`)'
   )
 }
 ```
@@ -126,6 +126,7 @@ function render(_template, _data) {
 ```js
 options = {
   targetPath: 'some/path/in/static', // If real path is not equal to request path.
+  encoding: 'utf8', // The file encoding
   cache: 'max-age=86400', // cache control string
   cache: { public: true, 'max-age': 31536000 }, // cache control as object
   cache: null, // Turn off cache control
@@ -201,7 +202,7 @@ options = {
 
 > HTTP status
 
-- `staticFile(file_path[, cache_control='max-age=86400'])`
+- `staticFile(file_path[, encoding='utf8', cache_control='max-age=86400'])`
 
 > Send static file.
 ```js
@@ -234,7 +235,7 @@ cache_control = null // Turn off Cache-Control
 
 > Render data into content and send.
 
-- `renderFile(file_path, data)`
+- `renderFile(file_path, data[, encoding='utf8'])`
 
 > Render data into file content and send.
 > The content of file will be cached.
