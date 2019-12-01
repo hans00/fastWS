@@ -70,13 +70,13 @@ Transfer/sec:      1.26MB
 # Dynamic with URL parameter
 
 ```sh
-wrk -c 1k -t 10 -d 10s http://<IP>:3000/param/test
+wrk -c 1k -t 10 -d 10s http://<IP>:3000/hello/test
 ```
 
 ## Express
 
 ```
-Running 10s test @ http://<IP>:3000/param/test
+Running 10s test @ http://<IP>:3000/hello/test
   10 threads and 1000 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
     Latency   102.97ms  101.94ms   1.35s    97.42%
@@ -90,7 +90,7 @@ Transfer/sec:      1.19MB
 ## This Project
 
 ```
-Running 10s test @ http://<IP>:3000/param/test
+Running 10s test @ http://<IP>:3000/hello/test
   10 threads and 1000 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
     Latency    25.17ms   12.54ms 493.42ms   99.29%
