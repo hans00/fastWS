@@ -73,11 +73,11 @@ wrk -c 1k -t 100 -d 10s http://$IP:3000/hello/test
 ```
   100 threads and 1000 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency   113.96ms  175.15ms   1.99s    96.52%
-    Req/Sec   115.81     41.47   303.00     78.35%
-  105699 requests in 10.09s, 13.41MB read
-Requests/sec:  10479.06
-Transfer/sec:      1.33MB
+    Latency    85.37ms   32.93ms 603.86ms   92.12%
+    Req/Sec   120.13     43.31   404.00     80.10%
+  108033 requests in 10.09s, 13.70MB read
+Requests/sec:  10705.26
+Transfer/sec:      1.36MB
 ```
 
 ### This Project
@@ -85,11 +85,11 @@ Transfer/sec:      1.33MB
 ```
   100 threads and 1000 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency   113.96ms  175.15ms   1.99s    96.52%
-    Req/Sec   115.81     41.47   303.00     78.35%
-  105699 requests in 10.09s, 13.41MB read
-Requests/sec:  10479.06
-Transfer/sec:      1.33MB
+    Latency    17.27ms    6.74ms 254.62ms   98.22%
+    Req/Sec   586.91     92.10     1.78k    89.87%
+  575113 requests in 10.10s, 37.84MB read
+Requests/sec:  56940.25
+Transfer/sec:      3.75MB
 ```
 
 ## WS
