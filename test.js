@@ -30,8 +30,6 @@ app.get('/xml/:message', (req, res, { message }) => {
 
 app.serve('/*')
 
-app.listen(3000, err => {
-  if (!err) {
-    console.log('Listen on 3000')
-  }
+app.listen(3000, () => {
+  console.log('Listen on 3000')
 })

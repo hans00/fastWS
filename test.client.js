@@ -1,6 +1,6 @@
 const WS = require('./client')
 
-const ws = new WS('ws://localhost:3000/ws')
+const ws = new WS('ws://localhost:3000/ws', { pingInterval: 1 })
 
 ws.on('pong', (latency) => console.log('pong', latency))
 

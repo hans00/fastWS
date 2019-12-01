@@ -1,6 +1,6 @@
 const uWS = require('bindings')('uWS')
 const LRU = require('lru-cache')
-const WSClient = require('./ws')
+const BasicWSProtocol = require('./ws-protocol/basic')
 const Request = require('./request')
 const Response = require('./response')
 const ServerError = require('./errors')
@@ -92,25 +92,13 @@ class fastWS {
       this._socket = listenSocket
       if (listenSocket) {
         this.options.verbose && console.log('Started')
+        if (callback) {
+          callback()
+        }
       } else {
         this.options.verbose && console.log('Failed')
       }
-      if (callback) {
-        callback(listenSocket)
-      }
     })
-  }
-
-  broadcast (channel, event, data, compress = true) {
-    this._server.publish(channel, WSClient.getPayload({ event, data }, 'event'), false, compress)
-  }
-
-  broadcastMessage (channel, data, compress = true) {
-    this._server.publish(channel, WSClient.getPayload(data), false, compress)
-  }
-
-  broadcastBinary (channel, data, compress = true) {
-    this._server.publish(channel, data, true, compress)
   }
 
   route (method, path, callbacks) {
@@ -168,15 +156,28 @@ class fastWS {
     if (options.maxPayloadLength && !Number.isInteger(options.maxPayloadLength)) {
       throw new ServerError({ code: 'INVALID_OPTIONS', message: 'Invalid websocket option' })
     }
+    if (options.protocol) {
+      if (options.protocol === 'custom' || options.protocol === 'chat') {
+        options.protocol = BasicWSProtocol
+      } else if (typeof options.protocol === 'string') {
+        options.protocol = require(`./ws-protocol/${options.protocol}`)
+      } else if (!(options.protocol.prototype instanceof BasicWSProtocol)) {
+        throw new ServerError({ code: 'INVALID_OPTIONS', message: 'Invalid websocket option' })
+      }
+    } else {
+      options.protocol = require('./ws-protocol/fast-ws')
+    }
+    const Protocol = options.protocol
     this.route('ws', path, {
-      ...options,
-      open: async (ws, req) => {
-        const client = new WSClient(ws, new Request(req))
+      compression: options.compression,
+      idleTimeout: options.idleTimeout,
+      maxPayloadLength: options.maxPayloadLength,
+      open: (ws, request) => {
+        const client = new Protocol(ws, new Request(request, null))
         this.options.verbose && console.log('[open]', client.remoteAddress)
         ws._client = client
         try {
-          await callback(client)
-          ws.send('\x00', 0, 0)
+          callback(client)
         } catch (error) {
           console.error(error)
           // disconnect when error
@@ -189,7 +190,7 @@ class fastWS {
             // decode message
             ws._client.emitPayload(Buffer.from(message).toString())
           } catch (error) {
-            if (error === 'INVALID_PAYLOAD') {
+            if (error.code === 'WS_INVALID_PAYLOAD') {
               this.options.verbose && console.log('[error]', 'Invalid message payload')
             } else {
               console.error(error)
@@ -211,7 +212,7 @@ class fastWS {
         ws._client.emit('pong')
       },
       close: (ws, code, message) => {
-        ws._client.emit('disconnect')
+        ws._client.emit('close', code, message)
         setImmediate(() => delete ws._client)
       }
     })

@@ -55,10 +55,8 @@ app.get('/hello/:name/alert', async (req, res, params) => {
 
 app.serve('/*') // auto serve project /static/*
 
-app.listen(3000, err => {
-  if (!err) {
-    console.log('Listen on 3000')
-  }
+app.listen(3000, () => {
+  console.log('Listen on 3000')
 })
 ```
 
@@ -175,21 +173,15 @@ options = {
 options = {
   compression: 'default', // 'disable' / 'default' == 'shared' / 'dedicated'
   idleTimeout: 300, // (sec)
-  maxPayloadLength: 4096
+  maxPayloadLength: 4096,
+  protocol: 'fast-ws', // string of ws protocol name (builtins: fast-ws, echo, chat)
+  protocol: Object, // object of WS protocol (must extends 'fast-ws/server/ws-prototol/basic')
 }
 ```
 
-- `broadcast(channel, event, data[, compress=true])`
+- `listen(path, callback)`
 
-> Broadcast event to WebSocket channel
-
-- `broadcastMessage(channel, message[, compress=true])`
-
-> Broadcast message to WebSocket channel
-
-- `broadcastBinary(channel, message[, compress=true])`
-
-> Broadcast binary to WebSocket channel
+> Start listen
 
 ## `Request`
 

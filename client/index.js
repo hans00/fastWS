@@ -6,7 +6,7 @@ class WSClient extends EventEmitter {
     super()
     this.options = options
     this.connectState = 0
-    this.client = new WebSocket(endpoint)
+    this.client = new WebSocket(endpoint, 'fast-ws', options)
     this.client.on('error', error => {
       this.emit('error', error)
     })
@@ -23,9 +23,16 @@ class WSClient extends EventEmitter {
       this.emit('disconnected')
     })
     this.client.on('message', (message) => {
-      if (message === '\x00') {
-        this.connectState = 2
-        this.emit('ready')
+      if (this.connectState !== 2) {
+        if (message === '\x00\x01') {
+          this.connectState = 2
+          this.emit('ready')
+        } else {
+          this.emit('error', new Error({
+            code: 'CLIENT_VERSION_MISMATCH',
+            message: 'Client version mismatch.'
+          }))
+        }
       } else {
         this.onMessage(message)
       }
