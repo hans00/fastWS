@@ -1,4 +1,6 @@
-const fastWS = require('../server')
+const fastWS = require('../../server')
+const fs = require('fs')
+const http = require('http')
 
 const app = new fastWS()
 
@@ -25,6 +27,16 @@ app.get('/xml/:message', (req, res, { message }) => {
 
 app.get('/js/:message', (req, res, { message }) => {
   res.render('response("${escapeVar(message, String)}")', { message })
+})
+
+app.get('/stream/file', (req, res) => {
+  fs.createReadStream('static/index.html').pipe(res)
+})
+
+app.get('/stream/http', (req, res) => {
+  http.get('http://google.com/', response => {
+    response.pipe(res)
+  })
 })
 
 app.serve('/*')

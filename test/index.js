@@ -11,7 +11,7 @@ const TIMEOUT = 10 * 1000
 process.chdir(__dirname)
 
 async function tests() {
-  await require('./server')(PORT)
+  await require('./prepare')(PORT)
   let pass = true
   const files = fs.readdirSync(path.resolve('cases'))
   for (const file of files) {
