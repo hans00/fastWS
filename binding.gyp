@@ -8,6 +8,7 @@
       ],
       'defines': [
         'LIBUS_USE_LIBUV',
+        'LIBUS_USE_OPENSSL',
       ],
       'cflags': [
         '-std=c++17',
@@ -30,6 +31,7 @@
           'sources': [
             '<!@(ls -1 src/uWebSockets.js/uWebSockets/uSockets/src/*.c)',
             '<!@(ls -1 src/uWebSockets.js/uWebSockets/uSockets/src/eventing/*.c)',
+            '<!@(ls -1 src/uWebSockets.js/uWebSockets/uSockets/src/crypto/*.c)',
             'src/uWebSockets.js/src/addon.cpp',
           ],
           'dependencies': [ 'uWebSockets' ],
@@ -59,13 +61,15 @@
       'type': 'static_library',
       'sources': [
         '<!@(ls -1 src/uWebSockets.js/uWebSockets/uSockets/src/*.c)',
-        '<!@(ls -1 src/uWebSockets.js/uWebSockets/uSockets/src/eventing/*.c)'
+        '<!@(ls -1 src/uWebSockets.js/uWebSockets/uSockets/src/eventing/*.c)',
+        '<!@(ls -1 src/uWebSockets.js/uWebSockets/uSockets/src/crypto/*.c)',
       ],
       'include_dirs': [
         'src/uWebSockets.js/uWebSockets/uSockets/src',
       ],
       'defines': [
         'LIBUS_USE_LIBUV',
+        'LIBUS_USE_OPENSSL',
       ],
       'cflags': [
         '-flto',
