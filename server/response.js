@@ -2,6 +2,7 @@ const ServerError = require('./errors')
 const fs = require('fs')
 const path = require('path')
 const mime = require('mime-types')
+const { Writable } = require('stream')
 
 function toArrayBuffer (buffer) {
   return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
@@ -53,14 +54,21 @@ const httpStatusCode = {
   503: 'Service Unavailable'
 }
 
-class Response {
+class Response extends Writable {
   constructor ({ _cache, _templateRender }, request, response) {
+    super()
     this.request = request
     this.response = response
     this._status = 200
     this._headers = {}
     this._cache = _cache
     this._templateRender = _templateRender
+    this.headersSent = false
+    this.on('pipe', (src) => this.pipeFrom(src))
+    this.corkWriteSize = 0
+    this.response.onAborted(() => {
+      this.destroy()
+    })
   }
 
   cork (callback) {
@@ -101,8 +109,8 @@ class Response {
         if (checkModifyTime && checkModifyTime === file.mtime) {
           return this.status(304).end('', undefined)
         } else {
-          this.set('Last-Modified', file.mtime)
-            .set('Cache-Control', cacheControl)
+          this.setHeader('Last-Modified', file.mtime)
+            .setHeader('Cache-Control', cacheControl)
             .end(file.content, file.contentType)
         }
       } else {
@@ -113,8 +121,8 @@ class Response {
         if (checkModifyTime && checkModifyTime === mtime) {
           return this.status(304).end('', false)
         } else {
-          this.set('Last-Modified', mtime)
-            .set('Cache-Control', cacheControl)
+          this.setHeader('Last-Modified', mtime)
+            .setHeader('Cache-Control', cacheControl)
             .end(content, contentType)
         }
       }
@@ -153,11 +161,9 @@ class Response {
     }
   }
 
-  end (data = '', contentType = null) {
-    if (typeof contentType === 'string') {
-      this._headers['content-type'] = contentType
-    }
-    this.cork(() => {
+  writeHead () {
+    if (!this.headersSent) {
+      this.headersSent = true
       if (this._status !== 200) {
         if (httpStatusCode[this._status]) {
           this.response.writeStatus(this._status + ' ' + httpStatusCode[this._status])
@@ -168,8 +174,67 @@ class Response {
       Object.keys(this._headers).forEach(key => {
         this.response.writeHeader(key, this._headers[key])
       })
-      this.response.end(data)
+    }
+  }
+
+  _write (chunk, encoding, next) {
+    const data = toArrayBuffer(chunk)
+    const [ok, _done] = this.response.tryEnd(data, this.corkWriteSize)
+    if (!ok) {
+      this.response.onWritable((offset) => {
+        this._write(data.slice(offset - this.response.getWriteOffset()), encoding, next)
+        this.emit('drain')
+      })
+    } else {
+      next()
+    }
+    if (_done) {
+      this.writableFinished = true
+      this.emit('finish')
+    }
+  }
+
+  pipeFrom (readable) {
+    readable.on('error', error => {
+      this.emit('error', error)
     })
+    if (readable.path) {
+      this.writeHead()
+      this.corkWriteSize = fs.statSync(readable.path).size
+      this.response.tryEnd('', this.corkWriteSize)
+    } else if (readable.headers && readable.headers['content-length']) {
+      this.writeHead()
+      this.corkWriteSize = Number(readable.headers['content-length'])
+      this.response.tryEnd('', this.corkWriteSize)
+    } else {
+      throw new ServerError({
+        code: 'SERVER_STREAM_UNKNOWN_SIZE',
+        message: 'Pipe stream must know response length.',
+        httpCode: 500
+      })
+    }
+    return this
+  }
+
+  end (data = '', contentType = null) {
+    if (this._writableState.destroyed) {
+      return
+    }
+    if (this.corkWriteSize === 0) {
+      if (typeof contentType === 'string') {
+        this._headers['content-type'] = contentType
+      }
+      this.cork(() => {
+        this.writeHead()
+        this.response.end(data)
+        this.writableFinished = true
+        this.emit('finish')
+      })
+    } else {
+      this.writableFinished = true
+      this.emit('finish')
+    }
+    return this
   }
 
   send (data) {
@@ -184,13 +249,39 @@ class Response {
     this.end(JSON.stringify(data), 'application/json')
   }
 
-  set (key, value) {
+  flushHeaders () {
+    this._headers = {}
+    return this
+  }
+
+  getHeader (key) {
+    return this._headers[key.toLowerCase()]
+  }
+
+  getHeaderNames () {
+    return Object.keys(this._headers)
+  }
+
+  getHeaders () {
+    return this._headers
+  }
+
+  hasHeader (key) {
+    return key.toLowerCase() in this._headers
+  }
+
+  removeHeader (key) {
+    delete this._headers[key.toLowerCase()]
+    return this
+  }
+
+  setHeader (key, value) {
     this._headers[key.toLowerCase()] = value
     return this
   }
 
   location (loc, code = 302) {
-    this.set('Location', loc).status(code)
+    this.setHeader('Location', loc).status(code)
     return this
   }
 }
