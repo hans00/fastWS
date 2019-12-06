@@ -3,6 +3,10 @@ const fs = require('fs')
 const path = require('path')
 const mime = require('mime-types')
 
+function toArrayBuffer(buffer) {
+  return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
+}
+
 const httpStatusCode = {
   // Informational
   100: 'Continue',
@@ -68,7 +72,7 @@ class Response {
     return this
   }
 
-  staticFile (filePath, encoding = 'utf8', cache = 'max-age=86400') {
+  staticFile (filePath, cache = 'max-age=86400') {
     if (filePath.endsWith('/')) {
       filePath += 'index.html'
     }
@@ -104,7 +108,7 @@ class Response {
       } else {
         const contentType = mime.lookup(fullPath)
         const mtime = new Date(fs.statSync(fullPath).mtime).toGMTString()
-        const content = fs.readFileSync(fullPath, { encoding })
+        const content = toArrayBuffer(fs.readFileSync(fullPath))
         this._cache.set(fullPath, { content, contentType, mtime })
         if (checkModifyTime && checkModifyTime === mtime) {
           return this.status(304).end('', false)
@@ -119,7 +123,7 @@ class Response {
     }
   }
 
-  renderFile (filePath, data, encoding = 'utf8') {
+  renderFile (filePath, data) {
     if (!this._templateRender) {
       throw new ServerError({ code: 'SERVER_ERROR', message: 'The render function is disabled.', httpCode: 500 })
     }
@@ -132,7 +136,7 @@ class Response {
         this.end(this._templateRender(file.content, data), file.contentType)
       } else {
         const contentType = mime.lookup(fullPath)
-        const content = fs.readFileSync(fullPath, { encoding })
+        const content = fs.readFileSync(fullPath).toString()
         this._cache.set(fullPath, { content, contentType })
         this.end(this._templateRender(content, data), contentType)
       }

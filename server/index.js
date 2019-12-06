@@ -262,14 +262,14 @@ class fastWS {
     this.route('any', path, callback)
   }
 
-  serve (path, { targetPath, cache = 'max-age=86400', encoding = 'utf8' } = {}) {
+  serve (path, { targetPath, cache = 'max-age=86400' } = {}) {
     if (targetPath) {
       this.route('get', path, (req, res) => {
-        res.staticFile(targetPath, encoding, cache)
+        res.staticFile(targetPath, cache)
       })
     } else {
       this.route('get', path, (req, res) => {
-        res.staticFile(req.url, encoding, cache)
+        res.staticFile(req.url, cache)
       })
     }
   }
