@@ -81,9 +81,9 @@
       ],
       'conditions': [
         [ 'OS=="linux"', {
-            'cflags+': [ '-flto', '-O3' ],
-            'cflags_c+': [ '-flto', '-O3' ],
-            'cflags_cc+': [ '-flto', '-O3' ],
+          'cflags+': [ '-flto', '-O3' ],
+          'cflags_c+': [ '-flto', '-O3' ],
+          'cflags_cc+': [ '-flto', '-O3' ],
         } ],
         [ 'OS=="win"', {
           'msvs_settings': {
