@@ -40,7 +40,7 @@ class Request {
           try {
             if (contentType.startsWith('text/')) {
               resolve(data.slice(0, contentLength).toString())
-            } else if (contentType === 'application/json') {
+            } else if (contentType.startsWith('application/json')) {
               resolve(JSON.parse(data.slice(0, contentLength)))
             } else {
               resolve(data.slice(0, contentLength))

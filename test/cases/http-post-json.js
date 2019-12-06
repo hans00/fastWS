@@ -4,15 +4,7 @@ module.exports = async function (port) {
   const data = {
     'hello': 'world'
   }
-  const res = await axios.post(
-    `http://localhost:${port}/post`,
-    data,
-    {
-      headers: {
-       'Content-Type': 'application/json'
-      }
-    }
-  )
+  const res = await axios.post(`http://localhost:${port}/post`, data)
   if (res.status !== 200) {
     throw new Error(`Response ${res.status}`)
   }
