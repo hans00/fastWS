@@ -189,8 +189,7 @@ class Response extends Writable {
       next()
     }
     if (_done) {
-      this.writableFinished = true
-      this.emit('finish')
+      super.end()
     }
   }
 
@@ -227,12 +226,10 @@ class Response extends Writable {
       this.cork(() => {
         this.writeHead()
         this.response.end(data)
-        this.writableFinished = true
-        this.emit('finish')
+        super.end()
       })
     } else {
-      this.writableFinished = true
-      this.emit('finish')
+      super.end()
     }
     return this
   }
