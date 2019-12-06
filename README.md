@@ -248,7 +248,7 @@ cache_control = null // Turn off Cache-Control
 
 > Send JSON format
 
-- `set(key, value)`
+- `setHeader(key, value)`
 
 > Set header
 
