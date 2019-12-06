@@ -5,7 +5,7 @@ module.exports = async function (port) {
   if (res.status !== 200) {
     throw new Error(`Response ${res.status}`)
   }
-  if (res.data !== 'TEST\n') {
+  if (!res.data.startsWith('TEST')) {
     throw new Error('Response data mismatch')
   }
 }
