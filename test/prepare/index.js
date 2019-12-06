@@ -1,4 +1,5 @@
 const fastWS = require('../../server')
+const path = require('path')
 const fs = require('fs')
 const http = require('http')
 
@@ -30,7 +31,7 @@ app.get('/js/:message', (req, res, { message }) => {
 })
 
 app.get('/stream/file', (req, res) => {
-  fs.createReadStream('static/index.html').pipe(res)
+  fs.createReadStream(path.resolve('static/index.html')).pipe(res)
 })
 
 app.get('/stream/http', (req, res) => {
