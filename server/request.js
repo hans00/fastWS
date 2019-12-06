@@ -7,6 +7,13 @@ class Request {
   constructor (request, response) {
     this.request = request
     this.response = response
+    this.url = this.request.getUrl()
+    this.headers = {}
+    this.request.forEach((k, v) => {
+      this.headers[k] = v
+    })
+    this.query = this.request.getQuery()
+    this.method = this.request.getMethod().toUpperCase()
   }
 
   // default limit in 4MB
@@ -14,8 +21,8 @@ class Request {
     if (!methodsWithBody.includes(this.method)) {
       throw new ServerError({ code: 'SERVER_NOT_ALLOWED', message: 'The method never with data.', httpCode: 405 })
     }
-    const contentType = this.header('Content-Type')
-    const _contentLength = this.header('Content-Length')
+    const contentType = this.getHeader('Content-Type')
+    const _contentLength = this.getHeader('Content-Length')
     if (!_contentLength) {
       throw new ServerError({ code: 'CLIENT_NO_LENGTH', message: '', httpCode: 411 })
     } else if (!/^[1-9]\d*$/.test(_contentLength)) {
@@ -53,28 +60,12 @@ class Request {
     return inet.ntop(Buffer.from(this.response.getRemoteAddress()))
   }
 
-  get url () {
-    return this.request.getUrl()
+  hasHeader (name) {
+    return name.toLowerCase() in this.headers
   }
 
-  get method () {
-    return this.request.getMethod().toUpperCase()
-  }
-
-  get query () {
-    return this.request.getQuery()
-  }
-
-  get headers () {
-    const headers = {}
-    this.request.forEach((k, v) => {
-      headers[k] = v
-    })
-    return headers
-  }
-
-  header (name) {
-    return this.request.getHeader(name.toLowerCase())
+  getHeader (name) {
+    return this.headers[name.toLowerCase()]
   }
 }
 
