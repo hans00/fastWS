@@ -8,7 +8,8 @@
   },
   "scripts": {
     "install": "prebuild-install || npm run build",
-    "build": "patch -f -p1 < fix-bug.patch && node-gyp rebuild",
+    "build": "npm run patch && node-gyp rebuild",
+    "patch": "patch -Np1 < fix-bug.patch || true",
     "prebuild-node": "prebuild -t 10.17.0 -t 11.15.0 -t 12.13.0 --strip",
     "prebuild-upload": "prebuild --upload-all $GITHUB_TOKEN",
     "prebuild-upload:win": "prebuild --upload-all %GITHUB_TOKEN%",
@@ -53,9 +54,11 @@
     "eslint-plugin-node": "^10.0.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
+    "mkcert": "^1.2.0",
     "node-gyp": "^6.0.1",
     "pre-commit": "^1.2.2",
     "prebuild": "^9.1.1",
-    "rimraf": "^3.0.0"
+    "rimraf": "^3.0.0",
+    "tempfile": "^3.0.0"
   }
 }

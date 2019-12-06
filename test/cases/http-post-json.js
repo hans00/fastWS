@@ -1,10 +1,10 @@
 const axios = require('axios')
 
-module.exports = async function (port) {
+module.exports = async function ({ HTTP_PORT }) {
   const data = {
     'hello': 'world'
   }
-  const res = await axios.post(`http://localhost:${port}/post`, data)
+  const res = await axios.post(`http://localhost:${HTTP_PORT}/post`, data)
   if (res.status !== 200) {
     throw new Error(`Response ${res.status}`)
   }

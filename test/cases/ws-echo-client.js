@@ -1,8 +1,8 @@
 const WS = require('ws')
 
-module.exports = function (port) {
+module.exports = function ({ HTTP_PORT }) {
   return new Promise((resolve, reject) => {
-    const ws = new WS(`ws://localhost:${port}/echo`)
+    const ws = new WS(`ws://localhost:${HTTP_PORT}/echo`)
 
     ws.on('error', () => {
       reject()

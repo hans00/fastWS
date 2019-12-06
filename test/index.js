@@ -5,13 +5,23 @@ const success = chalk.bold.green
 const error = chalk.bold.red
 const warning = chalk.keyword('orange')
 
-const PORT = 3000
+const config = {
+  HTTP_PORT: 3000,
+  HTTPS_PORT: 3001,
+}
+
 const TIMEOUT = 10 * 1000
 
 process.chdir(__dirname)
 
 async function tests() {
-  await require('./prepare')(PORT)
+  try {
+    await require('./prepare')(config)
+  } catch (e) {
+    console.log(warning('Prepare Failed!'))
+    console.log(error(e))
+    process.exit(1)
+  }
   let pass = true
   const files = fs.readdirSync(path.resolve('cases'))
   for (const file of files) {
@@ -21,7 +31,7 @@ async function tests() {
         setTimeout(() => {
           throw new Error('Timeout')
         }, TIMEOUT)
-        await require(`./cases/${file}`)(PORT)
+        await require(`./cases/${file}`)(config)
         console.log(success(`[success] ${caseName}`))
       } catch (e) {
         console.log(warning(`[failed] ${caseName}`))

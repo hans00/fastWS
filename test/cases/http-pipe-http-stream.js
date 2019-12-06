@@ -1,7 +1,7 @@
 const axios = require('axios')
 
-module.exports = async function (port) {
-  const res = await axios.get(`http://localhost:${port}/stream/http`)
+module.exports = async function ({ HTTP_PORT }) {
+  const res = await axios.get(`http://localhost:${HTTP_PORT}/stream/http`)
   if (res.status !== 200) {
     throw new Error(`Response ${res.status}`)
   }

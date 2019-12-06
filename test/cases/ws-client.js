@@ -1,8 +1,8 @@
 const WS = require('../../client')
 
-module.exports = function (port) {
+module.exports = function ({ HTTP_PORT }) {
   return new Promise((resolve, reject) => {
-    const ws = new WS(`ws://localhost:${port}/fast-ws`)
+    const ws = new WS(`ws://localhost:${HTTP_PORT}/fast-ws`)
 
     ws.on('error', reject)
 
