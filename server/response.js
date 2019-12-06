@@ -3,7 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const mime = require('mime-types')
 
-function toArrayBuffer(buffer) {
+function toArrayBuffer (buffer) {
   return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
 }
 
