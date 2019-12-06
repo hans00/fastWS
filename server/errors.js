@@ -12,14 +12,18 @@ module.exports = class ServerError extends Error {
     this.originError = originError
   }
 
-  toString () {
-    return this.message
-  }
-
   toJSON () {
     return {
       code: this.code,
       message: this.message
+    }
+  }
+
+  toString () {
+    if (this.originError) {
+      return this.originError.toString()
+    } else {
+      return 'ServerError: ' + this.code + ': ' + this.message
     }
   }
 }

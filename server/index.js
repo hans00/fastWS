@@ -124,13 +124,10 @@ class fastWS {
         try {
           await callbacks(req, res, params)
         } catch (e) {
+          console.error(e.toString())
           if (e instanceof ServerError && e.httpCode) {
-            if (e.originError) {
-              console.error(e.originError)
-            }
             res.status(e.httpCode).end(e.message)
           } else {
-            console.error(e)
             res.status(500).end('Server Internal Error')
           }
         }
