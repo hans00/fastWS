@@ -8,8 +8,7 @@
   },
   "scripts": {
     "install": "prebuild-install || npm run build",
-    "build": "npm run patch && node-gyp rebuild",
-    "patch": "patch -Np1 < fix-bug.patch || true",
+    "build": "node-gyp rebuild",
     "prebuild-node": "prebuild -t 10.17.0 -t 11.15.0 -t 12.13.0 --strip",
     "prebuild-upload": "prebuild --upload-all $GITHUB_TOKEN",
     "prebuild-upload:win": "prebuild --upload-all %GITHUB_TOKEN%",
