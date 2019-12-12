@@ -8,7 +8,7 @@
   },
   "scripts": {
     "install": "prebuild-install || npm run build",
-    "build": "./src/patch.sh && node-gyp rebuild",
+    "build": "bash ./src/patch.sh && node-gyp rebuild",
     "prebuild-all": "npm run prebuild-node && npm run prebuild-electron",
     "prebuild-node": "prebuild -t 10.17.0 -t 11.15.0 -t 12.13.0 --strip",
     "prebuild-electron": "prebuild -t 5.0.0 -t 6.0.0 -t 7.0.0 -r electron --strip",

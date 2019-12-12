@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 SRC=$(dirname $0)
 OS=$(uname)
