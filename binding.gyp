@@ -49,7 +49,7 @@
         },
       }],
       # This is the condition for using boringssl
-      ['OS=="win" or runtime=="electron"', {
+      ['runtime=="electron"', {
         "include_dirs": [
           "deps/boringssl/include"
         ],
@@ -101,7 +101,7 @@
     ]
   },
   'conditions': [
-    ['OS=="win" or runtime=="electron"', {
+    ['runtime=="electron"', {
       'targets': [
         {
           'target_name': 'boringssl',
@@ -211,7 +211,7 @@
           'cflags_c+': [ '-std=c++17' ],
           'cflags_cc+': [ '-std=c++17' ],
         }],
-        ['OS=="win" or runtime=="electron"', {
+        ['runtime=="electron"', {
           'dependencies': [ 'boringssl' ]
         }],
         ['OS=="win"', {
