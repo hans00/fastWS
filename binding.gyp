@@ -75,7 +75,7 @@
       }],
       ['OS == "win"', {
         "include_dirs": [
-          "deps/grpc/third_party/zlib"
+          "deps/zlib"
         ],
         "defines": [
           '_WIN32_WINNT=0x0600',
