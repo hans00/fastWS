@@ -50,7 +50,7 @@
         },
       }],
       # This is the condition for using boringssl
-      ['OS=="win" or runtime=="electron"', {
+      ['node_shared_openssl!="true"', {
         "include_dirs": [
           "deps/boringssl/include"
         ],
@@ -215,7 +215,7 @@
           'cflags_c+': [ '-std=c++17' ],
           'cflags_cc+': [ '-std=c++17' ],
         }],
-        ['OS=="win" or runtime=="electron"', {
+        ['node_shared_openssl!="true"', {
           'dependencies': [ 'boringssl' ]
         }],
         ['OS=="win"', {
