@@ -8,8 +8,9 @@
       '-flto',
       '-O3',
     ],
-    'cflags_cc+': [
-      '-std=c++17'
+    'cflags_cc': [
+      '-std=c++17',
+      '-stdlib=libc++'
     ],
     'include_dirs': [
       'src/uWebSockets.js/uWebSockets/uSockets/src',
@@ -31,6 +32,9 @@
             ]
           }
         },
+      }],
+      ['OS=="linux"', {
+        'cflags_cc+': [ '-std=c++17' ],
       }],
       ['OS=="mac"', {
         'xcode_settings': {
@@ -208,6 +212,10 @@
       ],
       'dependencies': [],
       'conditions': [
+        ['OS=="linux"', {
+          'cflags_c+': [ '-std=c++17' ],
+          'cflags_cc+': [ '-std=c++17' ],
+        }],
         ['OS=="win" or runtime=="electron"', {
           'dependencies': [ 'boringssl' ]
         }],
