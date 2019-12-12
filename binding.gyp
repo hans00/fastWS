@@ -1,5 +1,6 @@
 {
   'variables': {
+    'runtime%': 'node',
     'node_shared_openssl%': 'true'
   },
   'target_defaults': {
