@@ -210,6 +210,9 @@
         }],
         ['runtime=="electron"', {
           'dependencies': [ 'boringssl' ],
+          'defines': [
+            'BIO_get_flags(b)="BIO_test_flags(b,~(0x0))"'
+          ]
         }],
         ['OS=="win"', {
           'dependencies': [ 'z' ]
