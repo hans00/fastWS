@@ -210,10 +210,7 @@
           'cflags_cc+': [ '-std=c++17' ],
         }],
         ['runtime=="electron"', {
-          'dependencies': [ 'boringssl' ],
-          'sources': [
-            'src/boringssl.c'
-          ]
+          'dependencies': [ 'boringssl' ]
         }],
         ['OS=="win"', {
           'dependencies': [ 'z' ]
