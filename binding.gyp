@@ -16,6 +16,7 @@
     ],
     'defines': [
       'LIBUS_USE_LIBUV',
+      'LIBUS_USE_OPENSSL'
     ],
     'defines!': [
       'OPENSSL_THREADS'
@@ -55,7 +56,6 @@
         ],
         "defines": [
           'OPENSSL_NO_ASM',
-          'LIBUS_USE_BORINGSSL',
         ],
       }, {
         'conditions': [
@@ -68,10 +68,7 @@
           ["target_arch=='arm'", {
              "include_dirs": [ "<(node_root_dir)/deps/openssl/config/arm" ]
           }]
-        ],
-        'defines': [
-          'LIBUS_USE_OPENSSL'
-        ],
+        ]
       }],
       ['OS == "win"', {
         "include_dirs": [
@@ -212,7 +209,7 @@
           'cflags_cc+': [ '-std=c++17' ],
         }],
         ['runtime=="electron"', {
-          'dependencies': [ 'boringssl' ]
+          'dependencies': [ 'boringssl' ],
         }],
         ['OS=="win"', {
           'dependencies': [ 'z' ]
