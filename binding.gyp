@@ -8,10 +8,7 @@
       '-flto',
       '-O3',
     ],
-    'cflags_c': [
-      '-std=c99'
-    ],
-    'cflags_cc': [
+    'cflags_cc+': [
       '-std=c++17'
     ],
     'include_dirs': [
@@ -34,11 +31,6 @@
             ]
           }
         },
-      }],
-      ['OS=="linux"', {
-        'cflags+': [ '-flto', '-O3' ],
-        'cflags_c+': [ '-flto', '-O3' ],
-        'cflags_cc+': [ '-std=c++17', '-flto', '-O3' ],
       }],
       ['OS=="mac"', {
         'xcode_settings': {
