@@ -1,6 +1,7 @@
 {
   'variables': {
-    'node_shared_openssl%': 'true'
+    'node_shared_openssl%': 'true',
+    'openssl_dir%': '<!(node find_openssl)',
   },
   'targets': [
     {
@@ -22,19 +23,8 @@
       'conditions': [
         [ 'node_shared_openssl=="false"', {
           'include_dirs': [
-            '<(node_root_dir)/deps/openssl/openssl/include'
+            "<(openssl_dir)/include",
           ],
-          "conditions" : [
-            ["target_arch=='ia32'", {
-              "include_dirs": [ "<(node_root_dir)/deps/openssl/config/piii" ]
-            }],
-            ["target_arch=='x64'", {
-              "include_dirs": [ "<(node_root_dir)/deps/openssl/config/k8" ]
-            }],
-            ["target_arch=='arm'", {
-              "include_dirs": [ "<(node_root_dir)/deps/openssl/config/arm" ]
-            }]
-          ]
         } ],
         [ 'OS!="win"', {
           'sources': [
@@ -103,19 +93,8 @@
       'conditions': [
         [ 'node_shared_openssl=="false"', {
           'include_dirs': [
-            '<(node_root_dir)/deps/openssl/openssl/include'
+            "<(openssl_dir)/include",
           ],
-          "conditions" : [
-            ["target_arch=='ia32'", {
-              "include_dirs": [ "<(node_root_dir)/deps/openssl/config/piii" ]
-            }],
-            ["target_arch=='x64'", {
-              "include_dirs": [ "<(node_root_dir)/deps/openssl/config/k8" ]
-            }],
-            ["target_arch=='arm'", {
-              "include_dirs": [ "<(node_root_dir)/deps/openssl/config/arm" ]
-            }]
-          ]
         } ],
         [ 'OS=="linux"', {
           'cflags+': [ '-flto', '-O3' ],
