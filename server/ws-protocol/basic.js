@@ -8,8 +8,8 @@ class WSClient extends EventEmitter {
     this.requestHeaders = request.headers
   }
 
-  emitPayload (payload) {
-    this.emit('message', { data: payload })
+  incomingPacket (payload) {
+    this.emit('message', { data: payload.toString() })
   }
 
   get remoteAddress () {

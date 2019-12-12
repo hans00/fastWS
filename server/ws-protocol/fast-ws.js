@@ -7,13 +7,13 @@ function parsePayload (payload) {
   }
   const type = payload[0]; const content = payload.slice(2)
   if (type === 's') {
-    return { type: 'string', data: content }
+    return { type: 'message', data: content }
   } else if (type === 'b') {
-    return { type: 'boolean', data: content === '1' }
+    return { type: 'message', data: content === '1' }
   } else if (type === 'n') {
-    return { type: 'number', data: Number(content) }
+    return { type: 'message', data: Number(content) }
   } else if (type === 'o') {
-    return { type: 'object', data: JSON.parse(content) }
+    return { type: 'message', data: JSON.parse(content) }
   } else if (type === 'e') {
     const eventSplitIndex = content.indexOf(';')
     if (eventSplitIndex === -1) {
@@ -69,8 +69,8 @@ class WSClient extends basic {
     this._send('\x00\x01', 0, 0)
   }
 
-  emitPayload (payload) {
-    const incoming = parsePayload(payload)
+  incomingPacket (payload) {
+    const incoming = parsePayload(payload.toString())
     if (incoming.type === 'event') {
       incoming.reply = (data) => {
         if (incoming.reply_id) {

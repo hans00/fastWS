@@ -172,7 +172,7 @@ class fastWS {
       open: (ws, request) => {
         const client = new Protocol(ws, new Request(request, null))
         this.options.verbose && console.log('[open]', client.remoteAddress)
-        ws._client = client
+        ws.client = client
         try {
           callback(client)
         } catch (error) {
@@ -185,7 +185,7 @@ class fastWS {
         if (!isBinary) {
           try {
             // decode message
-            ws._client.emitPayload(Buffer.from(message).toString())
+            ws.client.incomingPacket(Buffer.from(message))
           } catch (error) {
             if (error.code === 'WS_INVALID_PAYLOAD') {
               this.options.verbose && console.log('[error]', 'Invalid message payload')
@@ -196,21 +196,21 @@ class fastWS {
             ws.close()
           }
         } else {
-          ws._client.emit('binary', message)
+          ws.client.emit('binary', message)
         }
       },
       drain: (ws) => {
-        ws._client.drain()
+        ws.client.drain()
       },
       ping: (ws) => {
-        ws._client.emit('ping')
+        ws.client.emit('ping')
       },
       pong: (ws) => {
-        ws._client.emit('pong')
+        ws.client.emit('pong')
       },
       close: (ws, code, message) => {
-        ws._client.emit('close', code, message)
-        setImmediate(() => delete ws._client)
+        ws.client.emit('close', code, message)
+        setImmediate(() => delete ws.client)
       }
     })
   }
