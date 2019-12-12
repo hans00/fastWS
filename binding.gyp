@@ -9,8 +9,7 @@
       '-O3',
     ],
     'cflags_cc': [
-      '-std=c++17',
-      '-stdlib=libc++'
+      '-std=c++17'
     ],
     'include_dirs': [
       'src/uWebSockets.js/uWebSockets/uSockets/src',
