@@ -113,6 +113,7 @@
           'dependencies': [
           ],
           'sources': [
+            'src/boringssl/err_data.c',
             '<!@(ls -1 deps/boringssl/crypto/*/*.c)',
             '<!@(ls -1 deps/boringssl/crypto/*.c)',
             'deps/boringssl/ssl/bio_ssl.cc',
