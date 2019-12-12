@@ -105,7 +105,7 @@
     ]
   },
   'conditions': [
-    ['OS=="win" or runtime=="electron"', {
+    ['node_shared_openssl!="true"', {
       'targets': [
         {
           'target_name': 'boringssl',
