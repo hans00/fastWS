@@ -1,7 +1,6 @@
 {
   'variables': {
-    'runtime%': 'node',
-    'node_shared_openssl%': 'true'
+    'runtime%': 'node'
   },
   'target_defaults': {
     'cflags': [
@@ -50,7 +49,7 @@
         },
       }],
       # This is the condition for using boringssl
-      ['node_shared_openssl!="true"', {
+      ['OS=="win" or runtime=="electron"', {
         "include_dirs": [
           "deps/boringssl/include"
         ],
@@ -69,9 +68,6 @@
           ["target_arch=='arm'", {
              "include_dirs": [ "<(node_root_dir)/deps/openssl/config/arm" ]
           }]
-        ],
-        'include_dirs': [
-          '<(node_root_dir)/deps/openssl/openssl/include',
         ],
         'defines': [
           'LIBUS_USE_OPENSSL'
@@ -105,7 +101,7 @@
     ]
   },
   'conditions': [
-    ['node_shared_openssl!="true"', {
+    ['OS=="win" or runtime=="electron"', {
       'targets': [
         {
           'target_name': 'boringssl',
@@ -215,7 +211,7 @@
           'cflags_c+': [ '-std=c++17' ],
           'cflags_cc+': [ '-std=c++17' ],
         }],
-        ['node_shared_openssl!="true"', {
+        ['OS=="win" or runtime=="electron"', {
           'dependencies': [ 'boringssl' ]
         }],
         ['OS=="win"', {
