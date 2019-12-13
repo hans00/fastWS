@@ -48,6 +48,7 @@ jobs:
             apt-get install -y nodejs
             npm ci
             npm run lint
+            npm run build
             npm run test
             [[ ${{ github.ref }} == refs/tags/* ]] && ( \
               npm run prebuild-all && \
