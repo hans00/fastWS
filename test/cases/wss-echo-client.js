@@ -2,7 +2,7 @@ const WS = require('ws')
 
 module.exports = function ({ HTTPS_PORT }) {
   return new Promise((resolve, reject) => {
-    const ws = new WS(`wss://localhost:${HTTPS_PORT}/echo`)
+    const ws = new WS(`wss://[::1]:${HTTPS_PORT}/echo`)
 
     ws.on('error', () => {
       reject()

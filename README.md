@@ -180,9 +180,17 @@ options = {
 }
 ```
 
-- `listen(path, callback)`
+- `listen(target, callback)`
 
 > Start listen
+
+```js
+target = 80 // port number (listen on all)
+// or
+target = '[::1]:80' // v6 localhost
+// or
+target = '127.0.0.1:80' // v4 localhost
+```
 
 ## `Request`
 

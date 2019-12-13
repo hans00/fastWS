@@ -73,13 +73,25 @@ class fastWS {
     process.on('SIGHUP', () => this.reload())
   }
 
-  listen (port, callback) {
-    if (!port && !this._port) {
-      throw new ServerError({ code: 'INVALID_NO_PORT', message: 'Invalid, must specify port' })
-    } else if (!port) {
-      port = this._port
+  listen (target, callback) {
+    if (this.target) {
+      target = this.target
+    } else if (target) {
+      this.target = target
     } else {
-      this._port = port
+      throw new ServerError({ code: 'INVALID_NO_TARGET', message: 'Invalid, must specify host and port or port only.' })
+    }
+    let host, port
+    if (typeof target === 'number') {
+      port = target
+    } else {
+      const listen = target.match(/^(?:\[([\da-f:]+)\]|((?:\.?\d{1,3}){4})):(\d{1,5})$/)
+      if (!listen) {
+        throw new ServerError({ code: 'INVALID_TARGET', message: 'Invalid, listen target format is wrong.' })
+      } else {
+        host = listen[1] || listen[2]
+        port = Number(listen[3])
+      }
     }
     this._server = this.options.ssl ? uWS.SSLApp(this.options.ssl) : uWS.App()
     Object.keys(this._routes).forEach(path => {
@@ -87,18 +99,23 @@ class fastWS {
         this._server[method](path, this._routes[path][method])
       })
     })
-    this.gracefulStop()
-    this._server.listen(port, (listenSocket) => {
+    const listenCallback = (listenSocket) => {
       this._socket = listenSocket
       if (listenSocket) {
         this.options.verbose && console.log('Started')
-        if (callback) {
-          callback()
-        }
       } else {
         this.options.verbose && console.log('Failed')
       }
-    })
+      if (callback) {
+        callback(listenSocket)
+      }
+    }
+    this.gracefulStop()
+    if (host) {
+      this._server.listen(host, port, listenCallback)
+    } else {
+      this._server.listen(port, listenCallback)
+    }
   }
 
   route (method, path, callbacks) {
