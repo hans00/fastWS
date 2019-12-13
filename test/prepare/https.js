@@ -32,7 +32,7 @@ module.exports = function (port) {
           cert_file_name,
         },
       }))
-      .listen(`[::1]:${port}`, () => {
+      .listen(`127.0.0.1:${port}`, () => {
         console.log(`Listen on ${port}`)
         resolve()
       })
