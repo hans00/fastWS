@@ -16,12 +16,6 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 12.x
-    - name: install openssl
-      if: matrix.os == 'macos-latest'
-      run: |
-        brew install openssl
-        export LDFLAGS="-L/usr/local/opt/openssl/lib"
-        export CPPFLAGS="-I/usr/local/opt/openssl/include"
     - name: correct msbuild path
       if: matrix.os == 'windows-latest'
       run: npm config set msbuild_path "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe"
