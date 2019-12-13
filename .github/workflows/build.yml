@@ -24,6 +24,7 @@ jobs:
       run: |
         npm ci
         npm run lint
+        npm run build
         npm run test
     - name: Publish prebuild binary
       if: startsWith(github.ref, 'refs/tags/')

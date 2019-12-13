@@ -1,2 +1,9 @@
 build/
 prebuilds/
+deps/**/*
+!deps/*/LICESNE
+!deps/**/*.c
+!deps/**/*.cc
+!deps/**/*.cpp
+!deps/**/*.h
+!deps/**/*.hpp
