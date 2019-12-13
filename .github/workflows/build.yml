@@ -49,9 +49,9 @@ jobs:
             npm ci
             npm run lint
             npm run test
-            [[ ${{ github.ref }} == refs/tags/* ]] && (
-              npm run prebuild-all &&
-              npx prebuild --upload-all ${{secrets.GITHUB_TOKEN}}
+            [[ ${{ github.ref }} == refs/tags/* ]] && ( \
+              npm run prebuild-all && \
+              npx prebuild --upload-all ${{secrets.GITHUB_TOKEN}} \
             )
 
   publish-npm:
