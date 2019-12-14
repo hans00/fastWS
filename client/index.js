@@ -10,14 +10,14 @@ const EVENT = '\x05'
 const RESPONSE = '\x06'
 const IDLE = '\x16'
 
-const eventId = (str) => str.split('').reduce((sum, char, index) => sum + char.charCodeAt(0) * ( index + 1 ), 0).toString(16)
+const eventId = (str) => str.split('').reduce((sum, char, index) => sum + char.charCodeAt(0) * (index + 1), 0).toString(16)
 
 class WSClient extends EventEmitter {
   constructor (endpoint, options = {}) {
     super()
     this.options = options
     this.connectState = 0
-    this.internalEvents = [ 'open', 'close', 'connected', 'disconnected', 'ready', 'ping', 'pong', 'message', 'binary', 'error' ]
+    this.internalEvents = ['open', 'close', 'connected', 'disconnected', 'ready', 'ping', 'pong', 'message', 'binary', 'error']
     this.client = new WebSocket(endpoint, 'fast-ws', options)
     this.client.on('error', error => {
       this.emit('error', error)
@@ -72,7 +72,7 @@ class WSClient extends EventEmitter {
   }
 
   static parsePayload (payload) {
-    if (payload[0] === DATA_START && payload[payload.length-1] === DATA_END) {
+    if (payload[0] === DATA_START && payload[payload.length - 1] === DATA_END) {
       return { type: 'message', data: replicator.decode(payload.slice(1, -1)) }
     } else if (payload[0] === RESPONSE) {
       const splitIndex = payload.indexOf(DATA_START)
@@ -107,7 +107,7 @@ class WSClient extends EventEmitter {
     }
   }
 
-  on(event, listener) {
+  on (event, listener) {
     if (this.internalEvents.includes(event)) {
       super.on(event, listener)
     } else {
@@ -115,7 +115,7 @@ class WSClient extends EventEmitter {
     }
   }
 
-  addListener(event, listener) {
+  addListener (event, listener) {
     if (this.internalEvents.includes(event)) {
       super.addListener(event, listener)
     } else {
@@ -123,7 +123,7 @@ class WSClient extends EventEmitter {
     }
   }
 
-  off(event, listener) {
+  off (event, listener) {
     if (this.internalEvents.includes(event)) {
       super.off(event, listener)
     } else {
@@ -131,7 +131,7 @@ class WSClient extends EventEmitter {
     }
   }
 
-  removeListener(event, listener) {
+  removeListener (event, listener) {
     if (this.internalEvents.includes(event)) {
       super.removeListener(event, listener)
     } else {
@@ -139,7 +139,7 @@ class WSClient extends EventEmitter {
     }
   }
 
-  removeAllListener(event) {
+  removeAllListener (event) {
     if (this.internalEvents.includes(event)) {
       super.removeAllListener(event)
     } else {
