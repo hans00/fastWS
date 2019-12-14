@@ -17,8 +17,8 @@
     "clean": "rimraf build node_modules prebuilds",
     "distclean": "npm run clean",
     "tag-version": "git tag -a v${npm_package_version} -m \"release v${npm_package_version}\"",
-    "lint": "eslint server/*.js client/*.js",
-    "lint:fix": "eslint --fix server/*.js client/*.js",
+    "lint": "eslint server/**/*.js client/**/*.js",
+    "lint:fix": "eslint --fix server/**/*.js client/**/*.js",
     "test": "node test"
   },
   "pre-commit": [
