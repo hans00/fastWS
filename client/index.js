@@ -43,7 +43,7 @@ class WSClient extends EventEmitter {
           this.emit('error', new Error('Client version mismatch.'))
         }
       } else {
-        this.onMessage(message)
+        this.incomingPacket(message)
       }
     })
     this.client.on('ping', () => {
@@ -90,11 +90,11 @@ class WSClient extends EventEmitter {
     this.client.ping(new Date().valueOf())
   }
 
-  onMessage (message) {
-    if (message.constructor.name === 'ArrayBuffer') {
-      this.emit('binary', message)
+  incomingPacket (payload) {
+    if (payload.constructor.name === 'ArrayBuffer') {
+      this.emit('binary', payload)
     } else {
-      const incoming = WSClient.parsePayload(message)
+      const incoming = WSClient.parsePayload(payload)
       if (incoming.type === 'event') {
         this.emit(incoming.event, incoming.data)
       } else if (incoming.type === 'returnData') {
