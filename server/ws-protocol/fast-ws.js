@@ -10,10 +10,10 @@ const EVENT = '\x05'
 const RESPONSE = '\x06'
 const IDLE = '\x16'
 
-const eventId = (str) => str.split('').reduce((sum, char, index) => sum + char.charCodeAt(0) * ( index + 1 ), 0).toString(16)
+const eventId = (str) => str.split('').reduce((sum, char, index) => sum + char.charCodeAt(0) * (index + 1), 0).toString(16)
 
 function parsePayload (payload) {
-  if (payload[0] === DATA_START && payload[payload.length-1] === DATA_END) {
+  if (payload[0] === DATA_START && payload[payload.length - 1] === DATA_END) {
     return { type: 'message', data: replicator.decode(payload.slice(1, -1)) }
   } else if (payload[0] === EVENT) {
     const eventSplitIndex = payload.indexOf(IDLE)
@@ -69,7 +69,7 @@ class WSClient extends basic {
     }
   }
 
-  on(event, listener) {
+  on (event, listener) {
     if (this.internalEvents.includes(event)) {
       super.on(event, listener)
     } else {
@@ -77,7 +77,7 @@ class WSClient extends basic {
     }
   }
 
-  addListener(event, listener) {
+  addListener (event, listener) {
     if (this.internalEvents.includes(event)) {
       super.addListener(event, listener)
     } else {
@@ -85,7 +85,7 @@ class WSClient extends basic {
     }
   }
 
-  off(event, listener) {
+  off (event, listener) {
     if (this.internalEvents.includes(event)) {
       super.off(event, listener)
     } else {
@@ -93,7 +93,7 @@ class WSClient extends basic {
     }
   }
 
-  removeListener(event, listener) {
+  removeListener (event, listener) {
     if (this.internalEvents.includes(event)) {
       super.removeListener(event, listener)
     } else {
@@ -101,7 +101,7 @@ class WSClient extends basic {
     }
   }
 
-  removeAllListener(event) {
+  removeAllListener (event) {
     if (this.internalEvents.includes(event)) {
       super.removeAllListener(event)
     } else {

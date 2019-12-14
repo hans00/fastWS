@@ -6,7 +6,7 @@ class WSClient extends EventEmitter {
     super()
     this.session = session
     this.requestHeaders = request.headers
-    this.internalEvents = [ 'message', 'binary', 'drained', 'close', 'ping', 'pong' ]
+    this.internalEvents = ['message', 'binary', 'drained', 'close', 'ping', 'pong']
   }
 
   incomingPacket (payload, isBinary) {
@@ -21,11 +21,11 @@ class WSClient extends EventEmitter {
     this.emit('close', code, Buffer.from(message))
   }
 
-  onPing() {
+  onPing () {
     this.emit('ping')
   }
 
-  onPong() {
+  onPong () {
     this.emit('pong')
   }
 
