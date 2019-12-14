@@ -1,34 +1,29 @@
+const Replicator = require('replicator')
 const basic = require('./basic')
 const ServerError = require('../errors')
 
+const replicator = new Replicator()
+
+const DATA_START = '\x01'
+const DATA_END = '\x02'
+const EVENT = '\x05'
+const RESPONSE = '\x06'
+const IDLE = '\x16'
+
+const eventId = (str) => str.split('').reduce((sum, char, index) => sum + char.charCodeAt(0) * ( index + 1 ), 0).toString(16)
+
 function parsePayload (payload) {
-  if (payload[1] !== ':') {
-    throw new ServerError({ code: 'WS_INVALID_PAYLOAD' })
-  }
-  const type = payload[0]; const content = payload.slice(2)
-  if (type === 's') {
-    return { type: 'message', data: content }
-  } else if (type === 'b') {
-    return { type: 'message', data: content === '1' }
-  } else if (type === 'n') {
-    return { type: 'message', data: Number(content) }
-  } else if (type === 'o') {
-    return { type: 'message', data: JSON.parse(content) }
-  } else if (type === 'e') {
-    const eventSplitIndex = content.indexOf(';')
-    if (eventSplitIndex === -1) {
+  if (payload[0] === DATA_START && payload[payload.length-1] === DATA_END) {
+    return { type: 'message', data: replicator.decode(payload.slice(1, -1)) }
+  } else if (payload[0] === EVENT) {
+    const eventSplitIndex = payload.indexOf(IDLE)
+    const replySplitIndex = payload.indexOf(DATA_START)
+    if (eventSplitIndex === -1 || replySplitIndex === -1) {
       throw new ServerError({ code: 'WS_INVALID_PAYLOAD' })
     }
-    const event = content.slice(0, eventSplitIndex)
-    const replySplitIndex = content.slice(eventSplitIndex + 1).indexOf(';')
-    const replyId = content.slice(eventSplitIndex + 1, eventSplitIndex + replySplitIndex + 1)
-    const dataPayload = content.slice(eventSplitIndex + replySplitIndex + 2)
-    if (!event) {
-      throw new ServerError({ code: 'WS_INVALID_PAYLOAD' })
-    }
-    if (dataPayload[0] === 'e') {
-      throw new ServerError({ code: 'WS_INVALID_PAYLOAD' })
-    }
+    const event = payload.slice(1, eventSplitIndex)
+    const replyId = payload.slice(eventSplitIndex + 1, replySplitIndex)
+    const dataPayload = payload.slice(replySplitIndex)
     return {
       type: 'event',
       name: event,
@@ -36,50 +31,81 @@ function parsePayload (payload) {
       data: parsePayload(dataPayload).data
     }
   } else {
-    return { type: 'unknown', data: '' }
+    throw new ServerError({ code: 'WS_INVALID_PAYLOAD' })
   }
 }
 
-function getPayload (data, type = '') {
-  if (type === 'returnId') {
-    return 'r:' + data.event + ';n:' + data.id
-  } else if (type === 'returnData') {
-    return 'R:' + data.id + ';' + getPayload(data.data)
+function getPayload (data, type = 'message') {
+  if (type === 'reply') {
+    return RESPONSE + data.replyId + getPayload(data.data)
   } else if (type === 'event') {
-    return 'e:' + data.event + ';' + getPayload(data.data)
+    return EVENT + data.event + getPayload(data.data)
   } else {
-    const type = typeof data
-    if (type === 'string') {
-      return 's:' + data
-    } else if (type === 'number') {
-      return 'n:' + String(data)
-    } else if (type === 'boolean') {
-      return 'b:' + (data ? '1' : '0')
-    } else if (type === 'object') {
-      return 'o:' + JSON.stringify(data)
-    } else {
-      return ''
-    }
+    return DATA_START + replicator.encode(data) + DATA_END
   }
 }
 
 class WSClient extends basic {
   constructor (session, request) {
     super(session, request)
-    this._send('\x00\x01', 0, 0)
+    this._send('\x00\x02', 0, 0)
   }
 
-  incomingPacket (payload) {
-    const incoming = parsePayload(payload.toString())
-    if (incoming.type === 'event') {
-      incoming.reply = (data) => {
-        if (incoming.reply_id) {
-          this._send('R:' + incoming.reply_id + ';' + getPayload(data))
-        }
-      }
-      this.emit(incoming.name, incoming)
+  incomingPacket (payload, isBinary) {
+    if (isBinary) {
+      this.emit('binary', payload)
     } else {
-      this.emit('message', incoming)
+      const incoming = parsePayload(payload.toString())
+      if (incoming.type === 'event') {
+        incoming.reply = (data) => {
+          if (incoming.reply_id) {
+            this._send(getPayload({ replyId: incoming.reply_id, data }, 'reply'))
+          }
+        }
+        this.emit(incoming.name, incoming)
+      } else {
+        this.emit('message', incoming)
+      }
+    }
+  }
+
+  on(event, listener) {
+    if (this.internalEvents.includes(event)) {
+      super.on(event, listener)
+    } else {
+      super.on(eventId(event), listener)
+    }
+  }
+
+  addListener(event, listener) {
+    if (this.internalEvents.includes(event)) {
+      super.addListener(event, listener)
+    } else {
+      super.addListener(eventId(event), listener)
+    }
+  }
+
+  off(event, listener) {
+    if (this.internalEvents.includes(event)) {
+      super.off(event, listener)
+    } else {
+      super.off(eventId(event), listener)
+    }
+  }
+
+  removeListener(event, listener) {
+    if (this.internalEvents.includes(event)) {
+      super.removeListener(event, listener)
+    } else {
+      super.removeListener(eventId(event), listener)
+    }
+  }
+
+  removeAllListener(event) {
+    if (this.internalEvents.includes(event)) {
+      super.removeAllListener(event)
+    } else {
+      super.removeAllListener(eventId(event))
     }
   }
 

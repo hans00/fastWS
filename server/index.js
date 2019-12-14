@@ -199,34 +199,30 @@ class fastWS {
         }
       },
       message: (ws, message, isBinary) => {
-        if (!isBinary) {
-          try {
-            // decode message
-            ws.client.incomingPacket(Buffer.from(message))
-          } catch (error) {
-            if (error.code === 'WS_INVALID_PAYLOAD') {
-              this.options.verbose && console.log('[error]', 'Invalid message payload')
-            } else {
-              console.error(error)
-            }
-            // kick user when error
-            ws.close()
+        try {
+          // decode message
+          ws.client.incomingPacket(Buffer.from(message), isBinary)
+        } catch (error) {
+          if (error.code === 'WS_INVALID_PAYLOAD') {
+            this.options.verbose && console.log('[error]', 'Invalid message payload')
+          } else {
+            console.error(error)
           }
-        } else {
-          ws.client.emit('binary', message)
+          // kick user when error
+          ws.close()
         }
       },
       drain: (ws) => {
         ws.client.drain()
       },
       ping: (ws) => {
-        ws.client.emit('ping')
+        ws.client.onPing()
       },
       pong: (ws) => {
-        ws.client.emit('pong')
+        ws.client.onPong()
       },
       close: (ws, code, message) => {
-        ws.client.emit('close', code, message)
+        ws.client.onClose(code, message)
         setImmediate(() => delete ws.client)
       }
     })

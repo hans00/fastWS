@@ -6,10 +6,27 @@ class WSClient extends EventEmitter {
     super()
     this.session = session
     this.requestHeaders = request.headers
+    this.internalEvents = [ 'message', 'binary', 'drained', 'close', 'ping', 'pong' ]
   }
 
-  incomingPacket (payload) {
-    this.emit('message', { data: payload.toString() })
+  incomingPacket (payload, isBinary) {
+    if (isBinary) {
+      this.emit('binary', payload)
+    } else {
+      this.emit('message', { data: payload.toString() })
+    }
+  }
+
+  onClose (code, message) {
+    this.emit('close', code, Buffer.from(message))
+  }
+
+  onPing() {
+    this.emit('ping')
+  }
+
+  onPong() {
+    this.emit('pong')
   }
 
   get remoteAddress () {
