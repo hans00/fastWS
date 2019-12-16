@@ -40,9 +40,11 @@
   "homepage": "https://github.com/hans00/fastWS#readme",
   "dependencies": {
     "bindings": "^1.5.0",
+    "content-type": "^1.0.4",
     "engine.io": "^3.4.0",
     "lru-cache": "^5.1.1",
     "mime-types": "^2.1.25",
+    "multipart-formdata": "^1.1.0",
     "prebuild-install": "^5.3.3",
     "qs": "^6.9.1",
     "replicator": "^1.0.3",

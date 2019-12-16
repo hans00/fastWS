@@ -1,4 +1,6 @@
 const qs = require('qs')
+const contentType = require('content-type')
+const multipart = require('multipart-formdata')
 const inet = require('./inet')
 const ServerError = require('./errors')
 
@@ -22,8 +24,13 @@ class Request {
     if (!methodsWithBody.includes(this.method)) {
       throw new ServerError({ code: 'SERVER_NOT_ALLOWED', message: 'The method never with data.', httpCode: 405 })
     }
-    const contentType = this.getHeader('Content-Type')
+    const _contentType = this.getHeader('Content-Type')
+    // Verify Content-Type
+    if (!_contentType) {
+      throw new ServerError({ code: 'CLIENT_NO_CONTENT_TYPE', message: '', httpCode: 400 })
+    }
     const _contentLength = this.getHeader('Content-Length')
+    // Verify Content-Length
     if (!_contentLength) {
       throw new ServerError({ code: 'CLIENT_NO_LENGTH', message: '', httpCode: 411 })
     } else if (!/^[1-9]\d*$/.test(_contentLength)) {
@@ -39,14 +46,23 @@ class Request {
         bodyLength += chunk.byteLength
         if (bodyLength >= contentLength) {
           try {
-            if (contentType.startsWith('text/')) {
-              resolve(data.slice(0, contentLength).toString())
-            } else if (contentType.startsWith('application/json')) {
-              resolve(JSON.parse(data.slice(0, contentLength)))
-            } else if (contentType.startsWith('application/x-www-form-urlencoded')) {
-              resolve(qs.parse(data.slice(0, contentLength).toString()))
+            const contentData = data.slice(0, contentLength)
+            const content = contentType.parse(_contentType)
+            // In RFC, charset default is ISO-8859-1, and it equal to latin1
+            const charset = content.parameters.charset || 'latin1'
+            if (content.type.startsWith('text/')) {
+              resolve(contentData.toString(charset))
+            } else if (content.type === 'application/json') {
+              resolve(JSON.parse(contentData.toString(charset)))
+            } else if (content.type === 'application/x-www-form-urlencoded') {
+              resolve(qs.parse(contentData.toString(charset)))
+            } else if (content.type === 'multipart/form-data') {
+              if (!content.parameters.boundary) {
+                throw 'NO_BOUNDARY'
+              }
+              resolve(multipart.parse(contentData, content.parameters.boundary))
             } else {
-              resolve(data.slice(0, contentLength))
+              resolve(contentData)
             }
           } catch (e) {
             reject(new ServerError({ code: 'SERVER_BODY_PARSE', originError: e, httpCode: 400 }))
