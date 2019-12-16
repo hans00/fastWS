@@ -52,7 +52,7 @@ jobs:
             npm run build
             npm run test
             if [[ ${{ github.ref }} == refs/tags/* ]]; then \
-              npm run prebuild-all
+              npm run prebuild-node
               npx prebuild --upload-all ${{secrets.GITHUB_TOKEN}}
             fi
 
