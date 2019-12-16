@@ -12,6 +12,12 @@ module.exports = function (app) {
 
   app.ws('/echo', ws => null, { protocol: 'echo' })
 
+  // app.ws('/io', ws => null, { protocol: 'socket.io' })
+
+  app.get('/get', (req, res) => {
+    res.json(req.query)
+  })
+
   app.post('/post', async (req, res) => {
     const data = await req.body()
     res.json(data)

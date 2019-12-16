@@ -8,7 +8,7 @@
   },
   "scripts": {
     "install": "prebuild-install || npm run build",
-    "build": "bash ./src/patch.sh && node-gyp rebuild",
+    "build": "node patch.js && node-gyp rebuild",
     "prebuild-all": "npm run prebuild-node && npm run prebuild-electron",
     "prebuild-node": "prebuild -t 10.17.0 -t 11.15.0 -t 12.13.0 --strip",
     "prebuild-electron": "prebuild -t 5.0.0 -t 6.0.0 -t 7.0.0 -r electron --strip",
@@ -40,9 +40,11 @@
   "homepage": "https://github.com/hans00/fastWS#readme",
   "dependencies": {
     "bindings": "^1.5.0",
+    "engine.io": "^3.4.0",
     "lru-cache": "^5.1.1",
     "mime-types": "^2.1.25",
     "prebuild-install": "^5.3.3",
+    "qs": "^6.9.1",
     "replicator": "^1.0.3",
     "socket.io-parser": "^3.4.0",
     "ws": "^7.2.0"
@@ -62,6 +64,8 @@
     "pre-commit": "^1.2.2",
     "prebuild": "^9.1.1",
     "rimraf": "^3.0.0",
+    "socket.io": "^2.3.0",
+    "socket.io-client": "^2.3.0",
     "tempfile": "^3.0.0"
   }
 }

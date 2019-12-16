@@ -1,3 +1,4 @@
+const qs = require('qs')
 const inet = require('./inet')
 const ServerError = require('./errors')
 
@@ -12,7 +13,7 @@ class Request {
     this.request.forEach((k, v) => {
       this.headers[k] = v
     })
-    this.query = this.request.getQuery()
+    this.query = qs.parse(this.request.getQuery())
     this.method = this.request.getMethod().toUpperCase()
   }
 
@@ -42,6 +43,8 @@ class Request {
               resolve(data.slice(0, contentLength).toString())
             } else if (contentType.startsWith('application/json')) {
               resolve(JSON.parse(data.slice(0, contentLength)))
+            } else if (contentType.startsWith('application/x-www-form-urlencoded')) {
+              resolve(qs.parse(data.slice(0, contentLength).toString()))
             } else {
               resolve(data.slice(0, contentLength))
             }
