@@ -1,4 +1,5 @@
 const qs = require('qs')
+const iconv = require('iconv-lite')
 const contentType = require('content-type')
 const multipart = require('multipart-formdata')
 const inet = require('./inet')
@@ -51,11 +52,11 @@ class Request {
             // In RFC, charset default is ISO-8859-1, and it equal to latin1
             const charset = content.parameters.charset || 'latin1'
             if (content.type.startsWith('text/')) {
-              resolve(contentData.toString(charset))
+              resolve(iconv.decode(contentData, charset))
             } else if (content.type === 'application/json') {
-              resolve(JSON.parse(contentData.toString(charset)))
+              resolve(JSON.parse(iconv.decode(contentData, charset)))
             } else if (content.type === 'application/x-www-form-urlencoded') {
-              resolve(qs.parse(contentData.toString(charset)))
+              resolve(qs.parse(iconv.decode(contentData, charset)))
             } else if (content.type === 'multipart/form-data') {
               if (!content.parameters.boundary) {
                 throw 'NO_BOUNDARY'
