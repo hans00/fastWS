@@ -1,9 +1,16 @@
-const fastWS = require('fast-ws/server')
+const fastWS = require('../server')
 
 const app = new fastWS()
 
-app.ws('/ws', ws => null, {
+app.ws('/echo', ws => null, {
   protocol: 'echo'
+})
+
+app.ws('/fws', ws => {
+  ws.on('echo', ({ data, reply }) => {
+    console.log(data)
+    reply(data)
+  })
 })
 
 app.get('/hello/:name', (req, res, { name }) => {

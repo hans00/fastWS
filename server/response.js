@@ -55,18 +55,21 @@ const httpStatusCode = {
 }
 
 class Response extends Writable {
-  constructor ({ _cache, _templateRender }, request, response) {
+  constructor ({ cache, templateRender }, request, response) {
     super()
     this.request = request
     this.response = response
     this._status = 200
     this._headers = {}
-    this._cache = _cache
-    this._templateRender = _templateRender
+    this._cache = cache
+    this._templateRender = templateRender
     this.headersSent = false
     this.on('pipe', (src) => this.pipeFrom(src))
     this.corkWriteSize = 0
     this.response.onAborted(() => {
+      if (this.response.abortData) {
+        this.response.abortData()
+      }
       this.destroy()
     })
   }
@@ -95,10 +98,10 @@ class Response extends Writable {
       } else if (typeof cache === 'object') {
         cache = Object.keys(cache).map(key => {
           if (cache[key]) {
-            if (['number', 'string'].includes(typeof cache[key])) {
-              return key + '=' + cache[key]
+            if (typeof cache[key] === 'boolean') {
+              return key
             } else {
-              return cache[key]
+              return key + '=' + cache[key].toString()
             }
           }
         }).filter(x => x).join(', ')
@@ -107,7 +110,7 @@ class Response extends Writable {
       if (this._cache.has(fullPath)) {
         const file = this._cache.get(fullPath)
         if (checkModifyTime && checkModifyTime === file.mtime) {
-          return this.status(304).end('', undefined)
+          return this.status(304).end()
         } else {
           this.setHeader('Last-Modified', file.mtime)
             .setHeader('Cache-Control', cacheControl)
@@ -119,7 +122,7 @@ class Response extends Writable {
         const content = toArrayBuffer(fs.readFileSync(fullPath))
         this._cache.set(fullPath, { content, contentType, mtime })
         if (checkModifyTime && checkModifyTime === mtime) {
-          return this.status(304).end('', false)
+          return this.status(304).end()
         } else {
           this.setHeader('Last-Modified', mtime)
             .setHeader('Cache-Control', cacheControl)
@@ -162,6 +165,9 @@ class Response extends Writable {
   }
 
   writeHead () {
+    if (this._writableState.destroyed) {
+      return
+    }
     if (!this.headersSent) {
       this.headersSent = true
       if (this._status !== 200) {
@@ -178,6 +184,9 @@ class Response extends Writable {
   }
 
   _write (chunk, encoding, next) {
+    if (this._writableState.destroyed) {
+      return
+    }
     const data = toArrayBuffer(chunk)
     const [ok, _done] = this.response.tryEnd(data, this.corkWriteSize)
     if (!ok) {
@@ -194,6 +203,9 @@ class Response extends Writable {
   }
 
   pipeFrom (readable) {
+    if (this._writableState.destroyed) {
+      return
+    }
     readable.on('error', error => {
       this.emit('error', error)
     })

@@ -1,5 +1,4 @@
 const uWS = require('bindings')('uWS')
-const LRU = require('lru-cache')
 const BasicWSProtocol = require('./ws-protocol/basic')
 const Request = require('./request')
 const Response = require('./response')
@@ -47,58 +46,134 @@ class fastWS {
   constructor ({
     ssl = null,
     verbose = false,
-    cache = 50,
-    templateRender
+    cache = false,
+    templateRender = render,
+    bodySize = '4mb'
   } = {}) {
+    if (typeof bodySize === 'string') {
+      // convert string to bytes number
+      bodySize = bodySize.toLowerCase()
+      if (!isNaN(bodySize.slice(0, -2))) {
+        switch (bodySize.slice(-2)) {
+          case 'kb': bodySize = Number(bodySize.slice(0, -2)) * 1024; break;
+          case 'mb': bodySize = Number(bodySize.slice(0, -2)) * 1024 * 1024; break;
+          case 'gb': bodySize = Number(bodySize.slice(0, -2)) * 1024 * 1024 * 1024; break;
+          default:
+            throw new ServerError({
+              code: 'SERVER_INVALID_OPTIONS',
+              message: 'The body size format is invalid.'
+            })
+        }
+      } else {
+        throw new ServerError({
+          code: 'SERVER_INVALID_OPTIONS',
+          message: 'The body size format is invalid.'
+        })
+      }
+    } else if (typeof bodySize !== 'number') {
+      throw new ServerError({
+        code: 'SERVER_INVALID_OPTIONS',
+        message: 'The body size format is invalid.'
+      })
+    }
+    if (typeof templateRender !== 'function') {
+       throw new ServerError({
+        code: 'SERVER_INVALID_OPTIONS',
+        message: 'The option `templateRender` must be function.'
+      })
+    }
+    if (typeof cache === 'object') {
+      if (!cache.hasOwnProperty('has') || !cache.hasOwnProperty('set') || !cache.hasOwnProperty('get')) {
+        throw new ServerError({
+          code: 'SERVER_INVALID_OPTIONS',
+          message: 'The option `cache` is invalid.'
+        })
+      }
+      this._cache = cache
+    } else if (typeof cache === 'string') {
+      const CacheModule = require(cache)
+      cache = new CacheModule()
+    } else if (cache === false) {
+      // disable cache
+      cache = {
+        has: (key) => false,
+        set: () => false,
+      }
+    } else {
+      throw new ServerError({
+        code: 'SERVER_INVALID_OPTIONS',
+        message: 'The option `cache` is invalid.'
+      })
+    }
     this.options = {
       ssl,
-      verbose
+      verbose,
+      bodySize,
+      templateRender,
+      cache,
     }
     this._server = null
     this._socket = null
-    this._port = null
-    this._routes = []
-    if (typeof templateRender === 'function') {
-      this._templateRender = templateRender
-    } else {
-      this._templateRender = render
-    }
-    if (typeof cache === 'object' && !(cache instanceof Object)) {
-      this._cache = cache
-    } else {
-      this._cache = new LRU(cache)
-    }
+    this._routes = {}
     process.on('SIGINT', () => this.gracefulStop())
     process.on('SIGTERM', () => this.gracefulStop())
     process.on('SIGHUP', () => this.reload())
   }
 
-  listen (target, callback) {
-    if (this.target) {
-      target = this.target
-    } else if (target) {
-      this.target = target
-    } else {
-      throw new ServerError({ code: 'INVALID_NO_TARGET', message: 'Invalid, must specify host and port or port only.' })
-    }
-    let host, port
-    if (typeof target === 'number') {
-      port = target
-    } else {
-      const listen = target.match(/^(?:\[([\da-f:]+)\]|((?:\.?\d{1,3}){4})):(\d{1,5})$/)
-      if (!listen) {
-        throw new ServerError({ code: 'INVALID_TARGET', message: 'Invalid, listen target format is wrong.' })
+  listen () {
+    // parse arguments
+    let host, port, callback
+    if (arguments.length === 0) {
+      if (this._listenTo) {
+        [host, port] = this._listenTo
       } else {
-        host = listen[1] || listen[2]
-        port = Number(listen[3])
+        throw new ServerError({
+          code: 'INVALID_ARG',
+          message: 'Invalid, must specify host and port or port only.'
+        })
       }
+    } else if (arguments.length === 1) {
+      port = arguments[0]
+      this._listenTo = [host, port]
+    } else if (arguments.length === 2) {
+      if (typeof arguments[0] === 'number' && typeof arguments[1] === 'function') {
+        port = arguments[0]
+        callback = arguments[1]
+      } else if (typeof arguments[0] === 'string' && typeof arguments[0] === 'function') {
+        host = arguments[0]
+        port = arguments[1]
+      } else {
+        throw new ServerError({
+          code: 'INVALID_ARG',
+          message: 'Invalid, argumrnts type is wrong.'
+        })
+      }
+      this._listenTo = [host, port]
+    } else if (arguments.length === 3) {
+      host = arguments[0]
+      port = arguments[1]
+      callback = arguments[2]
+      if (typeof host !== 'string' || typeof port !== 'number' || typeof callback !== 'function') {
+        throw new ServerError({
+          code: 'INVALID_ARG',
+          message: 'Invalid, argumrnts type is wrong.'
+        })
+      }
+      this._listenTo = [host, port]
+    } else {
+      throw new ServerError({
+        code: 'INVALID_ARG',
+        message: 'Invalid, argumrnt counts is wrong.'
+      })
     }
+    // init app
     this._server = this.options.ssl ? uWS.SSLApp(this.options.ssl) : uWS.App()
     Object.keys(this._routes).forEach(path => {
       Object.keys(this._routes[path]).forEach(method => {
         this._server[method](path, this._routes[path][method])
       })
     })
+    // ready to listen
     const listenCallback = (listenSocket) => {
       this._socket = listenSocket
       if (listenSocket) {
@@ -136,8 +211,8 @@ class fastWS {
             params[key] = decodeURIComponent(request.getParameter(index))
           })
         }
-        const req = new Request(request, response)
-        const res = new Response(this, request, response)
+        const req = new Request(this.options, request, response)
+        const res = new Response(this.options, request, response)
         try {
           await callbacks(req, res, params)
         } catch (e) {
@@ -187,7 +262,7 @@ class fastWS {
       idleTimeout: options.idleTimeout,
       maxPayloadLength: options.maxPayloadLength,
       open: (ws, request) => {
-        const client = new Protocol(ws, new Request(request, null))
+        const client = new Protocol(ws, new Request(this.options, request, null))
         this.options.verbose && console.log('[open]', client.remoteAddress)
         ws.client = client
         try {
@@ -214,12 +289,6 @@ class fastWS {
       },
       drain: (ws) => {
         ws.client.drain()
-      },
-      ping: (ws) => {
-        ws.client.onPing()
-      },
-      pong: (ws) => {
-        ws.client.onPong()
       },
       close: (ws, code, message) => {
         ws.client.onClose(code, message)

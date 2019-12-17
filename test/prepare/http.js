@@ -4,7 +4,9 @@ const app = require('./app')
 module.exports = function (port) {
   return new Promise((resolve, reject) => {
     try {
-      app(new fastWS())
+      app(new fastWS({
+        cache: 'lru-cache'
+      }))
       .listen(port, () => {
         console.log(`Listen on ${port}`)
         resolve()

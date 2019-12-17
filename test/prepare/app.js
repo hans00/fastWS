@@ -19,7 +19,7 @@ module.exports = function (app) {
   })
 
   app.post('/post', async (req, res) => {
-    const data = await req.body()
+    const data = await req.body
     res.json(data)
   })
 

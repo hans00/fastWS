@@ -41,15 +41,12 @@
   "dependencies": {
     "bindings": "^1.5.0",
     "content-type": "^1.0.4",
-    "engine.io": "^3.4.0",
     "iconv-lite": "^0.5.0",
-    "lru-cache": "^5.1.1",
     "mime-types": "^2.1.25",
     "multipart-formdata": "^1.1.0",
     "prebuild-install": "^5.3.3",
     "qs": "^6.9.1",
     "replicator": "^1.0.3",
-    "socket.io-parser": "^3.4.0",
     "ws": "^7.2.0"
   },
   "gypfile": true,
@@ -62,13 +59,12 @@
     "eslint-plugin-node": "^10.0.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
+    "lru-cache": "^5.1.1",
     "mkcert": "^1.2.0",
     "node-gyp": "^6.0.1",
     "pre-commit": "^1.2.2",
     "prebuild": "^9.1.1",
     "rimraf": "^3.0.0",
-    "socket.io": "^2.3.0",
-    "socket.io-client": "^2.3.0",
     "tempfile": "^3.0.0"
   }
 }
