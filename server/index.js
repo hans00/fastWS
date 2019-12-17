@@ -92,7 +92,7 @@ class fastWS {
       if (typeof cache.has !== 'function' || typeof cache.set !== 'function' || typeof cache.get !== 'function') {
         throw new ServerError({
           code: 'SERVER_INVALID_OPTIONS',
-          message: 'The option `cache` is invalid.',
+          message: 'The option `cache` is invalid.'
         })
       }
       this._cache = cache
