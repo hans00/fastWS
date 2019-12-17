@@ -98,7 +98,7 @@ function worker(options) {
   }
   const clients = []
   const echo_event = options.module === 'ws' ? 'message' : 'echo'
-  const connect_event = options.module === 'ws' ? 'open' : options.module === 'fast-ws' ? 'connected' : 'connect'
+  const connect_event = options.module === 'ws' ? 'open' : 'connect'
   const sender = setInterval(() => {
     let countDown = rampUp
     while (countDown--) {

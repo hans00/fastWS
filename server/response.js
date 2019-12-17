@@ -96,7 +96,7 @@ class Response extends Writable {
       if (typeof cache === 'string') {
         cacheControl = cache
       } else if (typeof cache === 'object') {
-        cache = Object.keys(cache).map(key => {
+        cacheControl = Object.keys(cache).map(key => {
           if (cache[key]) {
             if (typeof cache[key] === 'boolean') {
               return key

@@ -17,7 +17,7 @@ class WSClient extends EventEmitter {
     super()
     this.options = options
     this.connectState = 0
-    this.internalEvents = ['open', 'close', 'connected', 'disconnected', 'ready', 'ping', 'pong', 'message', 'binary', 'error']
+    this.internalEvents = ['open', 'close', 'disconnect', 'connect', 'ping', 'pong', 'message', 'binary', 'error']
     this.client = new WebSocket(endpoint, 'fast-ws', options)
     this.client.on('error', error => {
       this.emit('error', error)
@@ -27,12 +27,11 @@ class WSClient extends EventEmitter {
       this._heartbeat = setInterval(() => {
         this.ping()
       }, options.pingInterval || 30000)
-      this.emit('connected')
     })
     this.client.on('close', () => {
       this.connectState = -1
       clearInterval(this._heartbeat)
-      this.emit('disconnected')
+      this.emit('disconnect')
     })
     this.client.on('message', (message) => {
       if (this.connectState !== 2) {
@@ -139,11 +138,11 @@ class WSClient extends EventEmitter {
     }
   }
 
-  removeAllListener (event) {
+  removeAllListeners (event) {
     if (this.internalEvents.includes(event)) {
-      super.removeAllListener(event)
+      super.removeAllListeners(event)
     } else {
-      super.removeAllListener(eventId(event))
+      super.removeAllListeners(eventId(event))
     }
   }
 
