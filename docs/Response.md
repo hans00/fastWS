@@ -1,4 +1,4 @@
-# `Response`
+# Response
 
 ## `cork(callback)`
 

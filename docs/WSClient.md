@@ -67,7 +67,7 @@
 > Listen on builtin event or **custom event**.
 
 ```js
-ws.on('hello', ({ data, reply }) => {
+ws.on('hello', ({ data, reply }: WSEvent) => {
   reply(`Hello ${data}`)
 })
 ```
@@ -96,7 +96,7 @@ ws.on('hello', ({ data, reply }) => {
 
 > Broadcast binary to channel
 
-### WS Event
+### `WSEvent`
 
 #### `type`
 

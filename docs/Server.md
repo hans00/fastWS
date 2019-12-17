@@ -67,7 +67,7 @@ render('Hello ${name}', { name: 'World' }) // Hello World
 // HTML or XML
 `"${escapeHTML(data, String)}"`
 // URL encode
-`"${escape(data, String)}"`
+`"${escape(data)}"`
 ```
 
 ## Methods
