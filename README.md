@@ -5,7 +5,9 @@ fastWS
 [![Node version](https://img.shields.io/node/v/fast-ws.svg)](https://www.npmjs.com/package/fast-ws)
 [![GitHub Action](https://github.com/hans00/fastWS/workflows/build/badge.svg)](https://github.com/hans00/fastWS)
 
-Simple Node.js server based on uWebSockets.
+It's very fast Web Server Node.js server based on uWebSockets.
+
+And very easy to use.
 
 [Benchmark result](benchmark/README.md)
 
