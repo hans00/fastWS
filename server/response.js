@@ -67,10 +67,10 @@ class Response extends Writable {
     this.on('pipe', (src) => this.pipeFrom(src))
     this.corkWriteSize = 0
     this.response.onAborted(() => {
+      this.destroy()
       if (this.response.abortData) {
         this.response.abortData()
       }
-      this.destroy()
     })
   }
 

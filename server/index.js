@@ -55,9 +55,15 @@ class fastWS {
       bodySize = bodySize.toLowerCase()
       if (!isNaN(bodySize.slice(0, -2))) {
         switch (bodySize.slice(-2)) {
-          case 'kb': bodySize = Number(bodySize.slice(0, -2)) * 1024; break;
-          case 'mb': bodySize = Number(bodySize.slice(0, -2)) * 1024 * 1024; break;
-          case 'gb': bodySize = Number(bodySize.slice(0, -2)) * 1024 * 1024 * 1024; break;
+          case 'kb':
+            bodySize = Number(bodySize.slice(0, -2)) * 1024
+            break
+          case 'mb':
+            bodySize = Number(bodySize.slice(0, -2)) * 1024 * 1024
+            break
+          case 'gb':
+            bodySize = Number(bodySize.slice(0, -2)) * 1024 * 1024 * 1024
+            break
           default:
             throw new ServerError({
               code: 'SERVER_INVALID_OPTIONS',
@@ -77,16 +83,16 @@ class fastWS {
       })
     }
     if (typeof templateRender !== 'function') {
-       throw new ServerError({
+      throw new ServerError({
         code: 'SERVER_INVALID_OPTIONS',
         message: 'The option `templateRender` must be function.'
       })
     }
     if (typeof cache === 'object') {
-      if (!cache.hasOwnProperty('has') || !cache.hasOwnProperty('set') || !cache.hasOwnProperty('get')) {
+      if (typeof cache.has !== 'function' || typeof cache.set !== 'function' || typeof cache.get !== 'function') {
         throw new ServerError({
           code: 'SERVER_INVALID_OPTIONS',
-          message: 'The option `cache` is invalid.'
+          message: 'The option `cache` is invalid.',
         })
       }
       this._cache = cache
@@ -97,7 +103,7 @@ class fastWS {
       // disable cache
       cache = {
         has: (key) => false,
-        set: () => false,
+        set: () => false
       }
     } else {
       throw new ServerError({
@@ -110,7 +116,7 @@ class fastWS {
       verbose,
       bodySize,
       templateRender,
-      cache,
+      cache
     }
     this._server = null
     this._socket = null
@@ -217,10 +223,12 @@ class fastWS {
           await callbacks(req, res, params)
         } catch (e) {
           console.error(e.toString())
-          if (e instanceof ServerError && e.httpCode) {
-            res.status(e.httpCode).end(e.message)
-          } else {
-            res.status(500).end('Server Internal Error')
+          if (!res._writableState.destroyed) {
+            if (e instanceof ServerError && e.httpCode) {
+              res.status(e.httpCode).end(e.message)
+            } else {
+              res.status(500).end('Server Internal Error')
+            }
           }
         }
       }

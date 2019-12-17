@@ -37,7 +37,7 @@ class Request {
         } else if (bodySize && Number(_contentLength) > bodySize) {
           throw new ServerError({ code: 'CLIENT_LENGTH_TOO_LARGE', message: '', httpCode: 413 })
         }
-        response.abortData = () => reject()
+        this.response.abortData = () => reject(new ServerError({ code: 'SERVER_BODY_ABORTED' }))
         const contentLength = Number(_contentLength)
         let data = null; let bodyLength = 0
         this.response.onData((chunk, isLast) => {
@@ -57,7 +57,7 @@ class Request {
                 resolve(qs.parse(iconv.decode(contentData, charset)))
               } else if (content.type === 'multipart/form-data') {
                 if (!content.parameters.boundary) {
-                  throw 'NO_BOUNDARY'
+                  throw new Error('NO_BOUNDARY')
                 }
                 resolve(multipart.parse(contentData, content.parameters.boundary))
               } else {
