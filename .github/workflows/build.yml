@@ -52,8 +52,8 @@ jobs:
             npm run lint
             npm run build
             npm run test
-            [[ ${{ github.ref }} == refs/tags/* ]] && npm run prebuild-node
-            [[ ${{ github.ref }} == refs/tags/* ]] && npx prebuild --upload-all ${{secrets.GITHUB_TOKEN}}
+            [[ ${{ github.ref }} == refs/tags/* ]] && npm run prebuild-node || true
+            [[ ${{ github.ref }} == refs/tags/* ]] && npx prebuild --upload-all "${{secrets.GITHUB_TOKEN}}" || true
 
   publish-npm:
     needs: build
