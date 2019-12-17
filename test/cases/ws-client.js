@@ -6,7 +6,7 @@ module.exports = function ({ HTTP_PORT }) {
 
     ws.on('error', reject)
 
-    ws.on('ready', async () => {
+    ws.on('connect', async () => {
       try {
         {
           const data = { 'Hello': 'World' }

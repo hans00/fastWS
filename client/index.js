@@ -37,7 +37,7 @@ class WSClient extends EventEmitter {
       if (this.connectState !== 2) {
         if (message === '\x00\x02') {
           this.connectState = 2
-          this.emit('ready')
+          this.emit('connect')
         } else {
           this.emit('error', new Error('Client version mismatch.'))
         }
