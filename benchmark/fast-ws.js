@@ -8,7 +8,6 @@ app.ws('/echo', ws => null, {
 
 app.ws('/fws', ws => {
   ws.on('echo', ({ data, reply }) => {
-    console.log(data)
     reply(data)
   })
 })

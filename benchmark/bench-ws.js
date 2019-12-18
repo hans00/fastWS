@@ -30,10 +30,10 @@ function parseArgs(options) {
       console.log('  %s: %s', (`--help, -h`).padEnd(maxLen), 'This message.')
       process.exit(0)
     }
-    if (arg.startsWith('-')) {
-      argObj = tagged.find(x => x.short === arg.slice(1))
-    } else if (arg.startsWith('--')) {
+    if (arg.startsWith('--')) {
       argObj = tagged.find(x => x.name === arg.slice(2))
+    } else if (arg.startsWith('-')) {
+      argObj = tagged.find(x => x.short === arg.slice(1))
     } else {
       argObj = constRequired.shift()
     }
@@ -353,6 +353,7 @@ if (isMainThread) {
         console.log('  StdDev:', stddev(merged.echo.success), 'ms')
         console.log('')
         console.log('Connection/sec:', merged.conn.success.length / args.duration)
+        console.log('Echo/sec:', merged.echo.success.length / args.duration)
         console.log('Transfer/sec:', merged.echo.success.length * (args.size - 6 + args.payload.length) / args.duration / 1024 / 1024, 'MB')
         process.exit(0)
       }
