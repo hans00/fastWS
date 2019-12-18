@@ -1,4 +1,5 @@
-#!/usr/bin/env node --experimental-worker
+#!/bin/sh
+":" //# comment; exec /usr/bin/env node --experimental-worker "$0" "$@"
 const os = require('os')
 const { Worker, isMainThread, threadId, parentPort } = require('worker_threads')
 
