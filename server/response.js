@@ -65,7 +65,7 @@ class Response extends Writable {
     this._templateRender = templateRender
     this.headersSent = false
     this.on('pipe', (src) => this.pipeFrom(src))
-    this.corkWriteSize = 0
+    this.corkPipe = false
     this.response.onAborted(() => {
       this.destroy()
       if (this.response.abortData) {
@@ -188,7 +188,7 @@ class Response extends Writable {
       return
     }
     const data = toArrayBuffer(chunk)
-    const [ok, _done] = this.response.tryEnd(data, this.corkWriteSize)
+    const ok = this.response.write(data)
     if (!ok) {
       this.response.onWritable((offset) => {
         this._write(data.slice(offset - this.response.getWriteOffset()), encoding, next)
@@ -196,9 +196,6 @@ class Response extends Writable {
       })
     } else {
       next()
-    }
-    if (_done) {
-      super.end()
     }
   }
 
@@ -209,6 +206,10 @@ class Response extends Writable {
     readable.on('error', error => {
       this.emit('error', error)
     })
+    readable.on('end', () => {
+      this.response.end('')
+      super.end()
+    })
     // In RFC these status code must not have body
     if (this.status < 200 || this.status === 204 || this.status === 304) {
       throw new ServerError({
@@ -217,21 +218,8 @@ class Response extends Writable {
         httpCode: 500
       })
     }
-    if (readable.path) {
-      this.writeHead()
-      this.corkWriteSize = fs.statSync(readable.path).size
-      this.response.tryEnd('', this.corkWriteSize)
-    } else if (readable.headers && readable.headers['content-length']) {
-      this.writeHead()
-      this.corkWriteSize = Number(readable.headers['content-length'])
-      this.response.tryEnd('', this.corkWriteSize)
-    } else {
-      throw new ServerError({
-        code: 'SERVER_STREAM_UNKNOWN_SIZE',
-        message: 'Pipe stream must know response length.',
-        httpCode: 500
-      })
-    }
+    this.writeHead()
+    this.corkPipe = true
     return this
   }
 
@@ -243,7 +231,7 @@ class Response extends Writable {
     if (this.status < 200 || this.status === 204 || this.status === 304) {
       data = ''
     }
-    if (this.corkWriteSize === 0) {
+    if (!this.corkPipe) {
       if (typeof contentType === 'string') {
         this._headers['content-type'] = contentType
       }

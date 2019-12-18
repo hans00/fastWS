@@ -69,8 +69,6 @@ cache_control = false // Turn off Cache-Control
 
 ## Pipe stream
 
-> Must known length, support HTTP Client (if header exists content-length) and fs stream.
-
 ```js
 fs.createReadStream('/path/to/file').pipe(res)
 ```
