@@ -209,6 +209,14 @@ class Response extends Writable {
     readable.on('error', error => {
       this.emit('error', error)
     })
+    // In RFC these status code must not have body
+    if (this.status < 200 || this.status === 204 || this.status === 304) {
+      throw new ServerError({
+        code: 'SERVER_INVALID_OPERATE',
+        message: `The status ${this.status} must no content.`,
+        httpCode: 500
+      })
+    }
     if (readable.path) {
       this.writeHead()
       this.corkWriteSize = fs.statSync(readable.path).size
@@ -230,6 +238,10 @@ class Response extends Writable {
   end (data = '', contentType = null) {
     if (this._writableState.destroyed) {
       return
+    }
+    // In RFC these status code must not have body
+    if (this.status < 200 || this.status === 204 || this.status === 304) {
+      data = ''
     }
     if (this.corkWriteSize === 0) {
       if (typeof contentType === 'string') {
