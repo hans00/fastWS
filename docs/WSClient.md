@@ -70,6 +70,10 @@
 ws.on('hello', ({ data, reply }: WSEvent) => {
   reply(`Hello ${data}`)
 })
+
+ws.on('message', (message) => {
+  ws.sendMessage(message)
+})
 ```
 
 ### `send(event, data[, compress=true])`

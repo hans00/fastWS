@@ -3,6 +3,7 @@
   "version": "1.0.2",
   "description": "Simple Node.js server based on uWebSockets",
   "main": "index.js",
+  "browser": "client/browser.js",
   "engines": {
     "node": ">=10.0.0"
   },

@@ -4,6 +4,8 @@ const ServerError = require('../errors')
 
 const replicator = new Replicator()
 
+const PING = '\x0F'
+const PONG = '\x0E'
 const DATA_START = '\x01'
 const DATA_END = '\x02'
 const EVENT = '\x05'
@@ -15,6 +17,10 @@ const eventId = (str) => str.split('').reduce((sum, char, index) => sum + char.c
 function parsePayload (payload) {
   if (payload[0] === DATA_START && payload[payload.length - 1] === DATA_END) {
     return { type: 'message', data: replicator.decode(payload.slice(1, -1)) }
+  } else if (payload[0] === PING) {
+    return { type: 'ping', data: Number(payload.slice(1)) }
+  } else if (payload[0] === PONG) {
+    return { type: 'pong', data: new Date() - Number(payload.slice(1)) }
   } else if (payload[0] === EVENT) {
     const eventSplitIndex = payload.indexOf(IDLE)
     const replySplitIndex = payload.indexOf(DATA_START)
@@ -40,8 +46,14 @@ function getPayload (data, type = 'message') {
     return RESPONSE + data.replyId + getPayload(data.data)
   } else if (type === 'event') {
     return EVENT + data.event + getPayload(data.data)
-  } else {
+  } else if (type === 'ping') {
+    return PING + new Date().valueOf().toString()
+  } else if (type === 'pong') {
+    return PONG + data.toString()
+  } else if (type === 'message') {
     return DATA_START + replicator.encode(data) + DATA_END
+  } else {
+    return ''
   }
 }
 
@@ -64,9 +76,16 @@ class WSClient extends basic {
         }
         this.emit(incoming.name, incoming)
       } else {
-        this.emit('message', incoming)
+        if (incoming.type === 'ping') {
+          this._send(getPayload(incoming.data, 'pong'))
+        }
+        this.emit(incoming.type, incoming.data)
       }
     }
+  }
+
+  ping () {
+    this._send(getPayload(null, 'ping'))
   }
 
   on (event, listener) {
