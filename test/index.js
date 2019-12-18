@@ -29,7 +29,7 @@ async function tests() {
       const caseName = file.slice(0, -3).replace(/[-_]/ig, ' ')
       try {
         setTimeout(() => {
-          throw new Error('Timeout')
+          throw new Error(`Timeout: ${caseName}`)
         }, TIMEOUT)
         await require(`./cases/${file}`)(config)
         console.log(success(`[success] ${caseName}`))
