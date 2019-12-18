@@ -1,4 +1,4 @@
-if ((global && global.WebSocket) || (window && window.WebSocket)) {
+if (typeof window !== 'undefined') {
   module.exports = require('./browser')
 } else {
   module.exports = require('./node')
