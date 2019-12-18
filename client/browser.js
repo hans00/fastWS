@@ -18,22 +18,22 @@ class WSClient extends Base {
       clearInterval(this._heartbeat)
       this.emit('disconnect')
     }
-    this.client.onmessage = (message) => {
+    this.client.onmessage = ({ type, data }) => {
       if (this.connectState !== 2) {
-        if (message === '\x00\x02') {
+        if (data === '\x00\x02') {
           this.connectState = 2
           this.emit('connect')
         } else {
           this.emit('error', new Error('Client version mismatch.'))
         }
       } else {
-        this.incomingPacket(message)
+        this.incomingPacket(data)
       }
     }
   }
 
   ping () {
-    this._send(super.getPayload(null, 'ping'))
+    this.client.send(Base.getPayload(null, 'ping'))
   }
 }
 
