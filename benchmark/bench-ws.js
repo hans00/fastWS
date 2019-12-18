@@ -82,7 +82,7 @@ RegExp.escape = (s) => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
 function worker(options) {
   const data = '0'.repeat(options.size)
   const payload = options.payload.replace('{DATA}', data)
-  const rampUp = options['ramp-up']
+  const rampUp = Math.ceil(options['ramp-up'] / options.threads)
   const messageCount = options.counts
   const WS = require(options.module === 'fast-ws' ? '../client' : options.module)
   const timeout = options.timeout
