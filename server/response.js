@@ -211,10 +211,10 @@ class Response extends Writable {
       super.end()
     })
     // In RFC these status code must not have body
-    if (this.status < 200 || this.status === 204 || this.status === 304) {
+    if (this._status < 200 || this._status === 204 || this._status === 304) {
       throw new ServerError({
         code: 'SERVER_INVALID_OPERATE',
-        message: `The status ${this.status} must no content.`,
+        message: `The status ${this._status} must no content.`,
         httpCode: 500
       })
     }
@@ -228,7 +228,7 @@ class Response extends Writable {
       return
     }
     // In RFC these status code must not have body
-    if (this.status < 200 || this.status === 204 || this.status === 304) {
+    if (this._status < 200 || this._status === 204 || this._status === 304) {
       data = ''
     }
     if (!this.corkPipe) {
