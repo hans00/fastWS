@@ -5,7 +5,7 @@ const multipart = require('multipart-formdata')
 const inet = require('./inet')
 const ServerError = require('./errors')
 
-const methodsWithBody = ['POST', 'PUT', 'PATCH']
+const methodsWithBody = ['POST', 'PUT', 'PATCH', 'OPTIONS']
 
 class Request {
   constructor ({ bodySize }, request, response) {
@@ -66,6 +66,8 @@ class Request {
             } catch (e) {
               reject(new ServerError({ code: 'SERVER_BODY_PARSE', originError: e, httpCode: 400 }))
             }
+          } else if (isLast) {
+            reject(new ServerError({ code: 'SERVER_BODY_LENGTH', httpCode: 400 }))
           }
         })
       })
