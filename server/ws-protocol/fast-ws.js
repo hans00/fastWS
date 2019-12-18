@@ -45,7 +45,7 @@ function getPayload (data, type = 'message') {
   if (type === 'reply') {
     return RESPONSE + data.replyId + getPayload(data.data)
   } else if (type === 'event') {
-    return EVENT + data.event + getPayload(data.data)
+    return EVENT + eventId(data.event) + getPayload(data.data)
   } else if (type === 'ping') {
     return PING + new Date().valueOf().toString()
   } else if (type === 'pong') {

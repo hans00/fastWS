@@ -8,6 +8,12 @@ module.exports = function (app) {
     ws.on('echo', ({ reply, data }) => {
       reply(data)
     })
+    ws.on('broadcast', ({ data: { room, message } }) => {
+      ws.broadcast(room, 'someone said', message)
+    })
+    ws.on('join', ({ data }) => {
+      ws.join(data.toString())
+    })
   })
 
   app.ws('/echo', ws => null, { protocol: 'echo' })

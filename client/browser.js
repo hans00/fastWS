@@ -9,11 +9,13 @@ class WSClient extends Base {
     }
     this.client.onopen = () => {
       this.connectState = 1
+      this.emit('open')
       this._heartbeat = setInterval(() => {
         this.ping()
       }, options.pingInterval || 30000)
     }
     this.client.onclose = () => {
+      this.emit('close')
       this.connectState = -1
       clearInterval(this._heartbeat)
       this.emit('disconnect')

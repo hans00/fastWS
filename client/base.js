@@ -56,7 +56,7 @@ class WSClientBase extends EventEmitter {
     } else if (payload[0] === EVENT) {
       const splitIndex = payload.indexOf(DATA_START)
       const data = payload.slice(splitIndex)
-      return { type: 'event', event, data: WSClientBase.parsePayload(data).data }
+      return { type: 'event', event: payload.slice(1, splitIndex), data: WSClientBase.parsePayload(data).data }
     }
   }
 
@@ -65,7 +65,7 @@ class WSClientBase extends EventEmitter {
   }
 
   incomingPacket (payload) {
-    if (payload.constructor.name === 'ArrayBuffer') {
+    if (payload.constructor.name === 'ArrayBuffer' || payload.constructor.name === 'Blob') {
       this.emit('binary', payload)
     } else {
       const incoming = WSClientBase.parsePayload(payload)
