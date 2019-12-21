@@ -48,7 +48,8 @@ class fastWS {
     verbose = false,
     cache = false,
     templateRender = render,
-    bodySize = '4mb'
+    bodySize = '4mb',
+    forceStopTimeout = 5000
   } = {}) {
     if (typeof bodySize === 'string') {
       // convert string to bytes number
@@ -116,13 +117,14 @@ class fastWS {
       verbose,
       bodySize,
       templateRender,
-      cache
+      cache,
+      forceStopTimeout
     }
     this._server = null
     this._socket = null
     this._routes = {}
-    process.on('SIGINT', () => this.gracefulStop())
-    process.on('SIGTERM', () => this.gracefulStop())
+    process.on('SIGINT', () => this.gracefulStop(true))
+    process.on('SIGTERM', () => this.gracefulStop(true))
     process.on('SIGHUP', () => this.reload())
   }
 
@@ -191,7 +193,7 @@ class fastWS {
         callback(listenSocket)
       }
     }
-    this.gracefulStop()
+    this.gracefulStop(false)
     if (host) {
       this._server.listen(host, port, listenCallback)
     } else {
@@ -203,13 +205,19 @@ class fastWS {
     if (!this._routes[path]) {
       this._routes[path] = {}
     }
-    let URLParams = path.match(/:\w+/g)
-    if (URLParams) {
-      URLParams = URLParams.map(key => key.slice(1))
+    if (this._routes[path][method]) {
+      throw new ServerError({
+        code: 'INVALID_DUPLICATE_ROUTER',
+        message: 'Invalid, duplicated router.'
+      })
     }
     if (method === 'ws') {
       this._routes[path][method] = callbacks
     } else {
+      let URLParams = path.match(/:\w+/g)
+      if (URLParams) {
+        URLParams = URLParams.map(key => key.slice(1))
+      }
       this._routes[path][method] = async (response, request) => {
         const params = {}
         if (URLParams) {
@@ -264,17 +272,35 @@ class fastWS {
     } else {
       options.protocol = require('./ws-protocol/fast-ws')
     }
+    if (options.protocolOptions) {
+      if (typeof options.protocolOptions !== 'object') {
+        throw new ServerError({ code: 'INVALID_OPTIONS', message: 'Invalid websocket option' })
+      }
+    } else {
+      options.protocolOptions = {}
+    }
     const Protocol = options.protocol
+    const protocol = new Protocol(options.protocolOptions)
+    let URLParams = path.match(/:\w+/g)
+    if (URLParams) {
+      URLParams = URLParams.map(key => key.slice(1))
+    }
     this.route('ws', path, {
       compression: options.compression,
       idleTimeout: options.idleTimeout,
       maxPayloadLength: options.maxPayloadLength,
       open: (ws, request) => {
-        const client = new Protocol(ws, new Request(this.options, request, null))
+        const params = {}
+        if (URLParams) {
+          URLParams.forEach((key, index) => {
+            params[key] = decodeURIComponent(request.getParameter(index))
+          })
+        }
+        const client = protocol.newClient(ws, request)
         this.options.verbose && console.log('[open]', client.remoteAddress)
         ws.client = client
         try {
-          callback(client)
+          callback(client, params)
         } catch (error) {
           console.error(error)
           // disconnect when error
@@ -283,15 +309,11 @@ class fastWS {
       },
       message: (ws, message, isBinary) => {
         try {
-          // decode message
-          ws.client.incomingPacket(Buffer.from(message), isBinary)
+          const buf = Buffer.from(message)
+          ws.client.incomingPacket(isBinary ? buf : buf.toString(), isBinary)
         } catch (error) {
-          if (error.code === 'WS_INVALID_PAYLOAD') {
-            this.options.verbose && console.log('[error]', 'Invalid message payload')
-          } else {
-            console.error(error)
-          }
-          // kick user when error
+          console.error(error)
+          // disconnect when error
           ws.close()
         }
       },
@@ -361,10 +383,15 @@ class fastWS {
     }
   }
 
-  gracefulStop () {
+  gracefulStop (canForceExit = true) {
     if (this._socket) {
+      const forceStop = canForceExit && setTimeout(() => {
+        this.options.verbose && console.log('Force stop')
+        process.exit(0)
+      }, this.options.forceStopTimeout)
       this.options.verbose && console.log('Shutting down...')
       uWS.us_listen_socket_close(this._socket)
+      clearTimeout(forceStop)
       this._socket = null
     }
   }

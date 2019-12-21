@@ -8,17 +8,18 @@ module.exports = function (app) {
     ws.on('echo', ({ reply, data }) => {
       reply(data)
     })
-    ws.on('broadcast', ({ data: { room, message } }) => {
-      ws.broadcast(room, 'someone said', message)
+    ws.on('join', ({ data: channel }) => {
+      ws.join(channel.toString())
+      ws.channel = channel.toString()
     })
-    ws.on('join', ({ data }) => {
-      ws.join(data.toString())
+    ws.on('message', message => {
+      if (ws.channel) {
+        ws.emitToChannel(ws.channel, 'someone said', message)
+      }
     })
   })
 
   app.ws('/echo', ws => null, { protocol: 'echo' })
-
-  // app.ws('/io', ws => null, { protocol: 'socket.io' })
 
   app.get('/get', (req, res) => {
     res.json(req.query)

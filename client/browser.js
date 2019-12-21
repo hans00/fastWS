@@ -5,28 +5,28 @@ class WSClient extends Base {
     super(options)
     this.client = new WebSocket(endpoint, 'fast-ws')
     this.client.onerror = error => {
-      this.emit('error', error)
+      super.emit('error', error)
     }
     this.client.onopen = () => {
       this.connectState = 1
-      this.emit('open')
+      super.emit('open')
       this._heartbeat = setInterval(() => {
         this.ping()
       }, options.pingInterval || 30000)
     }
     this.client.onclose = () => {
-      this.emit('close')
+      super.emit('close')
       this.connectState = -1
       clearInterval(this._heartbeat)
-      this.emit('disconnect')
+      super.emit('disconnect')
     }
     this.client.onmessage = ({ type, data }) => {
       if (this.connectState !== 2) {
         if (data === '\x00\x02') {
           this.connectState = 2
-          this.emit('connect')
+          super.emit('connect')
         } else {
-          this.emit('error', new Error('Client version mismatch.'))
+          super.emit('error', new Error('Client version mismatch.'))
         }
       } else {
         this.incomingPacket(data)

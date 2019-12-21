@@ -1,8 +1,6 @@
 const Replicator = require('replicator')
-const basic = require('./basic')
+const BasicProtocol = require('./basic')
 const ServerError = require('../errors')
-
-const replicator = new Replicator()
 
 const PING = '\x0F'
 const PONG = '\x0E'
@@ -14,78 +12,84 @@ const IDLE = '\x16'
 
 const eventId = (str) => str.split('').reduce((sum, char, index) => sum + char.charCodeAt(0) * (index + 1), 0).toString(16)
 
-function parsePayload (payload) {
-  if (payload[0] === DATA_START && payload[payload.length - 1] === DATA_END) {
-    return { type: 'message', data: replicator.decode(payload.slice(1, -1)) }
-  } else if (payload[0] === PING) {
-    return { type: 'ping', data: Number(payload.slice(1)) }
-  } else if (payload[0] === PONG) {
-    return { type: 'pong', data: new Date() - Number(payload.slice(1)) }
-  } else if (payload[0] === EVENT) {
-    const eventSplitIndex = payload.indexOf(IDLE)
-    const replySplitIndex = payload.indexOf(DATA_START)
-    if (eventSplitIndex === -1 || replySplitIndex === -1) {
-      throw new ServerError({ code: 'WS_INVALID_PAYLOAD' })
+class Parser {
+  constructor (options) {
+    this.replicator = new Replicator(options)
+  }
+
+  parse (payload) {
+    if (payload[0] === DATA_START && payload[payload.length - 1] === DATA_END) {
+      return { type: 'message', data: this.replicator.decode(payload.slice(1, -1)) }
+    } else if (payload[0] === PING) {
+      return { type: 'ping', data: Number(payload.slice(1)) }
+    } else if (payload[0] === PONG) {
+      return { type: 'pong', data: new Date() - Number(payload.slice(1)) }
+    } else if (payload[0] === EVENT) {
+      const eventSplitIndex = payload.indexOf(IDLE)
+      const replySplitIndex = payload.indexOf(DATA_START)
+      if (eventSplitIndex === -1 || replySplitIndex === -1) {
+        throw new ServerError({ code: 'WS_INVALID_PAYLOAD' })
+      }
+      const event = payload.slice(1, eventSplitIndex)
+      const replyId = payload.slice(eventSplitIndex + 1, replySplitIndex)
+      const dataPayload = payload.slice(replySplitIndex)
+      return {
+        type: 'event',
+        name: event,
+        reply_id: replyId,
+        data: this.parse(dataPayload).data
+      }
+    } else {
+      throw new Error('Invalid payload')
     }
-    const event = payload.slice(1, eventSplitIndex)
-    const replyId = payload.slice(eventSplitIndex + 1, replySplitIndex)
-    const dataPayload = payload.slice(replySplitIndex)
-    return {
-      type: 'event',
-      name: event,
-      reply_id: replyId,
-      data: parsePayload(dataPayload).data
+  }
+
+  stringify (data, type = 'message') {
+    if (type === 'reply') {
+      return RESPONSE + data.replyId + this.stringify(data.data)
+    } else if (type === 'event') {
+      return EVENT + eventId(data.event) + this.stringify(data.data)
+    } else if (type === 'ping') {
+      return PING + new Date().valueOf().toString()
+    } else if (type === 'pong') {
+      return PONG + data.toString()
+    } else if (type === 'message') {
+      return DATA_START + this.replicator.encode(data) + DATA_END
+    } else {
+      throw new Error('Invalid type')
     }
-  } else {
-    throw new ServerError({ code: 'WS_INVALID_PAYLOAD' })
   }
 }
 
-function getPayload (data, type = 'message') {
-  if (type === 'reply') {
-    return RESPONSE + data.replyId + getPayload(data.data)
-  } else if (type === 'event') {
-    return EVENT + eventId(data.event) + getPayload(data.data)
-  } else if (type === 'ping') {
-    return PING + new Date().valueOf().toString()
-  } else if (type === 'pong') {
-    return PONG + data.toString()
-  } else if (type === 'message') {
-    return DATA_START + replicator.encode(data) + DATA_END
-  } else {
-    return ''
-  }
-}
-
-class WSClient extends basic {
-  constructor (session, request) {
-    super(session, request)
+class WSClient extends BasicProtocol.WSClient {
+  constructor (socket, request, parser) {
+    super(socket, request, { parser })
     this._send('\x00\x02', 0, 0)
   }
 
   incomingPacket (payload, isBinary) {
     if (isBinary) {
-      this.emit('binary', payload)
+      super.emit('binary', payload)
     } else {
-      const incoming = parsePayload(payload.toString())
+      const incoming = this.parser.parse(payload.toString(), isBinary)
       if (incoming.type === 'event') {
         incoming.reply = (data) => {
           if (incoming.reply_id) {
-            this._send(getPayload({ replyId: incoming.reply_id, data }, 'reply'))
+            this._send(this.parser.stringify({ replyId: incoming.reply_id, data }, 'reply'))
           }
         }
-        this.emit(incoming.name, incoming)
+        super.emit(incoming.name, incoming)
       } else {
         if (incoming.type === 'ping') {
-          this._send(getPayload(incoming.data, 'pong'))
+          this._send(this.parser.stringify(incoming.data, 'pong'))
         }
-        this.emit(incoming.type, incoming.data)
+        super.emit(incoming.type, incoming.data)
       }
     }
   }
 
   ping () {
-    this._send(getPayload(null, 'ping'))
+    this._send(this.parser.stringify(null, 'ping'))
   }
 
   on (event, listener) {
@@ -93,6 +97,14 @@ class WSClient extends basic {
       super.on(event, listener)
     } else {
       super.on(eventId(event), listener)
+    }
+  }
+
+  once (event, listener) {
+    if (this.internalEvents.includes(event)) {
+      super.once(event, listener)
+    } else {
+      super.once(eventId(event), listener)
     }
   }
 
@@ -128,29 +140,24 @@ class WSClient extends basic {
     }
   }
 
-  send (event, data, compress = true) {
-    return this._send(getPayload({ event, data }, 'event'), false, compress)
+  emit (event, data, compress = true) {
+    return this._send(this.parser.stringify({ event, data }, 'event'), false, compress)
   }
 
-  sendMessage (data, compress = true) {
-    return this._send(getPayload(data), false, compress)
-  }
-
-  sendBinary (data, compress = true) {
-    return this._send(data, true, compress)
-  }
-
-  broadcast (channel, event, data, compress = true) {
-    this._publish(channel, getPayload({ event, data }, 'event'), false, compress)
-  }
-
-  broadcastMessage (channel, data, compress = true) {
-    this._publish(channel, getPayload(data), false, compress)
-  }
-
-  broadcastBinary (channel, data, compress = true) {
-    this._publish(channel, data, true, compress)
+  emitToChannel (channel, event, data, compress = true) {
+    this._publish(channel, this.parser.stringify({ event, data }, 'event'), false, compress)
   }
 }
 
-module.exports = WSClient
+class WSProtocol extends BasicProtocol {
+  constructor (options = {}) {
+    super()
+    this.parser = new Parser(options.parserOptions)
+  }
+
+  newClient (socket, request) {
+    return new WSClient(socket, request, this.parser)
+  }
+}
+
+module.exports = WSProtocol

@@ -17,7 +17,7 @@ app.listen(host, port, () => {
 
 ## Directory Structure
 
-> `@` is your execute dir
+> `@` is your execute dir (`process.cwd()`)
 
 - `@/stctic/*` => Static files
 - `@/template/*` => Template files
@@ -150,6 +150,29 @@ app.ws(
     protocol: 'fast-ws',
     // Custom protocol object (must extends `fast-ws/server/ws-protocol/basic`)
     protocol: Object,
+
+    /*== Protocol Options : basic ==*/
+    protocolOptions: {
+      // Parse message (default)
+      parser: {
+        parse: (payload) => payload,
+        stringify: (payload) => payload
+      },
+      // Parse message using JSON
+      parser: JSON,
+      // Or you can create wour own parser
+    },
+
+    /*== Protocol Options : fast-ws ==*/
+    protocolOptions: {
+      // parser options, serialize to BSON
+      parserOptions: {
+        serialize: (val) => BSON.serialize(val, false, true, false),
+        deserialize: BSON.deserialize
+      },
+      // Detail see: https://github.com/inikulin/replicator#readme
+    },
+
     /*== uWS options ==*/
     // Compression
     compression: 'default', // equal shared

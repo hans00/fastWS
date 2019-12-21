@@ -10,21 +10,21 @@ module.exports = function ({ HTTP_PORT }) {
       try {
         {
           const data = { 'Hello': 'World' }
-          const res = await ws.send('echo', data, true)
+          const res = await ws.emit('echo', data, true)
           if (JSON.stringify(res) !== JSON.stringify(data)) {
             throw new Error('Response data mismatch (1)')
           }
         }
         {
           const data = "Test string"
-          const res = await ws.send('echo', data, true)
+          const res = await ws.emit('echo', data, true)
           if (JSON.stringify(res) !== JSON.stringify(data)) {
             throw new Error('Response data mismatch (2)')
           }
         }
         {
           const data = 123
-          const res = await ws.send('echo', data, true)
+          const res = await ws.emit('echo', data, true)
           if (JSON.stringify(res) !== JSON.stringify(data)) {
             throw new Error('Response data mismatch (3)')
           }

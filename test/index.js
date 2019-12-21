@@ -28,10 +28,17 @@ async function tests() {
     if (file.endsWith('.js') && file[0] !== '.') {
       const caseName = file.slice(0, -3).replace(/[-_]/ig, ' ')
       try {
-        setTimeout(() => {
-          throw new Error(`Timeout: ${caseName}`)
-        }, TIMEOUT)
-        await require(`./cases/${file}`)(config)
+        await new Promise(async (resolve, reject) => {
+          setTimeout(() => {
+            reject('Timeout')
+          }, TIMEOUT)
+          try {
+            await require(`./cases/${file}`)(config)
+            resolve()
+          } catch (error) {
+            reject(error)
+          }
+        })
         console.log(success(`[success] ${caseName}`))
       } catch (e) {
         console.log(warning(`[failed] ${caseName}`))

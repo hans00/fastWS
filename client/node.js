@@ -6,7 +6,7 @@ class WSClient extends Base {
     super(options)
     this.client = new WebSocket(endpoint, 'fast-ws', options)
     this.client.on('error', error => {
-      this.emit('error', error)
+      super.emit('error', error)
     })
     this.client.on('open', () => {
       this.connectState = 1
@@ -17,28 +17,28 @@ class WSClient extends Base {
     this.client.on('close', () => {
       this.connectState = -1
       clearInterval(this._heartbeat)
-      this.emit('disconnect')
+      super.emit('disconnect')
     })
     this.client.on('message', (message) => {
       if (this.connectState !== 2) {
         if (message === '\x00\x02') {
           this.connectState = 2
-          this.emit('connect')
+          super.emit('connect')
         } else {
-          this.emit('error', new Error('Client version mismatch.'))
+          super.emit('error', new Error('Client version mismatch.'))
         }
       } else {
         this.incomingPacket(message)
       }
     })
     this.client.on('ping', () => {
-      this.emit('ping')
+      super.emit('ping')
     })
     this.client.on('pong', (data) => {
       if (data.length) {
-        this.emit('pong', new Date().valueOf() - data.toString())
+        super.emit('pong', new Date().valueOf() - data.toString())
       } else {
-        this.emit('pong')
+        super.emit('pong')
       }
     })
   }

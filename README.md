@@ -69,11 +69,15 @@ app.listen(3000, () => {
 # Feature
 
 - [x] Simple to use
-- [x] Auto serve static file and cache.
-- [x] WebSocket reply event
-- [x] Auto reload SSL when signal(1)
-- [x] Auto graceful shutdown
-- [x] Auto parse message
-- [x] URL params to object
-- [x] Can use built-in template engine or custom template engine
+- [x] Serve static files
+- [x] Simple WebSocket Framework
+- [x] Reload SSL when system signal HUP(1)
+- [x] Graceful shutdown
+- [x] Parse body data
+- [x] URL params parser
+- [x] Support for template engine
 - [x] Response from pipe stream
+- [x] Support cache
+- [ ] Support for Socket.io
+- [ ] Support for TypeScript
+- [ ] Sub-route likes Express.js

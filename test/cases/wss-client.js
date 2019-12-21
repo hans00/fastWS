@@ -7,9 +7,9 @@ module.exports = function ({ HTTPS_PORT }) {
     ws.on('error', reject)
 
     ws.on('connect', () => {
-      ws.send('join', 'test')
-      ws.send('broadcast', { room: 'test', message: 'test-message' })
-      ws.on('someone said', (data) => {
+      ws.emit('join', 'test')
+      ws.send('test-message')
+      ws.on('someone said', data => {
         if (data === 'test-message') {
           resolve()
         } else {

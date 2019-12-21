@@ -178,7 +178,13 @@ class Response extends Writable {
         }
       }
       Object.keys(this._headers).forEach(key => {
-        this.response.writeHeader(key, this._headers[key])
+        if (this._headers[key] instanceof Array) {
+          this._headers[key].forEach(data => {
+            this.response.writeHeader(key, data)
+          })
+        } else {
+          this.response.writeHeader(key, this._headers[key])
+        }
       })
     }
   }

@@ -1,8 +1,6 @@
 const Replicator = require('replicator')
 const { EventEmitter } = require('events')
 
-const replicator = new Replicator()
-
 const PING = '\x0F'
 const PONG = '\x0E'
 const DATA_START = '\x01'
@@ -17,6 +15,7 @@ class WSClientBase extends EventEmitter {
   constructor (options = {}) {
     super()
     this.options = options
+    this.replicator = new Replicator(options.parserOptions)
     this.connectState = 0
     this.internalEvents = ['open', 'close', 'disconnect', 'connect', 'ping', 'pong', 'message', 'binary', 'error']
     this.client = null
@@ -24,26 +23,26 @@ class WSClientBase extends EventEmitter {
     this._event_return = {}
   }
 
-  static getPayload (data, type = 'message') {
+  getPayload (data, type = 'message') {
     if (type === 'event') {
       if (data.replyId === undefined || data.replyId === null) {
         data.replyId = ''
       }
-      return EVENT + eventId(data.event) + IDLE + data.replyId + WSClientBase.getPayload(data.data)
+      return EVENT + eventId(data.event) + IDLE + data.replyId + this.getPayload(data.data)
     } else if (type === 'ping') {
       return PING + new Date().valueOf().toString()
     } else if (type === 'pong') {
       return PONG + data.toString()
     } else if (type === 'message') {
-      return DATA_START + replicator.encode(data) + DATA_END
+      return DATA_START + this.replicator.encode(data) + DATA_END
     } else {
       return ''
     }
   }
 
-  static parsePayload (payload) {
+  parsePayload (payload) {
     if (payload[0] === DATA_START && payload[payload.length - 1] === DATA_END) {
-      return { type: 'message', data: replicator.decode(payload.slice(1, -1)) }
+      return { type: 'message', data: this.replicator.decode(payload.slice(1, -1)) }
     } else if (payload[0] === PING) {
       return { type: 'ping', data: Number(payload.slice(1)) }
     } else if (payload[0] === PONG) {
@@ -52,11 +51,11 @@ class WSClientBase extends EventEmitter {
       const splitIndex = payload.indexOf(DATA_START)
       const id = Number(payload.slice(1, splitIndex))
       const data = payload.slice(splitIndex)
-      return { type: 'returnData', id, data: WSClientBase.parsePayload(data).data }
+      return { type: 'returnData', id, data: this.parsePayload(data).data }
     } else if (payload[0] === EVENT) {
       const splitIndex = payload.indexOf(DATA_START)
       const data = payload.slice(splitIndex)
-      return { type: 'event', event: payload.slice(1, splitIndex), data: WSClientBase.parsePayload(data).data }
+      return { type: 'event', event: payload.slice(1, splitIndex), data: this.parsePayload(data).data }
     }
   }
 
@@ -66,17 +65,17 @@ class WSClientBase extends EventEmitter {
 
   incomingPacket (payload) {
     if (payload.constructor.name === 'ArrayBuffer' || payload.constructor.name === 'Blob') {
-      this.emit('binary', payload)
+      super.emit('binary', payload)
     } else {
-      const incoming = WSClientBase.parsePayload(payload)
+      const incoming = this.parsePayload(payload)
       if (incoming.type === 'event') {
-        this.emit(incoming.event, incoming.data)
+        super.emit(incoming.event, incoming.data)
       } else if (incoming.type === 'returnData') {
         if (this._event_return[incoming.id]) {
           this._event_return[incoming.id](incoming)
         }
       } else {
-        this.emit(incoming.type, incoming.data)
+        super.emit(incoming.type, incoming.data)
       }
     }
   }
@@ -125,7 +124,10 @@ class WSClientBase extends EventEmitter {
     this.client.close()
   }
 
-  send (event, data, waitReturn = false) {
+  emit (event, data, waitReturn = false) {
+    if (this.internalEvents.includes(event)) {
+      return super.emit(event, data)
+    }
     return new Promise((resolve, reject) => {
       let replyId
       if (waitReturn) {
@@ -134,7 +136,7 @@ class WSClientBase extends EventEmitter {
           this._return_id_counter = 0
         }
       }
-      this.client.send(WSClientBase.getPayload({ event, data, replyId }, 'event'))
+      this.client.send(this.getPayload({ event, data, replyId }, 'event'))
       if (waitReturn) {
         const timeOut = setTimeout(() => {
           reject(new Error('Response timeout.'))
@@ -152,8 +154,8 @@ class WSClientBase extends EventEmitter {
     })
   }
 
-  sendMessage (data) {
-    this.client.send(WSClientBase.getPayload(data))
+  send (data) {
+    this.client.send(this.getPayload(data))
   }
 
   sendBinary (data) {

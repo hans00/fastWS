@@ -11,6 +11,8 @@ const ws = new Client(
     pingInterval: 30000, // Default (ms)
     // Reply Timeout (Event reply)
     replyTimeout: 5000, // Default (ms)
+    // parser options (same as server)
+    parserOptions: {},
     ...// Others options for package 'ws'
   }
 )
@@ -30,11 +32,11 @@ const ws = new Client(
 
 > Remove all listeners by event name
 
-### `send(event, data)`
+### `emit(event, data)`
 
-> Send custom event to server
+> Emit custom event to server
 
-### `sendMessage(data)`
+### `send(data)`
 
 > Send message to server
 

@@ -45,13 +45,13 @@
 
 > Send binary to client
 
-### `broadcast(channel, message[, compress=true])`
+### `sendToChannel(channel, message[, compress=true])`
 
-> Broadcast message to channel
+> Send message to channel
 
-### `broadcastBinary(data[, compress=true])`
+### `sendBinaryToChannel(data[, compress=true])`
 
-> Broadcast binary to channel
+> Send binary to channel
 
 ### `close()`
 
@@ -76,29 +76,13 @@ ws.on('message', (message) => {
 })
 ```
 
-### `send(event, data[, compress=true])`
+### `emit(event, data[, compress=true])`
 
-> Send event to client
+> Emit event to client
 
-### `sendMessage(data[, compress=true])`
+### `emitToChannel(channel, event, data[, compress=true])`
 
-> Send message to client
-
-### `sendBinary(data[, compress=true])`
-
-> Send binary to client
-
-### `broadcast(channel, event, data[, compress=true])`
-
-> Broadcast event to channel
-
-### `broadcastMessage(channel, data[, compress=true])`
-
-> Broadcast message to channel
-
-### `broadcastBinary(channel, data[, compress=true])`
-
-> Broadcast binary to channel
+> Emit event to channel
 
 ### `WSEvent`
 

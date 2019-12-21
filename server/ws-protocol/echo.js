@@ -1,12 +1,13 @@
-const basic = require('./basic')
+const BasicProtocol = require('./basic')
 
-class WSClient extends basic {
-  constructor (session, request) {
-    super(session, request)
-    this.on('message', ({ data }) => {
-      this.send(data)
+class WSProtocol extends BasicProtocol {
+  newClient (socket, request) {
+    const client = new BasicProtocol.WSClient(socket, request)
+    client.on('message', data => {
+      client.send(data)
     })
+    return client
   }
 }
 
-module.exports = WSClient
+module.exports = WSProtocol
