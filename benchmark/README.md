@@ -107,8 +107,6 @@ Transfer/sec:      2.02MB
 
 ## WS Echo
 
-[Tool](https://github.com/hashrocket/websocket-shootout)
-
 ```sh
 ./bench-ws.js --duration 10 --ramp-up 100 --counts 10000 --threads 2 --timeout 3000 ws://$IP:3000/echo
 ```
