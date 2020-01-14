@@ -12,7 +12,7 @@ class WSClient extends Base {
       this.connectState = 1
       this._heartbeat = setInterval(() => {
         this.ping()
-      }, options.pingInterval || 30000)
+      }, this.options.pingInterval)
     })
     this.client.on('close', () => {
       this.connectState = -1
@@ -44,7 +44,11 @@ class WSClient extends Base {
   }
 
   ping () {
+    const autoTerminate = setTimeout(() => this.client.terminate(), this.options.pingTimeout)
     this.client.ping(new Date().valueOf())
+    super.once('pong', () => {
+      clearTimeout(autoTerminate)
+    })
   }
 }
 

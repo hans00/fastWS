@@ -12,7 +12,7 @@ class WSClient extends Base {
       super.emit('open')
       this._heartbeat = setInterval(() => {
         this.ping()
-      }, options.pingInterval || 30000)
+      }, this.options.pingInterval)
     }
     this.client.onclose = () => {
       super.emit('close')
@@ -35,7 +35,11 @@ class WSClient extends Base {
   }
 
   ping () {
+    const autoTerminate = setTimeout(() => this.client.close(), this.options.pingTimeout)
     this.client.send(Base.getPayload(null, 'ping'))
+    super.once('pong', () => {
+      clearTimeout(autoTerminate)
+    })
   }
 }
 

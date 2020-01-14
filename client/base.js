@@ -14,8 +14,13 @@ const eventId = (str) => str.split('').reduce((sum, char, index) => sum + char.c
 class WSClientBase extends EventEmitter {
   constructor (options = {}) {
     super()
-    this.options = options
-    this.replicator = new Replicator(options.parserOptions)
+    this.options = {
+      parserOptions: options.parserOptions,
+      pingInterval: options.pingInterval || 30000,
+      pingTimeout: options.pingTimeout || 1000,
+      replyTimeout: options.replyTimeout || 5000
+    }
+    this.replicator = new Replicator(this.options.parserOptions)
     this.connectState = 0
     this.internalEvents = ['open', 'close', 'disconnect', 'connect', 'ping', 'pong', 'message', 'binary', 'error']
     this.client = null
@@ -141,7 +146,7 @@ class WSClientBase extends EventEmitter {
         const timeOut = setTimeout(() => {
           reject(new Error('Response timeout.'))
           delete this._event_return[replyId]
-        }, this.options.replyTimeout || 5000)
+        }, this.options.replyTimeout)
         const getData = (payload) => {
           clearTimeout(timeOut)
           delete this._event_return[replyId]
