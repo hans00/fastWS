@@ -75,7 +75,7 @@ class Response extends Writable {
   }
 
   cork (callback) {
-    this.response.experimental_cork(callback)
+    this.response.cork(callback)
   }
 
   status (code) {
