@@ -51,7 +51,7 @@ class Request {
       const contentLength = Number(_contentLength)
       let data = null; let bodyLength = 0
       this.response.onData((chunk, isLast) => {
-        data = data !== null ? Buffer.concat([data, Buffer.from(chunk)]) : Buffer.from(chunk)
+        data = data !== null ? Buffer.concat([data, Buffer.from(chunk)]) : Buffer.concat([Buffer.from(chunk)])
         bodyLength += chunk.byteLength
         if (bodyLength >= contentLength) {
           try {
