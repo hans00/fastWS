@@ -320,6 +320,12 @@ class fastWS {
       drain: (ws) => {
         ws.client.drain()
       },
+      ping: (ws) => {
+        ws.client.onPing()
+      },
+      pong: (ws) => {
+        ws.client.onPong()
+      },
       close: (ws, code, message) => {
         ws.client.onClose(code, message)
         setImmediate(() => delete ws.client)
