@@ -52,6 +52,10 @@ module.exports = function (app) {
     })
   })
 
+  app.get('/address', (req, res) => {
+    res.end(req.remoteAddress)
+  })
+
   app.serve('/*')
 
   return app
