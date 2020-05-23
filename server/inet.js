@@ -13,7 +13,7 @@ exports.ntop = (buf) => {
       }
       return str
     }, '') // to full v6 string
-    .replace(/(0000|:0000)+/, ':') // collapse multiple zeroes
-    .replace(/0+([\dabcdef]+)/g, '$1') // drop leading zeroes
+      .replace(/(0000|:0000)+/, ':') // collapse multiple zeroes
+      .replace(/0+([\dabcdef]+)/g, '$1') // drop leading zeroes
   }
 }
