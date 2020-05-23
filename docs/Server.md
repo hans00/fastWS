@@ -167,8 +167,8 @@ app.ws(
     protocolOptions: {
       // parser options, serialize to BSON
       parserOptions: {
-        serialize: (val) => BSON.serialize(val, false, true, false),
-        deserialize: BSON.deserialize
+        serialize: val => BSON.serialize(val, false, true, false).toString('ascii'),
+        deserialize: bufStr => BSON.deserialize(Buffer.from(bufStr, 'ascii'))
       },
       // Detail see: https://github.com/inikulin/replicator#readme
     },
