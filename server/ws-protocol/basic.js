@@ -47,23 +47,23 @@ class WSClient extends EventEmitter {
     return inet.ntop(Buffer.from(this.socket.getRemoteAddress()))
   }
 
-  drain () {
+  onDrain () {
     if (this.socket.getBufferedAmount() === 0) {
       super.emit('drained')
     }
   }
 
-  _publish (topic, data, isBinary, compress) {
+  doPublish (topic, data, isBinary, compress) {
     this.socket.publish(topic, data, isBinary, compress)
   }
 
-  async _send (data, isBinary, compress) {
+  async doSend (data, isBinary, compress) {
     if (this.socket.getBufferedAmount() === 0) {
       return this.socket.send(data, isBinary, compress)
     } else {
       await new Promise((resolve) => {
         super.once('drained', async () => {
-          await this._send(data, isBinary, compress)
+          await this.doSend(data, isBinary, compress)
           resolve()
         })
       })
@@ -79,19 +79,19 @@ class WSClient extends EventEmitter {
   }
 
   send (data, compress = true) {
-    return this._send(this.parser.stringify(data), false, compress)
+    return this.doSend(this.parser.stringify(data), false, compress)
   }
 
   sendBinary (data, compress = true) {
-    return this._send(data, true, compress)
+    return this.doSend(data, true, compress)
   }
 
   sendToChannel (channel, data, compress = true) {
-    this._publish(channel, this.parser.stringify(data), false, compress)
+    this.doPublish(channel, this.parser.stringify(data), false, compress)
   }
 
   sendBinaryToChannel (channel, data, compress = true) {
-    this._publish(channel, data, true, compress)
+    this.doPublish(channel, data, true, compress)
   }
 
   close () {

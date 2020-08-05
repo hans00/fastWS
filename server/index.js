@@ -318,7 +318,7 @@ class fastWS {
         }
       },
       drain: (ws) => {
-        ws.client.drain()
+        ws.client.onDrain()
       },
       ping: (ws) => {
         ws.client.onPing()

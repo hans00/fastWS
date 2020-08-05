@@ -64,7 +64,7 @@ class Parser {
 class WSClient extends BasicProtocol.WSClient {
   constructor (socket, request, parser) {
     super(socket, request, { parser })
-    this._send('\x00\x02', 0, 0)
+    this.doSend('\x00\x02', 0, 0)
   }
 
   incomingPacket (payload, isBinary) {
@@ -75,13 +75,13 @@ class WSClient extends BasicProtocol.WSClient {
       if (incoming.type === 'event') {
         incoming.reply = (data) => {
           if (incoming.reply_id) {
-            this._send(this.parser.stringify({ replyId: incoming.reply_id, data }, 'reply'))
+            this.doSend(this.parser.stringify({ replyId: incoming.reply_id, data }, 'reply'))
           }
         }
         super.emit(incoming.name, incoming)
       } else {
         if (incoming.type === 'ping') {
-          this._send(this.parser.stringify(incoming.data, 'pong'))
+          this.doSend(this.parser.stringify(incoming.data, 'pong'))
         }
         super.emit(incoming.type, incoming.data)
       }
@@ -89,7 +89,7 @@ class WSClient extends BasicProtocol.WSClient {
   }
 
   ping () {
-    this._send(this.parser.stringify(null, 'ping'))
+    this.doSend(this.parser.stringify(null, 'ping'))
   }
 
   on (event, listener) {
@@ -141,11 +141,11 @@ class WSClient extends BasicProtocol.WSClient {
   }
 
   emit (event, data, compress = true) {
-    return this._send(this.parser.stringify({ event, data }, 'event'), false, compress)
+    return this.doSend(this.parser.stringify({ event, data }, 'event'), false, compress)
   }
 
   emitToChannel (channel, event, data, compress = true) {
-    this._publish(channel, this.parser.stringify({ event, data }, 'event'), false, compress)
+    this.doPublish(channel, this.parser.stringify({ event, data }, 'event'), false, compress)
   }
 }
 
