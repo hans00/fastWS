@@ -180,7 +180,6 @@ class Connection {
     }
     return this.response.upgrade(data, key, protocol, extension, this.wsContext)
   }
-
 }
 
 module.exports = Connection
