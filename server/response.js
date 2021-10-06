@@ -55,27 +55,21 @@ const httpStatusCode = {
 }
 
 class Response extends Writable {
-  constructor ({ cache, templateRender }, request, response) {
+  constructor (connection) {
     super()
-    this.request = request
-    this.response = response
+    this.connection = connection
     this._status = 200
     this._headers = {}
-    this._cache = cache
-    this._templateRender = templateRender
     this.headersSent = false
     this.on('pipe', (src) => this.pipeFrom(src))
     this.corkPipe = false
-    this.response.onAborted(() => {
+    this.connection.onAborted(() => {
       this.destroy()
-      if (this.response.abortData) {
-        this.response.abortData()
-      }
     })
   }
 
   cork (callback) {
-    this.response.cork(callback)
+    this.connection.cork(callback)
   }
 
   status (code) {
@@ -89,7 +83,7 @@ class Response extends Writable {
     }
     const fullPath = path.resolve(path.join('static', filePath))
     const isInStatic = fullPath.startsWith(path.resolve('static'))
-    const checkModifyTime = this.request.getHeader('if-modified-since')
+    const checkModifyTime = this.connection.headers['if-modified-since']
     if (isInStatic && fs.existsSync(fullPath) && !fullPath.match(/\/\./)) {
       // cache control
       let cacheControl
@@ -107,8 +101,8 @@ class Response extends Writable {
         }).filter(x => x).join(', ')
       }
       // if cache found file, send file in cache
-      if (this._cache.has(fullPath)) {
-        const file = this._cache.get(fullPath)
+      if (this.connection.cache_provider.has(fullPath)) {
+        const file = this.connection.cache_provider.get(fullPath)
         if (checkModifyTime && checkModifyTime === file.mtime) {
           return this.status(304).end()
         } else {
@@ -120,7 +114,7 @@ class Response extends Writable {
         const contentType = mime.lookup(fullPath)
         const mtime = new Date(fs.statSync(fullPath).mtime).toGMTString()
         const content = toArrayBuffer(fs.readFileSync(fullPath))
-        this._cache.set(fullPath, { content, contentType, mtime })
+        this.connection.cache_provider.set(fullPath, { content, contentType, mtime })
         if (checkModifyTime && checkModifyTime === mtime) {
           return this.status(304).end()
         } else {
@@ -135,21 +129,21 @@ class Response extends Writable {
   }
 
   renderFile (filePath, data) {
-    if (!this._templateRender) {
+    if (!this.connection.renderer) {
       throw new ServerError({ code: 'SERVER_ERROR', message: 'The render function is disabled.', httpCode: 500 })
     }
     const fullPath = path.resolve(path.join('template', filePath))
     const isInTemplate = fullPath.startsWith(path.resolve('template'))
     if (isInTemplate && fs.existsSync(fullPath)) {
       // if cache found file, send file in cache
-      if (this._cache.has(fullPath)) {
-        const file = this._cache.get(fullPath)
-        this.end(this._templateRender(file.content, data), file.contentType)
+      if (this.connection.cache_provider.has(fullPath)) {
+        const file = this.connection.cache_provider.get(fullPath)
+        this.end(this.connection.renderer(file.content, data), file.contentType)
       } else {
         const contentType = mime.lookup(fullPath)
         const content = fs.readFileSync(fullPath).toString()
-        this._cache.set(fullPath, { content, contentType })
-        this.end(this._templateRender(content, data), contentType)
+        this.connection.cache_provider.set(fullPath, { content, contentType })
+        this.end(this.connection.renderer(content, data), contentType)
       }
     } else {
       throw new ServerError({ code: 'SERVER_NOT_FOUND', message: 'The template file not found.', httpCode: 404 })
@@ -157,10 +151,10 @@ class Response extends Writable {
   }
 
   render (content, data) {
-    if (!this._templateRender) {
+    if (!this.connection.renderer) {
       throw new ServerError({ code: 'SERVER_ERROR', message: 'The render function is disabled.', httpCode: 500 })
     } else {
-      this.send(this._templateRender(content, data))
+      this.send(this.connection.renderer(content, data))
     }
   }
 
@@ -172,18 +166,18 @@ class Response extends Writable {
       this.headersSent = true
       if (this._status !== 200) {
         if (httpStatusCode[this._status]) {
-          this.response.writeStatus(this._status + ' ' + httpStatusCode[this._status])
+          this.connection.writeStatus(this._status + ' ' + httpStatusCode[this._status])
         } else {
-          this.response.writeStatus(this._status.toString())
+          this.connection.writeStatus(this._status.toString())
         }
       }
       Object.keys(this._headers).forEach(key => {
         if (this._headers[key] instanceof Array) {
           this._headers[key].forEach(data => {
-            this.response.writeHeader(key, data)
+            this.connection.writeHeader(key, data)
           })
         } else {
-          this.response.writeHeader(key, this._headers[key])
+          this.connection.writeHeader(key, this._headers[key])
         }
       })
     }
@@ -194,10 +188,10 @@ class Response extends Writable {
       return
     }
     const data = toArrayBuffer(chunk)
-    const ok = this.response.write(data)
+    const ok = this.connection.writeBody(data)
     if (!ok) {
-      this.response.onWritable((offset) => {
-        this._write(data.slice(offset - this.response.getWriteOffset()), encoding, next)
+      this.connection.onWritable((offset) => {
+        this._write(data.slice(offset - this.connection.getWriteOffset()), encoding, next)
         this.emit('drain')
       })
     } else {
@@ -213,7 +207,7 @@ class Response extends Writable {
       this.emit('error', error)
     })
     readable.on('end', () => {
-      this.response.end('')
+      this.connection.end('')
       super.end()
     })
     // In RFC these status code must not have body
@@ -243,7 +237,7 @@ class Response extends Writable {
       }
       this.cork(() => {
         this.writeHead()
-        this.response.end(data)
+        this.connection.end(data)
         super.end()
       })
     } else {

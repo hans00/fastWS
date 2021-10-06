@@ -19,7 +19,7 @@ module.exports = function ({ HTTPS_PORT }) {
     })
 
     ws.on('message', message => {
-      if (message !== 'Hello World') {
+      if (message.toString() !== 'Hello World') {
         reject('Response data mismatch')
       } else {
         resolve()

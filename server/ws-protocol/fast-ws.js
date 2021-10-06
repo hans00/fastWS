@@ -62,8 +62,12 @@ class Parser {
 }
 
 class WSClient extends BasicProtocol.WSClient {
-  constructor (socket, request, parser) {
-    super(socket, request, { parser })
+  constructor (socket, parser) {
+    super(socket, { parser })
+  }
+
+  onOpen (socket) {
+    super.onOpen(socket)
     this.doSend('\x00\x02', 0, 0)
   }
 
@@ -155,8 +159,8 @@ class WSProtocol extends BasicProtocol {
     this.parser = new Parser(options.parserOptions)
   }
 
-  newClient (socket, request) {
-    return new WSClient(socket, request, this.parser)
+  newClient (socket) {
+    return new WSClient(socket, this.parser)
   }
 }
 

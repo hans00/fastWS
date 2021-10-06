@@ -2,7 +2,7 @@ const fastWS = require('../../server')
 const app = require('./app')
 const fs = require('fs')
 const mkcert = require('mkcert')
-const tempfile = require('tempfile')
+const tmp = require('tmp')
 
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
 
@@ -21,8 +21,8 @@ module.exports = function (port) {
       caKey: ca.key,
       caCert: ca.cert
     })
-    const key_file_name = tempfile('.pem')
-    const cert_file_name = tempfile('.pem')
+    const key_file_name = tmp.tmpNameSync({ postfix: '.pem' })
+    const cert_file_name = tmp.tmpNameSync({ postfix: '.pem' })
     fs.writeFileSync(key_file_name, cert.key)
     fs.writeFileSync(cert_file_name, cert.cert)
     try {

@@ -9,8 +9,8 @@ module.exports = function (app) {
       reply(data)
     })
     ws.on('join', ({ data: channel }) => {
-      ws.join(channel.toString())
-      ws.channel = channel.toString()
+      ws.join(channel)
+      ws.channel = channel
     })
     ws.on('message', message => {
       if (ws.channel) {

@@ -1,5 +1,4 @@
 const { EventEmitter } = require('events')
-const inet = require('../inet')
 const ServerError = require('../errors')
 
 const nullParser = {
@@ -12,15 +11,38 @@ const nullParser = {
 }
 
 class WSClient extends EventEmitter {
-  constructor (socket, request, { parser = nullParser } = {}) {
+  constructor (connection, { parser = nullParser } = {}) {
     super()
-    this.socket = socket
-    this.requestHeaders = {}
-    request.forEach((k, v) => {
-      this.requestHeaders[k] = v
-    })
+    this.connection = connection
+    this.socket = null
     this.internalEvents = ['message', 'binary', 'drained', 'close', 'ping', 'pong']
     this.parser = parser
+  }
+
+  upgrade (upgradeProtocol) {
+    if (this.socket) throw new Error('WS_IS_UPGRADED')
+    if (upgradeProtocol) {
+      if (!this.connection.headers['sec-websocket-protocol'].includes(upgradeProtocol)) return
+      this.connection.upgrade(
+        {
+          client: this,
+        },
+        this.connection.headers['sec-websocket-key'],
+        upgradeProtocol,
+        this.connection.headers['sec-websocket-extensions'],
+        this.nativeContext,
+      )
+    } else {
+      this.connection.upgrade(
+        {
+          client: this,
+        },
+        this.connection.headers['sec-websocket-key'],
+        this.connection.headers['sec-websocket-protocol'],
+        this.connection.headers['sec-websocket-extensions'],
+        this.nativeContext,
+      )
+    }
   }
 
   incomingPacket (payload, isBinary) {
@@ -29,6 +51,11 @@ class WSClient extends EventEmitter {
     } else {
       super.emit('message', this.parser.parse(payload))
     }
+  }
+
+  onOpen (socket) {
+    this.socket = socket
+    super.emit('open')
   }
 
   onClose (code, message) {
@@ -44,7 +71,7 @@ class WSClient extends EventEmitter {
   }
 
   get remoteAddress () {
-    return inet.ntop(Buffer.from(this.socket.getRemoteAddress()))
+    return this.connection.remoteAddress
   }
 
   onDrain () {
@@ -54,10 +81,12 @@ class WSClient extends EventEmitter {
   }
 
   doPublish (topic, data, isBinary, compress) {
+    if (!this.socket) throw new Error('WS_NOT_UPGRADED')
     this.socket.publish(topic, data, isBinary, compress)
   }
 
   async doSend (data, isBinary, compress) {
+    if (!this.socket) throw new Error('WS_NOT_UPGRADED')
     if (this.socket.getBufferedAmount() === 0) {
       return this.socket.send(data, isBinary, compress)
     } else {
@@ -71,14 +100,17 @@ class WSClient extends EventEmitter {
   }
 
   join (channel) {
+    if (!this.socket) throw new Error('WS_NOT_UPGRADED')
     return this.socket.subscribe(channel)
   }
 
   quit (channel) {
+    if (!this.socket) throw new Error('WS_NOT_UPGRADED')
     return this.socket.unsubscribe(channel)
   }
 
   send (data, compress = true) {
+    if (!this.socket) throw new Error('WS_NOT_UPGRADED')
     return this.doSend(this.parser.stringify(data), false, compress)
   }
 
@@ -95,6 +127,7 @@ class WSClient extends EventEmitter {
   }
 
   close () {
+    if (!this.socket) throw new Error('WS_NOT_UPGRADED')
     return this.socket.close()
   }
 }
@@ -118,8 +151,8 @@ class WSProtocol {
     this.options = options
   }
 
-  newClient (socket, request) {
-    return new WSClient(socket, request, this.options)
+  newClient (socket) {
+    return new WSClient(socket, this.options)
   }
 }
 

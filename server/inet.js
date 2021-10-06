@@ -17,3 +17,15 @@ exports.ntop = (buf) => {
       .replace(/0+([\dabcdef]+)/g, '$1') // drop leading zeroes
   }
 }
+
+exports.toFraindlyIP = (rawIpAddress) => {
+  if (rawIpAddress.includes('.')) {
+    return rawIpAddress
+  } else if (rawIpAddress.startsWith('0000:0000:0000:0000:0000:ffff:')) {
+    return Buffer.from(rawIpAddress.split(/:/).slice(-2).join(''), 'hex').join('.')
+  } else {
+    return rawIpAddress
+      .replace(/(0000|:0000)+/, ':') // collapse multiple zeroes
+      .replace(/0+([\dabcdef]+)/g, '$1') // drop leading zeroes
+  }
+}

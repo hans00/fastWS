@@ -19,7 +19,7 @@ async function tests() {
     await require('./prepare')(config)
   } catch (e) {
     console.log(warning('Prepare Failed!'))
-    console.log(error(e))
+    console.log(error(e.stack))
     process.exit(1)
   }
   let pass = true

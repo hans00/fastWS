@@ -19,7 +19,8 @@ class WSClient extends Base {
       clearInterval(this._heartbeat)
       super.emit('disconnect')
     })
-    this.client.on('message', (message) => {
+    this.client.on('message', (message, isBinary) => {
+      if (!isBinary) message = message.toString()
       if (this.connectState !== 2) {
         if (message === '\x00\x02') {
           this.connectState = 2

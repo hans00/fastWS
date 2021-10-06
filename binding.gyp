@@ -15,6 +15,7 @@
       'src/uWebSockets.js/uWebSockets/src',
     ],
     'defines': [
+      'UWS_WITH_PROXY',
       'LIBUS_USE_LIBUV',
       'LIBUS_USE_OPENSSL'
     ],
@@ -202,6 +203,7 @@
         '<!@(ls -1 src/uWebSockets.js/uWebSockets/uSockets/src/eventing/*.c)',
         '<!@(ls -1 src/uWebSockets.js/uWebSockets/uSockets/src/crypto/*.c)',
         'src/uWebSockets.js/src/addon.cpp',
+        'src/uWebSockets.js/uWebSockets/uSockets/src/crypto/sni_tree.cpp',
       ],
       'dependencies': [],
       'conditions': [

@@ -2,16 +2,16 @@ const uWS = require('bindings')('uWS')
 const BasicWSProtocol = require('./ws-protocol/basic')
 const Request = require('./request')
 const Response = require('./response')
+const Connection = require('./connection')
 const ServerError = require('./errors')
 
-if (!process.nextTick) {
+if (process.env.EXPERIMENTAL_FASTCALL) {
   process.nextTick = (f, ...args) => {
     Promise.resolve().then(() => {
       f(...args)
     })
   }
 }
-process.on('exit', uWS.free)
 
 function render (_template, _data) {
   /* eslint no-unused-vars: 0 */
@@ -225,8 +225,9 @@ class fastWS {
             params[key] = decodeURIComponent(request.getParameter(index))
           })
         }
-        const req = new Request(this.options, request, response)
-        const res = new Response(this.options, request, response)
+        const conn = new Connection(this, request, response)
+        const req = new Request(conn)
+        const res = new Response(conn)
         try {
           await callbacks(req, res, params)
         } catch (e) {
@@ -281,6 +282,8 @@ class fastWS {
     }
     const Protocol = options.protocol
     const protocol = new Protocol(options.protocolOptions)
+    const autoUpgrade = options.autoUpgrade || true
+    const protocolName = typeof options.protocol === 'string' ? options.protocol : null
     let URLParams = path.match(/:\w+/g)
     if (URLParams) {
       URLParams = URLParams.map(key => key.slice(1))
@@ -289,18 +292,31 @@ class fastWS {
       compression: options.compression,
       idleTimeout: options.idleTimeout,
       maxPayloadLength: options.maxPayloadLength,
-      open: (ws, request) => {
+      upgrade: (response, request, context) => {
         const params = {}
         if (URLParams) {
           URLParams.forEach((key, index) => {
-            params[key] = decodeURIComponent(request.getParameter(index))
+            params[key] = decodeURIComponent(req.getParameter(index))
           })
         }
-        const client = protocol.newClient(ws, request)
-        this.options.verbose && console.log('[open]', client.remoteAddress)
-        ws.client = client
+        this.options.verbose && console.log('[upgrade-req]', client.remoteAddress)
+        const conn = new Connection(this, request, response, context)
+        const client = protocol.newClient(conn)
         try {
           callback(client, params)
+          if (autoUpgrade) {
+            client.upgrade(protocolName)
+          }
+        } catch (error) {
+          console.error(error)
+          const res = new Response(conn)
+          res.status(500).end('Server Internal Error')
+        }
+      },
+      open: (ws) => {
+        this.options.verbose && console.log('[open]', ws.client.remoteAddress)
+        try {
+          ws.client.onOpen(ws)
         } catch (error) {
           console.error(error)
           // disconnect when error
@@ -384,7 +400,7 @@ class fastWS {
       })
     } else {
       this.route('get', path, (req, res) => {
-        res.staticFile(req.url, cache)
+        res.staticFile(req.connection.url, cache)
       })
     }
   }

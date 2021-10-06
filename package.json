@@ -1,6 +1,6 @@
 {
   "name": "fast-ws",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "description": "Simple Node.js server based on uWebSockets",
   "main": "index.js",
   "browser": "client/browser.js",
@@ -9,7 +9,7 @@
   },
   "scripts": {
     "install": "prebuild-install || npm run build",
-    "build": "node patch.js && node-gyp rebuild",
+    "build": "node-gyp rebuild",
     "prebuild-all": "npm run prebuild-node && npm run prebuild-electron",
     "prebuild-node": "prebuild -t 10.17.0 -t 11.15.0 -t 12.13.0 --strip",
     "prebuild-electron": "prebuild -t 5.0.0 -t 6.0.0 -t 7.0.0 -r electron --strip",
@@ -42,30 +42,34 @@
   "dependencies": {
     "bindings": "^1.5.0",
     "content-type": "^1.0.4",
-    "iconv-lite": "^0.5.2",
+    "events": "^3.3.0",
+    "iconv-lite": "^0.6.3",
     "mime-types": "^2.1.27",
     "multipart-formdata": "^1.1.0",
-    "prebuild-install": "^5.3.5",
-    "qs": "^6.9.4",
-    "replicator": "^1.0.3",
-    "ws": "^7.3.1"
+    "prebuild-install": "^6.1.4",
+    "qs": "^6.10.1",
+    "replicator": "^1.0.5"
   },
   "gypfile": true,
   "devDependencies": {
-    "axios": "^0.21.1",
-    "chalk": "^3.0.0",
-    "eslint": "^6.8.0",
+    "axios": "^0.22.0",
+    "chalk": "^4.1.2",
+    "eslint": "^7.32.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-node": "^10.0.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "lru-cache": "^5.1.1",
-    "mkcert": "^1.3.0",
-    "node-gyp": "^6.1.0",
+    "lru-cache": "^6.0.0",
+    "mkcert": "^1.4.0",
+    "node-gyp": "^8.2.0",
     "pre-commit": "^1.2.2",
-    "prebuild": "^9.1.1",
+    "prebuild": "^7.2.2",
     "rimraf": "^3.0.2",
-    "tempfile": "^3.0.0"
+    "tmp": "^0.2.1",
+    "ws": "^8.2.3"
+  },
+  "peerDependencies": {
+    "ws": "*"
   }
 }
