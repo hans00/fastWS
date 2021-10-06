@@ -30,4 +30,4 @@ exports.toFraindlyIP = (rawIpAddress) => {
   }
 }
 
-expors.trust = () => ([])
+exports.trust = () => ([])
