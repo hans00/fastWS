@@ -108,7 +108,7 @@ class Connection {
   }
 
   get remoteAddress () {
-    return inet.toFraindlyIP(Buffer.from(this.response.getRemoteAddressAsText()).toString())
+    return utils.toFraindlyIP(Buffer.from(this.response.getRemoteAddressAsText()).toString())
   }
 
   get url () {
