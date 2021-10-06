@@ -25,22 +25,22 @@ class WSClient extends EventEmitter {
       if (!this.connection.headers['sec-websocket-protocol'].includes(upgradeProtocol)) return
       this.connection.upgrade(
         {
-          client: this,
+          client: this
         },
         this.connection.headers['sec-websocket-key'],
         upgradeProtocol,
         this.connection.headers['sec-websocket-extensions'],
-        this.nativeContext,
+        this.nativeContext
       )
     } else {
       this.connection.upgrade(
         {
-          client: this,
+          client: this
         },
         this.connection.headers['sec-websocket-key'],
         this.connection.headers['sec-websocket-protocol'],
         this.connection.headers['sec-websocket-extensions'],
-        this.nativeContext,
+        this.nativeContext
       )
     }
   }
