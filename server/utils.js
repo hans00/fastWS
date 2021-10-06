@@ -29,3 +29,5 @@ exports.toFraindlyIP = (rawIpAddress) => {
       .replace(/0+([\dabcdef]+)/g, '$1') // drop leading zeroes
   }
 }
+
+expors.trust = () => ([])

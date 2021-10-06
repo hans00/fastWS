@@ -1,9 +1,6 @@
 const os = require('os')
 const qs = require('qs')
-const iconv = require('iconv-lite')
-const contentType = require('content-type')
-const multipart = require('multipart-formdata')
-const ServerError = require('./errors')
+const utils = require('./utils')
 
 class Request {
   constructor (connection) {
@@ -17,7 +14,7 @@ class Request {
 
   get hostname () {
     const headers = this.connection.headers
-    return headers['host'] || headers['x-forwarded-host'] || os.hostname()
+    return headers.host || headers['x-forwarded-host'] || os.hostname()
   }
 
   get subdomains () {
@@ -25,21 +22,21 @@ class Request {
   }
 
   get query () {
-    if (!this._cache['query']) {
-      this._cache['query'] = qs.parse(this.connection.rawQuery)
+    if (!this._cache.query) {
+      this._cache.query = qs.parse(this.connection.rawQuery)
     }
-    return this._cache['query']
+    return this._cache.query
   }
 
-  get remoteAddress () {
+  get ip () {
     return this.connection.remoteAddress
   }
 
   get ips () {
     const app = this.connection.app
     const headers = this.connection.headers
-    const forwardIps = trust(app.get('trust proxy'), headers['x-forwarded-for'])
-    return [ip, ...forwardIps]
+    const forwardIps = utils.trust(app.get('trust proxy'), headers['x-forwarded-for'])
+    return [this.ip].concat(forwardIps)
   }
 
   get method () {
@@ -60,27 +57,27 @@ class Request {
   }
 
   is (type) {
-    throw new Error("SERVER_NOT_IMPL")
+    throw new Error('SERVER_NOT_IMPL')
   }
 
   accepts () {
-    throw new Error("SERVER_NOT_IMPL")
+    throw new Error('SERVER_NOT_IMPL')
   }
 
   acceptsCharsets () {
-    throw new Error("SERVER_NOT_IMPL")
+    throw new Error('SERVER_NOT_IMPL')
   }
 
   acceptsEncodings () {
-    throw new Error("SERVER_NOT_IMPL")
+    throw new Error('SERVER_NOT_IMPL')
   }
 
   acceptsLanguages () {
-    throw new Error("SERVER_NOT_IMPL")
+    throw new Error('SERVER_NOT_IMPL')
   }
 
   range (size, options) {
-    throw new Error("SERVER_NOT_IMPL")
+    throw new Error('SERVER_NOT_IMPL')
   }
 }
 

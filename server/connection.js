@@ -3,7 +3,7 @@ const iconv = require('iconv-lite')
 const contentType = require('content-type')
 const multipart = require('multipart-formdata')
 const ServerError = require('./errors')
-const inet = require('./inet')
+const utils = require('./utils')
 
 const methodsWithBody = ['POST', 'PUT', 'PATCH', 'OPTIONS']
 
@@ -95,7 +95,7 @@ class Connection {
     return this._body
   }
 
-  get cache_provider () {
+  get cacheProvider () {
     return this.app.options.cache
   }
 

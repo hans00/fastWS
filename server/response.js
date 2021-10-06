@@ -101,8 +101,8 @@ class Response extends Writable {
         }).filter(x => x).join(', ')
       }
       // if cache found file, send file in cache
-      if (this.connection.cache_provider.has(fullPath)) {
-        const file = this.connection.cache_provider.get(fullPath)
+      if (this.connection.cacheProvider.has(fullPath)) {
+        const file = this.connection.cacheProvider.get(fullPath)
         if (checkModifyTime && checkModifyTime === file.mtime) {
           return this.status(304).end()
         } else {
@@ -114,7 +114,7 @@ class Response extends Writable {
         const contentType = mime.lookup(fullPath)
         const mtime = new Date(fs.statSync(fullPath).mtime).toGMTString()
         const content = toArrayBuffer(fs.readFileSync(fullPath))
-        this.connection.cache_provider.set(fullPath, { content, contentType, mtime })
+        this.connection.cacheProvider.set(fullPath, { content, contentType, mtime })
         if (checkModifyTime && checkModifyTime === mtime) {
           return this.status(304).end()
         } else {
@@ -136,13 +136,13 @@ class Response extends Writable {
     const isInTemplate = fullPath.startsWith(path.resolve('template'))
     if (isInTemplate && fs.existsSync(fullPath)) {
       // if cache found file, send file in cache
-      if (this.connection.cache_provider.has(fullPath)) {
-        const file = this.connection.cache_provider.get(fullPath)
+      if (this.connection.cacheProvider.has(fullPath)) {
+        const file = this.connection.cacheProvider.get(fullPath)
         this.end(this.connection.renderer(file.content, data), file.contentType)
       } else {
         const contentType = mime.lookup(fullPath)
         const content = fs.readFileSync(fullPath).toString()
-        this.connection.cache_provider.set(fullPath, { content, contentType })
+        this.connection.cacheProvider.set(fullPath, { content, contentType })
         this.end(this.connection.renderer(content, data), contentType)
       }
     } else {

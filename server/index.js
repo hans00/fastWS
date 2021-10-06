@@ -296,12 +296,12 @@ class fastWS {
         const params = {}
         if (URLParams) {
           URLParams.forEach((key, index) => {
-            params[key] = decodeURIComponent(req.getParameter(index))
+            params[key] = decodeURIComponent(request.getParameter(index))
           })
         }
-        this.options.verbose && console.log('[upgrade-req]', client.remoteAddress)
         const conn = new Connection(this, request, response, context)
         const client = protocol.newClient(conn)
+        this.options.verbose && console.log('[upgrade-req]', client.remoteAddress)
         try {
           callback(client, params)
           if (autoUpgrade) {
