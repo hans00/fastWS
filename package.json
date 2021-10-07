@@ -1,14 +1,10 @@
 {
-  "name": "fast-ws",
-  "description": "A simple Node.js server based on uWebSockets",
   "private": true,
   "workspaces": {
     "packages": [
       "packages/*"
     ]
   },
-  "main": "index.js",
-  "browser": "client/browser.js",
   "pre-commit": [
     "lint:fix"
   ],
@@ -24,7 +20,7 @@
   "homepage": "https://github.com/hans00/fastWS#readme",
   "scripts": {
     "build": "lerna run build --no-sort",
-    "publish": "lerna publish --no-sort",
+    "publish-all": "lerna publish from-git --no-sort",
     "tag-version": "git tag -a v${npm_package_version} -m \"release v${npm_package_version}\"",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",

@@ -82,4 +82,4 @@ jobs:
           npm whoami
     - run: |
         yarn
-        npx lerna publish --yes
+        yarn publish-all
