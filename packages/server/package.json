@@ -27,14 +27,12 @@
   "author": "Hans <admin@itsrv.tw>",
   "license": "Apache-2.0",
   "scripts": {
-    "install": "prebuild-install || npm run build",
+    "install": "prebuild-install || node-gyp rebuild",
     "build": "node-gyp rebuild",
-    "prebuild-all": "npm run prebuild-node",
+    "prebuild-all": "yarn prebuild-node",
     "prebuild-node": "prebuild -t 12.13.0 -t 14.0.0 -t 15.0.0 -t 16.0.0 --strip",
     "prebuild-upload": "prebuild --upload-all",
-    "prebuild-upload:win": "prebuild --upload-all",
-    "clean": "rimraf build node_modules prebuilds",
-    "distclean": "npm run clean"
+    "clean": "rimraf build node_modules prebuilds"
   },
   "dependencies": {
     "bindings": "^1.5.0",
