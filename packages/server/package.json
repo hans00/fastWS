@@ -31,8 +31,8 @@
     "build": "node-gyp rebuild",
     "prebuild-all": "npm run prebuild-node",
     "prebuild-node": "prebuild -t 12.13.0 -t 14.0.0 -t 15.0.0 -t 16.0.0 --strip",
-    "prebuild-upload": "prebuild --upload-all $GITHUB_TOKEN",
-    "prebuild-upload:win": "prebuild --upload-all %GITHUB_TOKEN%",
+    "prebuild-upload": "prebuild --upload-all",
+    "prebuild-upload:win": "prebuild --upload-all",
     "clean": "rimraf build node_modules prebuilds",
     "distclean": "npm run clean"
   },
