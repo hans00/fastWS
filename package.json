@@ -22,6 +22,8 @@
     "build": "lerna run build --no-sort",
     "bump-version": "lerna version --no-push",
     "publish-all": "lerna publish from-git --no-sort",
+    "prebuild": "lerna run prebuild",
+    "prebuild-upload": "lerna run prebuild-upload",
     "tag-version": "git tag -a v${npm_package_version} -m \"release v${npm_package_version}\"",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
