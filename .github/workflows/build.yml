@@ -35,20 +35,22 @@ jobs:
         npx prebuild --upload-all ${{secrets.GITHUB_TOKEN}}
 
   build_arm:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
-      - uses: uraimo/run-on-arch-action@v1.0.5
+      - uses: uraimo/run-on-arch-action@v2.0.5
         with:
-          architecture: aarch64
-          distribution: ubuntu18.04
-          run: |
+          arch: aarch64
+          distro: ubuntu20.04
+          githubToken: ${{ github.token }}
+          install: |
             apt-get update
             apt-get install -y curl build-essential
             curl -sL https://deb.nodesource.com/setup_14.x | bash -
             apt-get install -y nodejs
+          run: |
             export NODE_ENV=development
             yarn
             yarn lint
@@ -61,6 +63,8 @@ jobs:
     needs: build
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
+    env:
+      NPM_TOKEN: ${{secrets.npm_token}}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -70,8 +74,12 @@ jobs:
         node-version: '14'
         cache: 'npm'
         registry-url: https://registry.npmjs.org/
+    - name: Authenticate with Registry
+        run: |
+          yarn logout
+          echo "registry=http://registry.npmjs.org/" >> .npmrc
+          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> .npmrc
+          npm whoami
     - run: |
         yarn
-        npx lerna publish
-      env:
-        NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+        npx lerna publish --yes
