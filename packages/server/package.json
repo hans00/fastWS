@@ -14,6 +14,15 @@
   "bugs": {
     "url": "https://github.com/hans00/fastWS/issues"
   },
+  "keywords": [
+    "uWebSockets",
+    "WebSocket",
+    "web-server",
+    "http-server",
+    "https-server",
+    "server",
+    "fast-ws"
+  ],
   "homepage": "https://github.com/hans00/fastWS#readme",
   "author": "Hans <admin@itsrv.tw>",
   "license": "Apache-2.0",

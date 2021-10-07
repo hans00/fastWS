@@ -11,8 +11,8 @@
   "author": "Hans <admin@itsrv.tw>",
   "license": "Apache-2.0",
   "keywords": [
-    "uWebSockets",
-    "WebSocket"
+    "WebSocket",
+    "fast-ws"
   ],
   "bugs": {
     "url": "https://github.com/hans00/fastWS/issues"
