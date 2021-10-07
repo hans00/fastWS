@@ -30,8 +30,8 @@
     "build": "lerna run build --no-sort",
     "publish": "lerna publish --no-sort",
     "tag-version": "git tag -a v${npm_package_version} -m \"release v${npm_package_version}\"",
-    "lint": "eslint packages/**/*.js",
-    "lint:fix": "eslint --fix packages/**/*.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
     "test": "node test"
   },
   "devDependencies": {
