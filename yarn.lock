@@ -2403,18 +2403,14 @@ fast-levenshtein@^2.0.6:
   resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
   integrity sha1-PYpcZog6FqMMqGQ+hR8Zuqd5eRc=
 
-fast-ws-client@*:
+"fast-ws-client@file:packages/client":
   version "2.0.1-alpha.0"
-  resolved "https://registry.yarnpkg.com/fast-ws-client/-/fast-ws-client-2.0.1-alpha.0.tgz#05a8e96f8f8349e180174a9f652cd610aed187c8"
-  integrity sha512-pXwwZjn8OSeCzVAYzOkGD3pgfnozfd1fnMpLYgk93iN/dTpl0KeIgxUM7UBvxCjEXc7C4EINaCHlWpkmPNR/fg==
   dependencies:
     events "^3.3.0"
     replicator "^1.0.5"
 
-fast-ws-server@*:
+"fast-ws-server@file:packages/server":
   version "2.0.1-alpha.0"
-  resolved "https://registry.yarnpkg.com/fast-ws-server/-/fast-ws-server-2.0.1-alpha.0.tgz#5b4b5fbcc64b60e9a876730531aa99c5a3f666dd"
-  integrity sha512-IBIuNj4c2h1ihc4wRrhz+u9q4lbhPw+eDQt4TF55zEFepa+31R9Eod6zUbzNNoZU5IU4A+leGkHbjAzETknoCA==
   dependencies:
     bindings "^1.5.0"
     content-type "^1.0.4"
