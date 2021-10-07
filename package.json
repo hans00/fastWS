@@ -20,6 +20,7 @@
   "homepage": "https://github.com/hans00/fastWS#readme",
   "scripts": {
     "build": "lerna run build --no-sort",
+    "bump-version": "lerna version --no-push",
     "publish-all": "lerna publish from-git --no-sort",
     "tag-version": "git tag -a v${npm_package_version} -m \"release v${npm_package_version}\"",
     "lint": "eslint .",
