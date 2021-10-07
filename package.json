@@ -21,7 +21,7 @@
   "scripts": {
     "build": "lerna run build --no-sort",
     "bump-version": "lerna version --no-push",
-    "publish-all": "lerna publish from-git --no-sort",
+    "publish-all": "lerna publish from-git --no-sort --yes",
     "prebuild": "lerna run prebuild --",
     "prebuild-upload": "lerna run prebuild-upload --",
     "push-with-tag": "git push --follow-tags",
