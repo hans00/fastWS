@@ -1,9 +1,6 @@
-[submodule "src/uWebSockets.js"]
-	path = src/uWebSockets.js
+[submodule "packages/server/deps/uWebSockets.js"]
+	path = packages/server/deps/uWebSockets.js
 	url = https://github.com/uNetworking/uWebSockets.js.git
-[submodule "deps/boringssl"]
-	path = deps/boringssl
-	url = https://github.com/google/boringssl.git
-[submodule "deps/zlib"]
-	path = deps/zlib
+[submodule "packages/server/deps/zlib"]
+	path = packages/server/deps/zlib
 	url = https://github.com/madler/zlib.git

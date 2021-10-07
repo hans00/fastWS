@@ -8,18 +8,22 @@
 
 ## basic
 
-### `remoteAddress`
+### `connection`
 
-> Remote IP address. (Full length)
+> HTTP Connection
 
-### `requestHeaders`
+### `connection.remoteAddress`
 
-> Request headers
+> Remote IP address
+
+### `upgrade([protocol = null])`
+
+> Accept protocol upgrade
 
 ### `on(event_name, callback)`
 
 > Listen on builtin event.
-> Builtin events: `disconnect`, `drained`, `message`, `binary`
+> Builtin events: `open`, `disconnect`, `drained`, `message`, `binary`
 
 ### `off(event_name, callback)`
 

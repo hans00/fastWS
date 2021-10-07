@@ -84,7 +84,7 @@ function worker(options) {
   const payload = options.payload.replace('{DATA}', data)
   const rampUp = Math.ceil(options['ramp-up'] / options.threads)
   const messageCount = options.counts
-  const WS = require(options.module === 'fast-ws' ? '../client' : options.module)
+  const WS = require(options.module === 'fast-ws' ? 'fast-ws-client' : options.module)
   const timeout = options.timeout
   const target = options.target
   const result = {
@@ -137,7 +137,7 @@ function worker(options) {
             })
           } else if (options.module === 'fast-ws') {
             try {
-              const message = await client.send(echo_event, payload, true)
+              const message = await client.emit(echo_event, payload, true)
               if (message.includes(data)) {
                 resolve()
               } else {

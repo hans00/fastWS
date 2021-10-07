@@ -151,8 +151,8 @@ class WSProtocol {
     this.options = options
   }
 
-  newClient (socket) {
-    return new WSClient(socket, this.options)
+  newClient (connection) {
+    return new WSClient(connection, this.options)
   }
 }
 

@@ -1,0 +1,46 @@
+{
+  "name": "fast-ws-server",
+  "version": "2.0.0",
+  "description": "A simple Node.js server based on uWebSockets",
+  "main": "js/index.js",
+  "gypfile": true,
+  "engines": {
+    "node": ">=12.13.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hans00/fastWS.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hans00/fastWS/issues"
+  },
+  "homepage": "https://github.com/hans00/fastWS#readme",
+  "author": "Hans <admin@itsrv.tw>",
+  "license": "Apache-2.0",
+  "scripts": {
+    "install": "prebuild-install || npm run build",
+    "build": "node-gyp rebuild",
+    "prebuild-all": "npm run prebuild-node",
+    "prebuild-node": "prebuild -t 12.13.0 -t 14.0.0 -t 15.0.0 -t 16.0.0 --strip",
+    "prebuild-upload": "prebuild --upload-all $GITHUB_TOKEN",
+    "prebuild-upload:win": "prebuild --upload-all %GITHUB_TOKEN%",
+    "clean": "rimraf build node_modules prebuilds",
+    "distclean": "npm run clean"
+  },
+  "dependencies": {
+    "bindings": "^1.5.0",
+    "content-type": "^1.0.4",
+    "events": "^3.3.0",
+    "iconv-lite": "^0.6.3",
+    "mime-types": "^2.1.27",
+    "multipart-formdata": "^1.1.0",
+    "prebuild-install": "^6.1.4",
+    "qs": "^6.10.1",
+    "replicator": "^1.0.5"
+  },
+  "devDependencies": {
+    "node-gyp": "^8.2.0",
+    "prebuild": "^11.0.0",
+    "rimraf": "^3.0.2"
+  }
+}

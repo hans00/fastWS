@@ -1,8 +1,8 @@
 const BasicProtocol = require('./basic')
 
 class WSProtocol extends BasicProtocol {
-  newClient (socket) {
-    const client = new BasicProtocol.WSClient(socket)
+  newClient (connection) {
+    const client = new BasicProtocol.WSClient(connection)
     client.on('message', data => {
       client.send(data)
     })

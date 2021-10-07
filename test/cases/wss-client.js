@@ -1,4 +1,4 @@
-const WS = require('../../client')
+const WS = require('fast-ws-client')
 
 module.exports = function ({ HTTPS_PORT }) {
   return new Promise((resolve, reject) => {

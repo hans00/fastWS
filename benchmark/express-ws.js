@@ -1,5 +1,5 @@
 const express = require('express')
-const fWS_protocol = require('../server/ws-protocol/fast-ws')
+const Protocol = require('fast-ws-server/js/ws-protocol/fast-ws')
 
 const app = express()
 require('express-ws')(app)
@@ -10,9 +10,11 @@ app.ws('/echo', (ws, req) => {
   })
 })
 
+const fWS_protocol = new Protocol()
 app.ws('/fws', (ws, req) => {
   ws.getBufferedAmount = () => 0
-  const client = new fWS_protocol(ws, req)
+  const client = fWS_protocol.newClient(req)
+  client.onOpen(ws)
   ws.on('message', data => {
     client.incomingPacket(data, false)
   })

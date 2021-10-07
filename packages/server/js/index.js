@@ -282,7 +282,7 @@ class fastWS {
     }
     const Protocol = options.protocol
     const protocol = new Protocol(options.protocolOptions)
-    const autoUpgrade = options.autoUpgrade || true
+    const autoUpgrade = options.autoUpgrade !== false
     const protocolName = typeof options.protocol === 'string' ? options.protocol : null
     let URLParams = path.match(/:\w+/g)
     if (URLParams) {

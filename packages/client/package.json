@@ -1,0 +1,28 @@
+{
+  "name": "fast-ws-client",
+  "version": "2.0.0",
+  "description": "WebSocket client for fastWS",
+  "main": "index.js",
+  "browser": "client/browser.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hans00/fastWS.git"
+  },
+  "author": "Hans <admin@itsrv.tw>",
+  "license": "Apache-2.0",
+  "keywords": [
+    "uWebSockets",
+    "WebSocket"
+  ],
+  "bugs": {
+    "url": "https://github.com/hans00/fastWS/issues"
+  },
+  "homepage": "https://github.com/hans00/fastWS#readme",
+  "dependencies": {
+    "events": "^3.3.0",
+    "replicator": "^1.0.5"
+  },
+  "peerDependencies": {
+    "ws": "^8.2.3"
+  }
+}

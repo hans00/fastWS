@@ -1,4 +1,4 @@
-const fastWS = require('../../server')
+const fastWS = require('fast-ws-server')
 const app = require('./app')
 
 module.exports = function (port) {

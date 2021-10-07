@@ -3,7 +3,7 @@
 ## Usage
 
 ```js
-const fastWS = require('fast-ws')
+const fastWS = require('fast-ws-server')
 const app = new fastWS({...options})
 
 app.any('/*', (req, res) => {
@@ -136,8 +136,13 @@ app.ws(
   '/path',
   // Callback
   (ws: WSClient) => {
-    ws.send('Hello')
-    ws.close()
+    // Manually upgrade
+    ws.upgrade()
+    // WebSocket peer open
+    ws.on('open', () => {
+      ws.send('Hello')
+      ws.close()
+    })
   },
   // Options (not required)
   {
@@ -173,7 +178,7 @@ app.ws(
       // Detail see: https://github.com/inikulin/replicator#readme
     },
 
-    /*== uWS options ==*/
+    /*== Common options ==*/
     // Compression
     compression: 'default', // equal shared
     compression: 'disable', // disable compression
@@ -183,6 +188,8 @@ app.ws(
     idleTimeout: 300, // Default
     // Max payload length (bytes)
     maxPayloadLength: 4096 // Default
+    // Auto upgrade WebSocket
+    autoUpgrade: true, // Default
   }
 )
 ```

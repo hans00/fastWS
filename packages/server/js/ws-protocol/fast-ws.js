@@ -62,8 +62,8 @@ class Parser {
 }
 
 class WSClient extends BasicProtocol.WSClient {
-  constructor (socket, parser) {
-    super(socket, { parser })
+  constructor (connection, parser) {
+    super(connection, { parser })
   }
 
   onOpen (socket) {
@@ -159,8 +159,8 @@ class WSProtocol extends BasicProtocol {
     this.parser = new Parser(options.parserOptions)
   }
 
-  newClient (socket) {
-    return new WSClient(socket, this.parser)
+  newClient (connection) {
+    return new WSClient(connection, this.parser)
   }
 }
 
