@@ -75,11 +75,11 @@ jobs:
         cache: 'npm'
         registry-url: https://registry.npmjs.org/
     - name: Authenticate with Registry
-        run: |
-          yarn logout
-          echo "registry=http://registry.npmjs.org/" >> .npmrc
-          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> .npmrc
-          npm whoami
+      run: |
+        yarn logout
+        echo "registry=http://registry.npmjs.org/" >> .npmrc
+        echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> .npmrc
+        npm whoami
     - run: |
         yarn
         yarn publish-all
