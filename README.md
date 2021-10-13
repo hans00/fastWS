@@ -1,8 +1,6 @@
 fastWS
 =====
 
-[![npm](https://img.shields.io/npm/v/fast-ws.svg)](https://www.npmjs.com/package/fast-ws)
-[![Node version](https://img.shields.io/node/v/fast-ws.svg)](https://www.npmjs.com/package/fast-ws)
 [![GitHub Action](https://github.com/hans00/fastWS/workflows/build/badge.svg)](https://github.com/hans00/fastWS)
 
 It's very fast Web Server Node.js server based on uWebSockets.
@@ -13,14 +11,19 @@ And very easy to use.
 
 [Documents](docs/README.md)
 
+[Server package](packages/server)
+
+[Client package](packages/client)
+
+Usage
 ---
 
-# Usage
+`npm i fast-ws-client fast-ws-server`
 
-`npm i fast-ws`
+### Server
 
 ```js
-const fastWS = require('fast-ws/server')
+const fastWS = require('fast-ws-server')
 
 const app = new fastWS({ /* options */ })
 
@@ -66,18 +69,18 @@ app.listen(3000, () => {
 })
 ```
 
-# Feature
+### Client
 
-- [x] Simple to use
-- [x] Serve static files
-- [x] Simple WebSocket Framework
-- [x] Reload SSL when system signal HUP(1)
-- [x] Graceful shutdown
-- [x] Parse body data
-- [x] URL params parser
-- [x] Support for template engine
-- [x] Response from pipe stream
-- [x] Support cache
-- [ ] Support for Socket.io
-- [ ] Support for TypeScript
-- [ ] Sub-route likes Express.js
+```js
+const Client = require('fast-ws-client')
+
+const client = new Client('ws://server/fast-ws', options)
+
+client.on('connect', () => {
+  client.emit('event name', 'message')
+})
+
+client.on('event name', async () => {
+  await client.emit('wait for remote', 'message', true)
+})
+```
