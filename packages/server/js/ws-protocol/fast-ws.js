@@ -71,23 +71,23 @@ class WSClient extends BasicProtocol.WSClient {
     this.doSend('\x00\x02', 0, 0)
   }
 
+  reply (replyId, data) {
+    this.doSend(this.parser.stringify({ replyId, data }, 'reply'))
+  }
+
   incomingPacket (payload, isBinary) {
     if (isBinary) {
       super.emit('binary', payload)
     } else {
-      const incoming = this.parser.parse(payload.toString(), isBinary)
-      if (incoming.type === 'event') {
-        incoming.reply = (data) => {
-          if (incoming.reply_id) {
-            this.doSend(this.parser.stringify({ replyId: incoming.reply_id, data }, 'reply'))
-          }
-        }
-        super.emit(incoming.name, incoming)
+      const data = this.parser.parse(payload.toString(), isBinary)
+      if (data.type === 'event') {
+        data.reply = this.reply.bind(this, data.reply_id)
+        super.emit(data.name, data)
       } else {
-        if (incoming.type === 'ping') {
-          this.doSend(this.parser.stringify(incoming.data, 'pong'))
+        if (data.type === 'ping') {
+          this.doSend(this.parser.stringify(data.data, 'pong'))
         }
-        super.emit(incoming.type, incoming.data)
+        super.emit(data.type, data.data)
       }
     }
   }

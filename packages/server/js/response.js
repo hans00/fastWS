@@ -90,15 +90,13 @@ class Response extends Writable {
       if (typeof cache === 'string') {
         cacheControl = cache
       } else if (typeof cache === 'object') {
-        cacheControl = Object.keys(cache).map(key => {
-          if (cache[key]) {
-            if (typeof cache[key] === 'boolean') {
-              return key
-            } else {
-              return key + '=' + cache[key].toString()
-            }
-          }
-        }).filter(x => x).join(', ')
+        cacheControl = Object.entries(cache)
+          .map(([key, val]) =>
+            val
+              ? ((typeof val === 'boolean') ? key : `${key}=${val}`)
+              : null)
+          .filter(x => x)
+          .join(', ')
       }
       // if cache found file, send file in cache
       if (this.connection.cacheProvider.has(fullPath)) {
