@@ -22,8 +22,8 @@
     "build": "lerna run build --no-sort",
     "bump-version": "lerna version --no-push",
     "publish-all": "lerna publish from-git --no-sort --yes",
-    "prebuild": "lerna run prebuild --",
-    "prebuild-upload": "lerna run prebuild-upload --",
+    "pre-build": "lerna run prebuild --",
+    "pre-build-upload": "lerna run prebuild-upload --",
     "push-with-tag": "git push --follow-tags",
     "tag-version": "git tag -a v${npm_package_version} -m \"release v${npm_package_version}\"",
     "lint": "eslint .",
@@ -31,7 +31,8 @@
     "test": "node test"
   },
   "devDependencies": {
-    "axios": "^0.22.0",
+    "@nanoexpress/middleware-static-serve": "^1.0.0",
+    "axios": "^0.27.2",
     "chalk": "^4.1.2",
     "eslint": "^7.32.0",
     "eslint-config-standard": "^14.1.1",
@@ -39,17 +40,19 @@
     "eslint-plugin-node": "^10.0.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "express": "^4.17.1",
+    "express": "^4.18.1",
     "express-ws": "^5.0.2",
     "fast-ws-client": "file:packages/client",
     "fast-ws-server": "file:packages/server",
+    "form-data": "^4.0.0",
     "lerna": "^4.0.0",
     "lru-cache": "^6.0.0",
-    "mkcert": "^1.4.0",
+    "mkcert": "^1.5.0",
+    "nanoexpress": "^5.2.4",
     "pre-commit": "^1.2.2",
-    "socket.io": "^4.2.0",
-    "socket.io-client": "^4.2.0",
+    "socket.io": "^4.5.0",
+    "socket.io-client": "^4.5.0",
     "tmp": "^0.2.1",
-    "ws": "^8.2.3"
+    "ws": "^8.6.0"
   }
 }

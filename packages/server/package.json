@@ -29,19 +29,18 @@
   "scripts": {
     "install": "prebuild-install || node-gyp rebuild",
     "build": "node-gyp rebuild",
-    "prebuild": "npx prebuild -t 12.13.0 -t 14.0.0 -t 15.0.0 -t 16.0.0 --strip",
-    "prebuild-upload": "npx prebuild --upload-all",
+    "pre-build": "npx prebuild -t 14.0.0 -t 15.0.0 -t 16.0.0 -t 17.0.0 -t 18.0.0 --strip",
+    "pre-build-upload": "npx prebuild --upload-all",
     "clean": "rimraf build node_modules prebuilds"
   },
   "dependencies": {
     "bindings": "^1.5.0",
     "content-type": "^1.0.4",
-    "events": "^3.3.0",
     "iconv-lite": "^0.6.3",
-    "mime-types": "^2.1.27",
+    "mime-types": "^2.1.35",
     "multipart-formdata": "^1.1.0",
-    "prebuild-install": "^6.1.4",
-    "qs": "^6.10.1",
+    "prebuild-install": "^7.1.0",
+    "qs": "^6.10.3",
     "replicator": "^1.0.5"
   },
   "devDependencies": {

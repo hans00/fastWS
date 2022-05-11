@@ -3,7 +3,7 @@
   "version": "2.0.1-alpha.1",
   "description": "WebSocket client for fastWS",
   "main": "index.js",
-  "browser": "client/browser.js",
+  "browser": "browser.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hans00/fastWS.git"
@@ -23,7 +23,7 @@
     "replicator": "^1.0.5"
   },
   "peerDependencies": {
-    "ws": "^8.2.3"
+    "ws": "^8.6.0"
   },
   "gitHead": "e939a8cb4e569fc3155c95c942470ab279e9d77d"
 }
