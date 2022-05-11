@@ -8,6 +8,9 @@ module.exports = {
   extends: [
     'standard'
   ],
+  plugins: [
+    'eslint-plugin-perf-standard'
+  ],
   globals: {
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly'
@@ -16,5 +19,8 @@ module.exports = {
     ecmaVersion: 2018
   },
   rules: {
+    'perf-standard/no-instanceof-guard': 2,
+    'perf-standard/no-self-in-constructor': 2,
+    'perf-standard/check-function-inline': 1
   }
 }
