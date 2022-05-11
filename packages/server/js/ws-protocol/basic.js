@@ -1,5 +1,6 @@
 const { EventEmitter } = require('events')
 const ServerError = require('../errors')
+const utils = require('../utils')
 
 const nullParser = {
   parse (payload) {
@@ -11,12 +12,12 @@ const nullParser = {
 }
 
 class WSClient extends EventEmitter {
-  constructor (connection, { parser = nullParser } = {}) {
+  constructor (connection, options = {}) {
     super()
     this.connection = connection
     this.socket = null
     this.internalEvents = ['message', 'binary', 'drained', 'close', 'ping', 'pong']
-    this.parser = parser
+    this.parser = options.parser || nullParser
   }
 
   upgrade (upgradeProtocol) {
@@ -71,7 +72,9 @@ class WSClient extends EventEmitter {
   }
 
   get remoteAddress () {
-    return this.connection.remoteAddress
+    return this.socket
+      ? utils.toFraindlyIP(Buffer.from(this.socket.getRemoteAddressAsText()).toString())
+      : this.connection.remoteAddress
   }
 
   onDrain () {

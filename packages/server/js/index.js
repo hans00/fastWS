@@ -5,14 +5,6 @@ const Response = require('./response')
 const Connection = require('./connection')
 const ServerError = require('./errors')
 
-if (process.env.EXPERIMENTAL_FASTCALL) {
-  process.nextTick = (f, ...args) => {
-    Promise.resolve().then(() => {
-      f(...args)
-    })
-  }
-}
-
 function render (_template, _data) {
   /* eslint no-unused-vars: 0 */
   function escapeVar (data, type) { // type = [ String, Number, Object, Array ]
@@ -314,9 +306,9 @@ class fastWS {
         }
       },
       open: (ws) => {
-        this.options.verbose && console.log('[open]', ws.client.remoteAddress)
         try {
           ws.client.onOpen(ws)
+          this.options.verbose && console.log('[open]', ws.client.remoteAddress)
         } catch (error) {
           console.error(error)
           // disconnect when error
