@@ -17,7 +17,9 @@
     'defines': [
       'UWS_WITH_PROXY',
       'LIBUS_USE_LIBUV',
-      'LIBUS_USE_OPENSSL'
+      'LIBUS_USE_OPENSSL',
+      'OPENSSL_API_COMPAT=0x10100001L',
+      'OPENSSL_CONFIGURED_API=10100',
     ],
     'defines!': [
       'OPENSSL_THREADS'
