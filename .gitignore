@@ -4,3 +4,4 @@ prebuilds/
 *.pem
 dev-test/
 *.log
+.npmrc
