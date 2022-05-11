@@ -17,9 +17,9 @@ jobs:
       with:
         node-version: '14'
         cache: 'npm'
-    - name: correct msbuild path
+    - name: find msbuild path
       if: matrix.os == 'windows-latest'
-      run: npm config set msbuild_path "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe"
+      uses: microsoft/setup-msbuild@v1.1
     - name: Install
       run: yarn install
     - name: Lint check
