@@ -1,4 +1,4 @@
-const fastWS = require('fast-ws-server')
+const fastWS = require('../../packages/server')
 const app = require('./app')
 const fs = require('fs')
 const mkcert = require('mkcert')

@@ -30,6 +30,11 @@ module.exports = function (app) {
     res.json(data)
   })
 
+  app.post('/upload', async (req, res) => {
+    const [file] = await req.body
+    res.json({ size: file.data.length })
+  })
+
   app.get('/param/:data', (req, res, { data }) => {
     res.end(data)
   })
