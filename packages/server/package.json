@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "node-gyp": "^8.2.0",
-    "prebuild": "^11.0.0",
+    "prebuild": "^11.0.3",
     "rimraf": "^3.0.2"
   },
   "gitHead": "e939a8cb4e569fc3155c95c942470ab279e9d77d"
