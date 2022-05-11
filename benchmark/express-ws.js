@@ -29,6 +29,9 @@ app.get('/hello/:name', (req, res) => {
 
 app.use('/', express.static('static'))
 
+console.time('STARTUP')
+
 app.listen(3000, () => {
+  console.timeEnd('STARTUP')
   console.log('Listen on 3000')
 })
