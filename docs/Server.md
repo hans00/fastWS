@@ -128,6 +128,17 @@ app.serve('/*', {
 
 ## WebSocket
 
+### Supported protocol
+
+- `basic`
+- `chat` (same as basic)
+- `echo` (just echo message)
+- `fast-ws`
+  - Event base
+  - Awaitable event reply
+
+### Usage
+
 [WSClient Object](WSClient.md)
 
 ```js
@@ -144,14 +155,14 @@ app.ws(
       ws.close()
     })
   },
-  // Options (not required)
+  // Protocol Name or Options (not required)
   {
     /*== Protocol ==*/
-    // Basic WebSocket protocol
+    // (Default) Basic WebSocket protocol
     protocol: 'basic',
     // Echo WebSocket protocol
     protocol: 'echo',
-    // (Default) This project implements WebSocket protocol
+    // This project implements WebSocket protocol
     protocol: 'fast-ws',
     // Custom protocol object (must extends `fast-ws/server/ws-protocol/basic`)
     protocol: Object,
@@ -187,9 +198,11 @@ app.ws(
     // Idle timeout (sec)
     idleTimeout: 300, // Default
     // Max payload length (bytes)
-    maxPayloadLength: 4096 // Default
+    maxPayloadLength: 4096, // Default
     // Auto upgrade WebSocket
     autoUpgrade: true, // Default
+    // Restrict protocol (only work on auto upgrade)
+    restrictProtocol: false, // Default
   }
 )
 ```

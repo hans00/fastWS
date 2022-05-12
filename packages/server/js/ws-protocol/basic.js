@@ -23,7 +23,7 @@ class WSClient extends EventEmitter {
   upgrade (upgradeProtocol) {
     if (this.socket) throw new Error('WS_IS_UPGRADED')
     if (upgradeProtocol) {
-      if (!this.connection.headers['sec-websocket-protocol'].includes(upgradeProtocol)) return
+      if (this.connection.headers['sec-websocket-protocol'].includes(upgradeProtocol)) return
       this.connection.upgrade(
         {
           client: this

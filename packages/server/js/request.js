@@ -1,9 +1,12 @@
 const os = require('os')
 const qs = require('qs')
+const accepts = require('accepts')
+const parseRange = require('range-parser')
 const utils = require('./utils')
 
 class Request {
   constructor (connection) {
+    this._accepts = accepts(connection)
     this.connection = connection
     this._cache = {}
   }
@@ -35,7 +38,7 @@ class Request {
   get ips () {
     const app = this.connection.app
     const headers = this.connection.headers
-    const forwardIps = utils.trust(app.get('trust proxy'), headers['x-forwarded-for'])
+    const forwardIps = utils.trust(app.getParam('trust proxy'), headers['x-forwarded-for'])
     return [this.ip].concat(forwardIps)
   }
 
@@ -57,27 +60,27 @@ class Request {
   }
 
   is (type) {
-    throw new Error('SERVER_NOT_IMPL')
+    return this._accepts.type(type)
   }
 
-  accepts () {
-    throw new Error('SERVER_NOT_IMPL')
+  accepts (types) {
+    return this._accepts.types(types)
   }
 
   acceptsCharsets () {
-    throw new Error('SERVER_NOT_IMPL')
+    return this._accepts.charsets()
   }
 
   acceptsEncodings () {
-    throw new Error('SERVER_NOT_IMPL')
+    return this._accepts.encodings()
   }
 
   acceptsLanguages () {
-    throw new Error('SERVER_NOT_IMPL')
+    return this._accepts.languages()
   }
 
   range (size, options) {
-    throw new Error('SERVER_NOT_IMPL')
+    return parseRange(size, this.connection.headers.range, options)
   }
 }
 

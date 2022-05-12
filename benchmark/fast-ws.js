@@ -10,6 +10,8 @@ app.ws('/fws', (ws) => {
   ws.on('echo', (e) => {
     e.reply(e.data)
   })
+}, {
+  protocol: 'fast-ws'
 })
 
 app.get('/hello/:name', (req, res, params) => {

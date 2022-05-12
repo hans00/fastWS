@@ -17,6 +17,8 @@ module.exports = function (app) {
         ws.emitToChannel(ws.channel, 'someone said', message)
       }
     })
+  }, {
+    protocol: 'fast-ws'
   })
 
   app.ws('/echo', ws => null, { protocol: 'echo' })
