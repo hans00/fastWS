@@ -26,7 +26,7 @@ class WSClient extends Base {
           this.connectState = 2
           super.emit('connect')
         } else {
-          super.emit('error', new Error('Client version mismatch.'))
+          super.emit('error', new Error('Server version mismatch.'))
         }
       } else {
         this.incomingPacket(data)
