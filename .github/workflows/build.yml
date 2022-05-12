@@ -75,11 +75,9 @@ jobs:
         node-version: '14'
         cache: 'npm'
         registry-url: https://registry.npmjs.org/
-    - name: Authenticate with Registry
+    - name: Login and publish
       run: |
-        yarn logout
-        npm config set //registry.npmjs.org/:_authToken=$NPM_TOKEN
+        echo '//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}' > .npmrc
         npm whoami
-    - run: |
         yarn install --frozen-lockfile
         yarn publish-all
