@@ -1,15 +1,10 @@
 module.exports = class ServerError extends Error {
-  constructor ({
-    code,
-    message,
-    httpCode,
-    originError
-  }) {
+  constructor (options = {}) {
     super()
-    this.code = code
-    this.message = message
-    this.httpCode = httpCode
-    this.originError = originError
+    this.code = options.code || 'E_INTERNAL'
+    this.message = options.message || 'Internal Error'
+    this.httpCode = options.httpCode || 500
+    this.originError = options.originError
   }
 
   toJSON () {
