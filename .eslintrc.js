@@ -9,7 +9,8 @@ module.exports = {
     'standard'
   ],
   plugins: [
-    'eslint-plugin-perf-standard'
+    'eslint-plugin-perf-standard',
+    'eslint-plugin-destructuring'
   ],
   globals: {
     Atomics: 'readonly',
@@ -21,6 +22,9 @@ module.exports = {
   rules: {
     'perf-standard/no-instanceof-guard': 2,
     'perf-standard/no-self-in-constructor': 2,
-    'perf-standard/check-function-inline': 1
+    'perf-standard/check-function-inline': 1,
+    'destructuring/no-rename': 1,
+    'destructuring/in-params': 2,
+    'destructuring/in-methods-params': 2
   }
 }

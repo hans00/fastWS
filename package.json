@@ -52,5 +52,8 @@
     "tar": "^6.1.11",
     "uuid": "^8.3.2",
     "node-gyp": "^9.0.0"
+  },
+  "dependencies": {
+    "eslint-plugin-destructuring": "^2.2.1"
   }
 }
