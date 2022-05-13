@@ -1,35 +1,26 @@
 const Response = require('./response')
 
 class WebSocketResponse extends Response {
-  constructor (connection, socket) {
+  constructor (connection, ctx) {
     super(connection)
-    this.socket = socket
+    this.ctx = ctx
   }
 
-  static create (connection, socket) {
-    return new WebSocketResponse(connection, socket)
+  static create (connection, ctx) {
+    return new WebSocketResponse(connection, ctx)
   }
 
-  upgrade (upgradeProtocol) {
-    if (upgradeProtocol) {
-      if (this.connection.headers['sec-websocket-protocol'].includes(upgradeProtocol)) return
-      this.connection.upgrade(
-        {
-          client: this.socket
-        },
-        this.connection.headers['sec-websocket-key'],
-        upgradeProtocol,
-        this.connection.headers['sec-websocket-extensions']
-      )
+  upgrade (protocol) {
+    const {
+      'sec-websocket-protocol': requestProtocol,
+      'sec-websocket-key': key,
+      'sec-websocket-extensions': extensions
+    } = this.connection.headers
+    if (protocol) {
+      if (requestProtocol.includes(protocol)) return
+      this.connection.upgrade(this.ctx, key, protocol, extensions)
     } else {
-      this.connection.upgrade(
-        {
-          client: this.socket
-        },
-        this.connection.headers['sec-websocket-key'],
-        this.connection.headers['sec-websocket-protocol'],
-        this.connection.headers['sec-websocket-extensions']
-      )
+      this.connection.upgrade(this.ctx, key, requestProtocol, extensions)
     }
     this._upgraded = true
   }

@@ -136,7 +136,10 @@ class Routes {
         }
         const conn = Connection.create(this, request, response, context)
         const client = options.protocolInstance.newClient(conn)
-        const res = WebSocketResponse.create(conn, client)
+        const res = WebSocketResponse.create(conn, {
+          client,
+          params
+        })
         try {
           if (!connHandler) {
             await openHandler(res.socket, params)
@@ -153,7 +156,7 @@ class Routes {
       open: async (ws) => {
         try {
           if (connHandler) {
-            await openHandler(ws.client)
+            await openHandler(ws.client, ws.params)
           }
           ws.client.onOpen(ws)
         } catch (error) {
