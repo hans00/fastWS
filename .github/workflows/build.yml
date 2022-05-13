@@ -80,4 +80,4 @@ jobs:
         echo '//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}' > .npmrc
         npm whoami
         yarn install --frozen-lockfile
-        yarn publish-all
+        yarn publish-all --no-verify-access
