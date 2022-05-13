@@ -11,6 +11,10 @@ class Request {
     this._cache = {}
   }
 
+  static create(connection) {
+    return new Request(connection)
+  }
+
   get body () {
     return this.connection.bodyData()
   }

@@ -20,32 +20,6 @@ class WSClient extends EventEmitter {
     this.parser = options.parser || nullParser
   }
 
-  upgrade (upgradeProtocol) {
-    if (this.socket) throw new Error('WS_IS_UPGRADED')
-    if (upgradeProtocol) {
-      if (this.connection.headers['sec-websocket-protocol'].includes(upgradeProtocol)) return
-      this.connection.upgrade(
-        {
-          client: this
-        },
-        this.connection.headers['sec-websocket-key'],
-        upgradeProtocol,
-        this.connection.headers['sec-websocket-extensions'],
-        this.nativeContext
-      )
-    } else {
-      this.connection.upgrade(
-        {
-          client: this
-        },
-        this.connection.headers['sec-websocket-key'],
-        this.connection.headers['sec-websocket-protocol'],
-        this.connection.headers['sec-websocket-extensions'],
-        this.nativeContext
-      )
-    }
-  }
-
   incomingPacket (payload, isBinary) {
     if (isBinary) {
       super.emit('binary', payload)

@@ -68,6 +68,10 @@ class Response extends Writable {
     })
   }
 
+  static create(connection) {
+    return new Response(connection)
+  }
+
   cork (callback) {
     this.connection.cork(callback)
   }

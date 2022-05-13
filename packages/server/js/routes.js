@@ -1,6 +1,7 @@
 const BasicWSProtocol = require('./ws-protocol/basic')
 const Request = require('./request')
 const Response = require('./response')
+const WebSocketResponse = require('./websocket')
 const Connection = require('./connection')
 const ServerError = require('./errors')
 
@@ -51,9 +52,9 @@ class Routes {
             params[key] = decodeURIComponent(request.getParameter(index))
           })
         }
-        const conn = new Connection(this, request, response)
-        const req = new Request(conn)
-        const res = new Response(conn)
+        const conn = Connection.create(this, request, response)
+        const req = Request.create(conn)
+        const res = Response.create(conn)
         try {
           await callbacks(req, res, params)
         } catch (e) {
@@ -70,7 +71,13 @@ class Routes {
     }
   }
 
-  ws (path, callback, options = {}) {
+  ws (path, connHandler, optOrOpenHandler, options) {
+    let openHandler = optOrOpenHandler
+    if (!options) {
+      options = optOrOpenHandler
+      openHandler = connHandler
+      connHandler = null
+    }
     if (options.compression) {
       if (options.compression === false || options.compression === 'disable') {
         options.compression = 0
@@ -108,7 +115,6 @@ class Routes {
     }
     const Protocol = options.protocol
     options.protocolInstance = new Protocol(options.protocolOptions)
-    options.autoUpgrade = options.autoUpgrade !== false
     options.protocolName =
       (options.restrictProtocol && typeof options.protocol === 'string')
         ? options.protocol
@@ -121,28 +127,34 @@ class Routes {
       compression: options.compression,
       idleTimeout: options.idleTimeout,
       maxPayloadLength: options.maxPayloadLength,
-      upgrade: (response, request, context) => {
+      upgrade: async (response, request, context) => {
         const params = {}
         if (URLParams) {
           URLParams.forEach((key, index) => {
             params[key] = decodeURIComponent(request.getParameter(index))
           })
         }
-        const conn = new Connection(this, request, response, context)
+        const conn = Connection.create(this, request, response, context)
         const client = options.protocolInstance.newClient(conn)
+        const res = WebSocketResponse.create(conn, client)
         try {
-          callback(client, params)
-          if (options.autoUpgrade) {
-            client.upgrade(options.protocolName)
+          if (!connHandler) {
+            await openHandler(res.socket, params)
+            res.upgrade(options.protocolName)
+          } else {
+            const req = Request.create(conn)
+            await connHandler(req, res, params)
           }
         } catch (error) {
           console.error(error)
-          const res = new Response(conn)
           res.status(500).end('Server Internal Error')
         }
       },
-      open: (ws) => {
+      open: async (ws) => {
         try {
+          if (connHandler) {
+            await openHandler(ws.client)
+          }
           ws.client.onOpen(ws)
         } catch (error) {
           console.error(error)

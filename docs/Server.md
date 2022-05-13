@@ -145,7 +145,11 @@ app.serve('/*', {
 app.ws(
   // Path
   '/path',
-  // Callback
+  // Request Callback (optional) (add this if yout want upgrade manually)
+  (req: Request, res: WebSocketResponse) => {
+    res.upgrade()
+  },
+  // WebSocket Callback (required)
   (ws: WSClient) => {
     // Manually upgrade
     ws.upgrade()
@@ -199,8 +203,6 @@ app.ws(
     idleTimeout: 300, // Default
     // Max payload length (bytes)
     maxPayloadLength: 4096, // Default
-    // Auto upgrade WebSocket
-    autoUpgrade: true, // Default
     // Restrict protocol (only work on auto upgrade)
     restrictProtocol: false, // Default
   }

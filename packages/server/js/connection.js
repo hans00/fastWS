@@ -8,7 +8,7 @@ const utils = require('./utils')
 const methodsWithBody = ['POST', 'PUT', 'PATCH', 'OPTIONS']
 
 class Connection {
-  constructor (app, request, response, wsContext = null) {
+  constructor (app, request, response, wsContext) {
     this.app = app
     this.request = request
     this.response = response
@@ -21,16 +21,22 @@ class Connection {
       }
     })
     this.rawQuery = this.request.getQuery()
-    this.method = this.request.getMethod().toUpperCase()
+    this._method = null
     this._body = null
     this._reject_data = null
     this._on_aborted = []
     this.aborted = false
+    this.upgraded = false
     this.response.onAborted(() => {
       this._on_aborted.forEach(call => call())
       this.aborted = false
     })
     this.wsContext = wsContext
+    this._remote_address = null
+  }
+
+  static create (app, request, response, wsContext = null) {
+    return new Connection(app, request, response, wsContext)
   }
 
   bodyData () {
@@ -115,6 +121,12 @@ class Connection {
     return this.request.getUrl()
   }
 
+  get method () {
+    if (!this._method)
+      this._method = this.request.getMethod().toUpperCase()
+    return this._method
+  }
+
   onWritable (callback) {
     if (this.aborted) {
       throw new ServerError({ code: 'CONNECTION_ABORTED' })
@@ -133,12 +145,18 @@ class Connection {
     if (this.aborted) {
       throw new ServerError({ code: 'CONNECTION_ABORTED' })
     }
+    if (this.upgraded) {
+      throw new ServerError({ code: 'SERVER_CONNECTION_HAD_UPGRADED' })
+    }
     return this.response.writeStatus(statusText)
   }
 
   writeHeader (key, value) {
     if (this.aborted) {
       throw new ServerError({ code: 'CONNECTION_ABORTED' })
+    }
+    if (this.upgraded) {
+      throw new ServerError({ code: 'SERVER_CONNECTION_HAD_UPGRADED' })
     }
     return this.response.writeHeader(key, value)
   }
@@ -147,12 +165,18 @@ class Connection {
     if (this.aborted) {
       throw new ServerError({ code: 'CONNECTION_ABORTED' })
     }
+    if (this.upgraded) {
+      throw new ServerError({ code: 'SERVER_CONNECTION_HAD_UPGRADED' })
+    }
     return this.response.write(data)
   }
 
   getWriteOffset () {
     if (this.aborted) {
       throw new ServerError({ code: 'CONNECTION_ABORTED' })
+    }
+    if (this.upgraded) {
+      throw new ServerError({ code: 'SERVER_CONNECTION_HAD_UPGRADED' })
     }
     return this.response.getWriteOffset()
   }
@@ -161,12 +185,18 @@ class Connection {
     if (this.aborted) {
       throw new ServerError({ code: 'CONNECTION_ABORTED' })
     }
+    if (this.upgraded) {
+      throw new ServerError({ code: 'SERVER_CONNECTION_HAD_UPGRADED' })
+    }
     return this.response.end(data)
   }
 
   cork (callback) {
     if (this.aborted) {
       throw new ServerError({ code: 'CONNECTION_ABORTED' })
+    }
+    if (this.upgraded) {
+      throw new ServerError({ code: 'SERVER_CONNECTION_HAD_UPGRADED' })
     }
     return this.response.cork(callback)
   }
@@ -178,6 +208,10 @@ class Connection {
     if (!this.wsContext) {
       throw new ServerError({ code: 'SERVER_INVALID_OPERATE' })
     }
+    if (this.upgraded) {
+      throw new ServerError({ code: 'SERVER_CONNECTION_HAD_UPGRADED' })
+    }
+    this.upgraded = true
     return this.response.upgrade(data, key, protocol, extension, this.wsContext)
   }
 }
