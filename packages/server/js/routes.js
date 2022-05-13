@@ -142,7 +142,7 @@ class Routes {
         })
         try {
           if (!connHandler) {
-            await openHandler(res.socket, params)
+            await openHandler(client, params)
             res.upgrade(options.protocolName)
           } else {
             const req = Request.create(conn)
