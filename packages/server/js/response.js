@@ -68,7 +68,7 @@ class Response extends Writable {
     })
   }
 
-  static create(connection) {
+  static create (connection) {
     return new Response(connection)
   }
 

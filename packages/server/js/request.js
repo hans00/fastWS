@@ -11,7 +11,7 @@ class Request {
     this._cache = {}
   }
 
-  static create(connection) {
+  static create (connection) {
     return new Request(connection)
   }
 

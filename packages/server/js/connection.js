@@ -122,8 +122,7 @@ class Connection {
   }
 
   get method () {
-    if (!this._method)
-      this._method = this.request.getMethod().toUpperCase()
+    if (!this._method) { this._method = this.request.getMethod().toUpperCase() }
     return this._method
   }
 

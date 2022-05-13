@@ -1,12 +1,12 @@
 const Response = require('./response')
 
 class WebSocketResponse extends Response {
-  constructor(connection, socket) {
+  constructor (connection, socket) {
     super(connection)
     this.socket = socket
   }
 
-  static create(connection, socket) {
+  static create (connection, socket) {
     return new WebSocketResponse(connection, socket)
   }
 
