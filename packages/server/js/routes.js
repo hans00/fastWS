@@ -71,7 +71,7 @@ class Routes {
     }
   }
 
-  ws (path, connHandler, optOrOpenHandler, options) {
+  ws (path, connHandler, optOrOpenHandler = {}, options = null) {
     let openHandler = optOrOpenHandler
     if (typeof optOrOpenHandler === 'object') {
       options = optOrOpenHandler
