@@ -23,6 +23,12 @@ module.exports = function (app) {
 
   app.ws('/echo', ws => null, { protocol: 'echo' })
 
+  app.ws(
+    '/ws-upgrade',
+    (req, res) => res.upgrade(),
+    ws => ws.on('open', () => ws.send('UPGRADED'))
+  )
+
   app.get('/get', (req, res) => {
     res.json(req.query)
   })

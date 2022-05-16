@@ -73,10 +73,12 @@ class Routes {
 
   ws (path, connHandler, optOrOpenHandler, options) {
     let openHandler = optOrOpenHandler
-    if (!options) {
+    if (typeof optOrOpenHandler === 'object') {
       options = optOrOpenHandler
       openHandler = connHandler
       connHandler = null
+    } else if (!options) {
+      options = {}
     }
     if (options.compression) {
       if (options.compression === false || options.compression === 'disable') {
