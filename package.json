@@ -22,7 +22,7 @@
   "scripts": {
     "build": "lerna run build --no-sort",
     "bump-version": "lerna version --no-push",
-    "publish-all": "lerna publish from-git --no-sort --yes",
+    "publish-all": "lerna publish from-package --no-sort --yes",
     "pre-build": "lerna run pre-build --",
     "pre-build-upload": "lerna run pre-build-upload --",
     "push-with-tag": "git push --follow-tags",
