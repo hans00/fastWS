@@ -1,4 +1,5 @@
 const fastWS = require('fast-ws-server')
+const { Readable } = require('stream')
 
 const app = new fastWS()
 
@@ -17,6 +18,13 @@ app.ws('/fws', (ws) => {
 app.get('/hello/:name', (req, res, params) => {
   const { name } = params
   res.end(`Hello ${name}`)
+})
+
+const bufString = Buffer.alloc(10240).fill(0x20).toString()
+
+app.get('/stream', (req, res) => {
+  const stream = Readable.from(bufString)
+  stream.pipe(res)
 })
 
 app.serve('/')

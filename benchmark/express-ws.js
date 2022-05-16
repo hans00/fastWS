@@ -1,5 +1,6 @@
 const express = require('express')
 const Protocol = require('fast-ws-server/js/ws-protocol/fast-ws')
+const { Readable } = require('stream')
 
 const app = express()
 require('express-ws')(app)
@@ -25,6 +26,13 @@ app.ws('/fws', (ws, req) => {
 
 app.get('/hello/:name', (req, res) => {
   res.end(`Hello ${req.params.name}`)
+})
+
+const bufString = Buffer.alloc(10240).fill(0x20).toString()
+
+app.get('/stream', (req, res) => {
+  const stream = Readable.from(bufString)
+  stream.pipe(res)
 })
 
 app.use('/', express.static('static'))
