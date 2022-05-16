@@ -202,18 +202,22 @@ class Response extends Writable {
     }
   }
 
+  _pipeError (error) {
+    this.corkPipe = false
+    this.emit('error', error)
+  }
+
+  _pipeEnd () {
+    this.connection.end('')
+    super.end()
+  }
+
   pipeFrom (readable) {
     if (this._writableState.destroyed) {
       return
     }
-    readable.on('error', error => {
-      this.corkPipe = false
-      this.emit('error', error)
-    })
-    readable.on('end', () => {
-      this.connection.end('')
-      super.end()
-    })
+    readable.on('error', this._pipeError.bind(this))
+    readable.on('end', this._pipeEnd.bind(this))
     // In RFC these status code must not have body
     if (this._status < 200 || this._status === 204 || this._status === 304) {
       throw new ServerError({
