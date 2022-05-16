@@ -18,6 +18,7 @@ class WSClient extends EventEmitter {
     this.socket = null
     this.internalEvents = ['message', 'binary', 'drained', 'close', 'ping', 'pong']
     this.parser = options.parser || nullParser
+    this.waitToSend = []
   }
 
   incomingPacket (payload, isBinary) {
@@ -54,6 +55,11 @@ class WSClient extends EventEmitter {
   onDrain () {
     if (this.socket.getBufferedAmount() === 0) {
       super.emit('drained')
+      if (this.waitToSend.length) {
+        const send = this.waitToSend
+        send.map(([args, resolve]) => this.doSend(...args).then(resolve))
+        this.waitToSend = []
+      }
     }
   }
 
@@ -68,10 +74,7 @@ class WSClient extends EventEmitter {
       return this.socket.send(data, isBinary, compress)
     } else {
       await new Promise((resolve) => {
-        super.once('drained', async () => {
-          await this.doSend(data, isBinary, compress)
-          resolve()
-        })
+        this.waitToSend.push([[data, isBinary, compress], resolve])
       })
     }
   }

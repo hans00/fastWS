@@ -30,6 +30,14 @@ module.exports = function (app) {
     ws => ws.on('open', () => ws.send('UPGRADED'))
   )
 
+  app.ws('/drain', ws => {
+    const count = 100000
+    ws.on('open', () => {
+      for (let index = 0; index < count; index++)
+        ws.send(index.toString())
+    })
+  })
+
   app.get('/get', (req, res) => {
     res.json(req.query)
   })
