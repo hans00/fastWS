@@ -189,6 +189,7 @@ class Response extends Writable {
     if (this._writableState.destroyed) {
       return
     }
+    this.writeHead()
     const data = toArrayBuffer(chunk)
     const ok = this.connection.writeBody(data)
     if (!ok) {
@@ -206,6 +207,7 @@ class Response extends Writable {
       return
     }
     readable.on('error', error => {
+      this.corkPipe = false
       this.emit('error', error)
     })
     readable.on('end', () => {
@@ -220,7 +222,6 @@ class Response extends Writable {
         httpCode: 500
       })
     }
-    this.writeHead()
     this.corkPipe = true
     return this
   }

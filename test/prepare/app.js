@@ -1,6 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 const http = require('http')
+const Stream = require('stream')
 
 module.exports = function (app) {
 
@@ -63,6 +64,18 @@ module.exports = function (app) {
     http.get('http://google.com/', response => {
       response.pipe(res)
     })
+  })
+
+  app.get('/stream/error', (req, res) => {
+    const stream = new Stream.Readable({
+      read: () => '',
+    })
+    setTimeout(() => stream.emit('error', new Error('OOPS')))
+    stream
+      .pipe(res)
+      .on('error', e => {
+        res.status(500).end(e.message)
+      })
   })
 
   app.get('/address', (req, res) => {
