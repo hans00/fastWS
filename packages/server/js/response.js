@@ -5,7 +5,11 @@ const mime = require('mime-types')
 const { Writable } = require('stream')
 
 function toArrayBuffer (buffer) {
-  return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
+  if (typeof buffer === 'object' && buffer.constructor.name === 'Buffer') {
+    return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
+  } else {
+    return buffer
+  }
 }
 
 const httpStatusCode = {
