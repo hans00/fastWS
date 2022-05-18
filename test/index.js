@@ -10,7 +10,7 @@ const config = {
   HTTPS_PORT: 3001,
 }
 
-const TIMEOUT = 10 * 1000
+const TIMEOUT = 30 * 1000
 
 process.chdir(__dirname)
 

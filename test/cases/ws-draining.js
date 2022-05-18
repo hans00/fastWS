@@ -5,7 +5,7 @@ module.exports = function ({ HTTP_PORT }) {
     const ws = new WS(`ws://localhost:${HTTP_PORT}/drain`)
 
     let indexToWait = 0
-    const count = 100000
+    const count = 50000
 
     ws.on('error', (e) => {
       reject(e)
