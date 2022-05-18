@@ -32,12 +32,17 @@ module.exports = function (app) {
 
   app.ws('/drain', ws => {
     const count = 80000
-    ws.on('open', () => {
-      for (let index = 0; index < count; index++)
-        ws.send(index.toString())
+    let isDraining = false
+    let index = -1
+    ws.on('open', async () => {
+      while (!isDraining)
+        await ws.send(JSON.stringify(++index))
+      ws.send(JSON.stringify({ index: index + 10 }))
+      for (let i=1; i <= 10; ++i)
+        ws.send(JSON.stringify(index+i))
     })
     ws.on('drained', () => {
-      console.log('Buffer clear')
+      isDraining = true
     })
   })
 
