@@ -31,10 +31,13 @@ module.exports = function (app) {
   )
 
   app.ws('/drain', ws => {
-    const count = 50000
+    const count = 80000
     ws.on('open', () => {
       for (let index = 0; index < count; index++)
         ws.send(index.toString())
+    })
+    ws.on('drained', () => {
+      console.log('Buffer clear')
     })
   })
 

@@ -5,11 +5,19 @@ module.exports = function ({ HTTP_PORT }) {
     const ws = new WS(`ws://localhost:${HTTP_PORT}/drain`)
 
     let indexToWait = 0
-    const count = 50000
+    const count = 80000
 
     ws.on('error', (e) => {
       reject(e)
       ws.close()
+    })
+
+    ws.on('close', (e) => {
+      if (indexToWait >= count) {
+        resolve()
+      } else {
+        reject(new Error('Unexpected socket close'))
+      }
     })
 
     ws.on('message', message => {
@@ -21,7 +29,6 @@ module.exports = function ({ HTTP_PORT }) {
         ws.close()
       }
       if (indexToWait >= count) {
-        resolve()
         ws.close()
       }
     })
