@@ -29,7 +29,10 @@
     "tag-version": "git tag -a v${npm_package_version} -m \"release v${npm_package_version}\"",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "test": "node test"
+    "test": "node test",
+    "coverage": "yarn run coverage:test && yarn run coverage:report",
+    "coverage:test": "nyc yarn run test",
+    "coverage:report": "nyc report --reporter=lcov --reporter=text-summary"
   },
   "devDependencies": {
     "axios": "^0.27.2",
@@ -44,6 +47,7 @@
     "lerna": "^4.0.0",
     "lru-cache": "^6.0.0",
     "mkcert": "^1.5.0",
+    "nyc": "^15.1.0",
     "pre-commit": "^1.2.2",
     "tmp": "^0.2.1",
     "ws": "^8.6.0"

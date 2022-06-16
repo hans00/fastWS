@@ -3,5 +3,7 @@ build/
 prebuilds/
 *.pem
 dev-test/
+coverage/
+.nyc_output/
 *.log
 .npmrc
