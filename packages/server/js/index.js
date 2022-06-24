@@ -91,7 +91,7 @@ class fastWS extends Routes {
       this._listenTo = [host, port]
     }
     // init app
-    this._server = this.options.ssl ? uWS.SSLApp(this.options.ssl) : uWS.App()
+    this._server = this._options.ssl ? uWS.SSLApp(this._options.ssl) : uWS.App()
     super.build()
       .forEach(([method, path, callback]) => {
         this._server[method](path, callback)
@@ -100,9 +100,9 @@ class fastWS extends Routes {
     const listenCallback = (listenSocket) => {
       this._socket = listenSocket
       if (listenSocket) {
-        this.options.verbose && console.log('Started')
+        this._options.verbose && console.log('Started')
       } else {
-        this.options.verbose && console.log('Failed')
+        this._options.verbose && console.log('Failed')
       }
       if (callback) {
         callback(listenSocket)
@@ -119,10 +119,10 @@ class fastWS extends Routes {
   gracefulStop (canForceExit = true) {
     if (this._socket) {
       const forceStop = canForceExit && setTimeout(() => {
-        this.options.verbose && console.log('Force stop')
+        this._options.verbose && console.log('Force stop')
         process.exit(0)
-      }, this.options.forceStopTimeout)
-      this.options.verbose && console.log('Shutting down...')
+      }, this._options.forceStopTimeout)
+      this._options.verbose && console.log('Shutting down...')
       uWS.us_listen_socket_close(this._socket)
       clearTimeout(forceStop)
       this._socket = null
@@ -131,7 +131,7 @@ class fastWS extends Routes {
 
   reload () {
     if (this._server) {
-      this.options.verbose && console.log('Reloading...')
+      this._options.verbose && console.log('Reloading...')
       this.listen()
     }
   }
