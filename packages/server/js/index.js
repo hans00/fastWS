@@ -1,4 +1,5 @@
 const uWS = require('bindings')('uWS')
+const bytes = require('bytes')
 const ServerError = require('./errors')
 const Routes = require('./routes')
 const render = require('./render')
@@ -14,36 +15,13 @@ class fastWS extends Routes {
       bodySize = '4mb',
       forceStopTimeout = 5000
     } = options || {}
-    if (typeof bodySize === 'string') {
-      // convert string to bytes number
-      bodySize = bodySize.toLowerCase()
-      if (!isNaN(bodySize.slice(0, -2))) {
-        switch (bodySize.slice(-2)) {
-          case 'kb':
-            bodySize = Number(bodySize.slice(0, -2)) * 1024
-            break
-          case 'mb':
-            bodySize = Number(bodySize.slice(0, -2)) * 1024 * 1024
-            break
-          case 'gb':
-            bodySize = Number(bodySize.slice(0, -2)) * 1024 * 1024 * 1024
-            break
-          default:
-            throw new ServerError({
-              code: 'SERVER_INVALID_OPTIONS',
-              message: 'The body size format is invalid.'
-            })
-        }
-      } else {
-        throw new ServerError({
-          code: 'SERVER_INVALID_OPTIONS',
-          message: 'The body size format is invalid.'
-        })
-      }
-    } else if (typeof bodySize !== 'number') {
+    try {
+      bodySize = bytes.parse(bodySize)
+    } catch (e) {
       throw new ServerError({
         code: 'SERVER_INVALID_OPTIONS',
-        message: 'The body size format is invalid.'
+        message: 'The body size format is invalid.',
+        originError: e
       })
     }
     if (typeof templateRender !== 'function') {
