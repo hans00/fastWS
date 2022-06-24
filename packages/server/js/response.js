@@ -196,7 +196,7 @@ class Response extends Writable {
       return
     }
     this.writeHead()
-    const data = toArrayBuffer(Buffer.from(body, encoding))
+    const data = !encoding && typeof body === 'string' ? body : toArrayBuffer(Buffer.from(body, encoding))
     const ok = this.connection.writeBody(data)
     if (!ok) {
       this.connection.onWritable((offset) => {
