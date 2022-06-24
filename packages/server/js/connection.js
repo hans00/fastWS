@@ -102,15 +102,15 @@ class Connection {
   }
 
   get cacheProvider () {
-    return this.app.options.cache
+    return this.app._options.cache
   }
 
   get renderer () {
-    return this.app.options.templateRender
+    return this.app._options.templateRender
   }
 
   get bodyLimit () {
-    return this.app.options.bodySize
+    return this.app._options.bodySize
   }
 
   get remoteAddress () {

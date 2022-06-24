@@ -75,7 +75,7 @@ class fastWS extends Routes {
         message: 'The option `cache` is invalid.'
       })
     }
-    this.options = {
+    this._options = {
       ssl,
       verbose,
       bodySize,
