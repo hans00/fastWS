@@ -9,8 +9,8 @@
     "fast-ws-client": "^2.1.0",
     "fast-ws-server": "^2.2.5",
     "nanoexpress": "^5.2.4",
-    "socket.io": "^4.5.0",
-    "socket.io-client": "^4.5.0",
-    "ws": "^8.6.0"
+    "socket.io": "^4.5.1",
+    "socket.io-client": "^4.5.1",
+    "ws": "^8.8.0"
   }
 }
