@@ -4,6 +4,8 @@ const path = require('path')
 const mime = require('mime-types')
 const { Writable } = require('stream')
 
+const noop = () => {}
+
 function toArrayBuffer (buffer) {
   if (typeof buffer === 'object' && buffer.constructor.name === 'Buffer') {
     return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
@@ -189,20 +191,20 @@ class Response extends Writable {
     }
   }
 
-  _write (chunk, encoding, next) {
+  write (body, encoding, callback = noop) {
     if (this._writableState.destroyed) {
       return
     }
     this.writeHead()
-    const data = toArrayBuffer(chunk)
+    const data = toArrayBuffer(Buffer.from(body, encoding))
     const ok = this.connection.writeBody(data)
     if (!ok) {
       this.connection.onWritable((offset) => {
-        this._write(data.slice(offset - this.connection.getWriteOffset()), encoding, next)
+        this.write(data.slice(offset - this.connection.getWriteOffset()), encoding, callback)
         this.emit('drain')
       })
     } else {
-      next()
+      callback()
     }
   }
 
