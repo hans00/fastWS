@@ -38,9 +38,6 @@ class fastWS extends Routes {
         })
       }
       this._cache = cache
-    } else if (typeof cache === 'string') {
-      const CacheModule = require(cache)
-      cache = new CacheModule()
     } else if (cache === false) {
       // disable cache
       cache = {
