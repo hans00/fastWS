@@ -98,6 +98,10 @@ module.exports = function (app) {
     res.end(req.ip)
   })
 
+  app.get('/empty', (req, res) => {
+    res.end()
+  })
+
   app.serve('/*')
 
   return app

@@ -187,7 +187,7 @@ class Connection {
     if (this.upgraded) {
       throw new ServerError({ code: 'SERVER_CONNECTION_HAD_UPGRADED' })
     }
-    return this.response.end(data)
+    return data ? this.response.end(data) : this.response.endWithoutBody()
   }
 
   cork (callback) {

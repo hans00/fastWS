@@ -240,6 +240,9 @@ class Response extends Writable {
     if (this._writableState.destroyed) {
       return
     }
+    if (!data && this._status === 200) {
+      this._status = 204
+    }
     // In RFC these status code must not have body
     if (this._status < 200 || this._status === 204 || this._status === 304) {
       data = ''
@@ -256,7 +259,6 @@ class Response extends Writable {
     } else {
       super.end()
     }
-    return this
   }
 
   send (data) {
