@@ -1,9 +1,9 @@
 const fs = require('fs')
 const path = require('path')
-const chalk = require('chalk')
-const success = chalk.bold.green
-const error = chalk.bold.red
-const warning = chalk.keyword('orange')
+const c = require('ansi-colors')
+const success = c.bold.green
+const error = c.bold.red
+const warning = c.yellow
 
 const config = {
   HTTP_PORT: 3000,
