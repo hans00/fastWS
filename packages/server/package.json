@@ -27,11 +27,10 @@
   "author": "Hans <admin@itsrv.tw>",
   "license": "Apache-2.0",
   "scripts": {
-    "install": "prebuild-install || node-gyp rebuild",
+    "install": "node-gyp-build",
     "build": "node-gyp rebuild",
-    "pre-build": "prebuild -t 14.0.0 -t 16.0.0 -t 17.0.1 -t 18.0.0 --strip",
-    "pre-build-arm": "prebuildify-cross  -i linux-arm64 -t 14.0.0 -t 16.0.0 -t 17.0.1 -t 18.0.0 --strip",
-    "pre-build-upload": "prebuild --upload-all",
+    "pre-build": "prebuildify -t 14.0.0 -t 16.0.0 -t 17.0.1 -t 18.0.0 --strip",
+    "pre-build-arm": "docker run --rm -v $PWD:/app ghcr.io/prebuild/linux-arm64:2 npx prebuildify -t 14.0.0 -t 16.0.0 -t 17.0.1 -t 18.0.0 --strip --tag-armv",
     "clean": "rimraf build node_modules prebuilds"
   },
   "dependencies": {
@@ -42,6 +41,7 @@
     "iconv-lite": "^0.6.3",
     "mime-types": "^2.1.35",
     "multipart-formdata": "^1.1.0",
+    "node-gyp-build": "^4.4.0",
     "prebuild-install": "^7.1.0",
     "qs": "^6.10.3",
     "range-parser": "^1.2.1",
@@ -49,9 +49,7 @@
   },
   "devDependencies": {
     "node-gyp": "^8.2.0",
-    "prebuild": "^11.0.3",
     "prebuildify": "^5.0.0",
-    "prebuildify-cross": "^5.0.0",
     "rimraf": "^3.0.2"
   },
   "gitHead": "e939a8cb4e569fc3155c95c942470ab279e9d77d"

@@ -28,14 +28,18 @@ jobs:
       run: yarn build
     - name: Test
       run: yarn test
-    - name: prebuild arm
+    - name: Prebuild binary for ARM
       if: matrix.os == 'ubuntu-latest'
       run: yarn pre-build-arm
-    - name: Publish prebuild binary
+    - name: Prebuild binary
       if: startsWith(github.ref, 'refs/tags/v')
-      run: |
-        yarn pre-build
-        yarn pre-build-upload ${{secrets.GITHUB_TOKEN}}
+      run: yarn pre-build
+    - name: Archive prebuilds
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist
+        path: |
+          packages/server/prebuilds
 
   publish-npm:
     needs: build
@@ -52,6 +56,10 @@ jobs:
         node-version: '14'
         cache: 'npm'
         registry-url: https://registry.npmjs.org/
+    - name: Download prebuilds
+      uses: actions/download-artifact@v3
+      with:
+        name: dist
     - name: Login and publish
       run: |
         echo '//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}' > .npmrc

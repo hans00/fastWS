@@ -1,4 +1,4 @@
-const uWS = require('bindings')('uWS')
+const uWS = require('../binding')
 const bytes = require('bytes')
 const ServerError = require('./errors')
 const Routes = require('./routes')
