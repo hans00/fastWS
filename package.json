@@ -44,7 +44,7 @@
     "eslint-plugin-perf-standard": "^1.0.3",
     "eslint-plugin-promise": "^6.0.0",
     "form-data": "^4.0.0",
-    "lerna": "^4.0.0",
+    "lerna": "^5.1.6",
     "lru-cache": "^7.10.1",
     "mkcert": "^1.5.0",
     "nyc": "^15.1.0",
