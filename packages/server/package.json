@@ -30,8 +30,8 @@
     "install": "node-gyp-build",
     "build": "node-gyp rebuild",
     "pre-build": "prebuildify -t 14.0.0 -t 16.0.0 -t 17.0.1 -t 18.0.0 --strip",
-    "prepre-build-arm": "mkdir prebuilds 2>/dev/null && chmod -R a+wx prebuilds build || true",
-    "pre-build-arm": "docker run --rm -v $PWD:/app ghcr.io/prebuild/linux-arm64:2 npx prebuildify -t 14.0.0 -t 16.0.0 -t 17.0.1 -t 18.0.0 --strip --tag-armv",
+    "pre-build-arm-docker": "docker run --user $(id -u):$(id -g) --rm -v $PWD:/app ghcr.io/prebuild/linux-arm64:2 yarn pre-build-arm",
+    "pre-build-arm": "prebuildify -t 14.0.0 -t 16.0.0 -t 17.0.1 -t 18.0.0 --strip --tag-armv",
     "clean": "rimraf build node_modules prebuilds"
   },
   "dependencies": {

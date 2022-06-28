@@ -24,6 +24,7 @@
     "bump-version": "lerna version --no-push",
     "publish-all": "lerna publish from-package --no-sort --yes",
     "pre-build": "lerna run pre-build --",
+    "pre-build-arm-docker": "lerna run pre-build-arm-docker --",
     "pre-build-arm": "lerna run pre-build-arm --",
     "push-with-tag": "git push --follow-tags",
     "tag-version": "git tag -a v${npm_package_version} -m \"release v${npm_package_version}\"",
