@@ -227,7 +227,7 @@ class Response extends Writable {
         contentType = mime.lookup(readable.path) || 'application/octet-stream'
       }
     }
-    if (contentType) {
+    if (!this.getHeader('content-type') && contentType) {
       this.setHeader('Content-Type', contentType)
     }
     readable.on('error', this._pipeError.bind(this))
