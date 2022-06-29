@@ -211,15 +211,24 @@ class Response extends Writable {
     super.end()
   }
 
-  pipeFrom (readable) {
+  pipeFrom (readable, contentType) {
     if (this._writableState.destroyed) {
       return
     }
     if (readable.headers) { // HTTP
       this._totalSize = Number(readable.headers['content-length'])
+      if (!contentType && readable.headers['content-type']) {
+        contentType = readable.headers['content-type']
+      }
     } else if (readable.path) { // FS
       const { size } = fs.statSync(readable.path)
       this._totalSize = size
+      if (!contentType) {
+        contentType = mime.lookup(readable.path) || 'application/octet-stream'
+      }
+    }
+    if (contentType) {
+      this.setHeader('Content-Type', contentType)
     }
     readable.on('error', this._pipeError.bind(this))
     readable.on('end', this._pipeEnd.bind(this))

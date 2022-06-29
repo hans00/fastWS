@@ -5,6 +5,9 @@ module.exports = async function ({ HTTP_PORT }) {
   if (res.status !== 200) {
     throw new Error(`Response ${res.status}`)
   }
+  if (!res.headers['content-type']) {
+    throw new Error('Unknown Content-Type')
+  }
   if (!res.headers['content-length']) {
     throw new Error('Unknown Content-Length')
   }
