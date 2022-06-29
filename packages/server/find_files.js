@@ -5,7 +5,7 @@ const basePath = process.argv[2]
 const ext = process.argv[3] || ''
 const exclude = process.argv[4] || ''
 
-function walk(dir) {
+function walk (dir) {
   for (const name of fs.readdirSync(dir)) {
     const fullPath = path.join(dir, name)
     if (fs.lstatSync(fullPath).isDirectory() && (!exclude || !name.includes(exclude))) {
