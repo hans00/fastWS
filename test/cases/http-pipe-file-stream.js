@@ -8,7 +8,7 @@ module.exports = async function ({ HTTP_PORT }) {
   if (!res.headers['content-type']) {
     throw new Error('Unknown Content-Type')
   }
-  if (Number(res.headers['content-length']) !== 5) {
+  if (Number(res.headers['content-length']) > 4) {
     throw new Error(`Invalid Content-Length ${res.headers['content-length']}`)
   }
   if (!res.data.startsWith('TEST')) {
