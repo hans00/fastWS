@@ -29,7 +29,7 @@ class Connection {
     this.upgraded = false
     this.response.onAborted(() => {
       this._on_aborted.forEach(call => call())
-      this.aborted = false
+      this.aborted = true
     })
     this.wsContext = wsContext
     this._remote_address = null
@@ -160,14 +160,22 @@ class Connection {
     return this.response.writeHeader(key, value)
   }
 
-  writeBody (data) {
+  writeBody (data, totalSize = 0) {
     if (this.aborted) {
       throw new ServerError({ code: 'CONNECTION_ABORTED' })
     }
     if (this.upgraded) {
       throw new ServerError({ code: 'SERVER_CONNECTION_HAD_UPGRADED' })
     }
-    return this.response.write(data)
+    if (totalSize) {
+      const [ok, done] = this.response.tryEnd(data, totalSize)
+      if (done) {
+        this.aborted = true
+      }
+      return ok
+    } else {
+      return this.response.write(data)
+    }
   }
 
   getWriteOffset () {
@@ -181,6 +189,7 @@ class Connection {
   }
 
   end (data) {
+    if (!data && this.aborted) return
     if (this.aborted) {
       throw new ServerError({ code: 'CONNECTION_ABORTED' })
     }

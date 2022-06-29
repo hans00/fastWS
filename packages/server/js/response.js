@@ -64,6 +64,7 @@ class Response extends Writable {
   constructor (connection) {
     super()
     this.connection = connection
+    this._totalSize = 0
     this._status = 200
     this._headers = {}
     this.headersSent = false
@@ -196,8 +197,10 @@ class Response extends Writable {
       return
     }
     this.writeHead()
-    const data = !encoding && typeof body === 'string' ? body : toArrayBuffer(Buffer.from(body, encoding))
-    const ok = this.connection.writeBody(data)
+    const data = !encoding && typeof body === 'string'
+      ? body
+      : toArrayBuffer(Buffer.from(body, encoding))
+    const ok = this.connection.writeBody(data, this._totalSize)
     if (!ok) {
       this.connection.onWritable((offset) => {
         this.write(data.slice(offset - this.connection.getWriteOffset()), encoding, callback)
@@ -221,6 +224,12 @@ class Response extends Writable {
   pipeFrom (readable) {
     if (this._writableState.destroyed) {
       return
+    }
+    if (readable.headers) { // HTTP
+      this._totalSize = Number(readable.headers['content-length'])
+    } else if (readable.path) { // FS
+      const { size } = fs.statSync(readable.path)
+      this._totalSize = size
     }
     readable.on('error', this._pipeError.bind(this))
     readable.on('end', this._pipeEnd.bind(this))
