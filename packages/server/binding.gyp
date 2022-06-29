@@ -4,18 +4,29 @@
   },
   'target_defaults': {
     'cflags': [
+      '-std=c11',
       '-flto',
       '-O3',
+      '-pthread'
     ],
     'cflags_cc': [
-      '-std=c++17'
+      '-std=c++17',
+      '-pthread'
+    ],
+    'ldflags': [
+      '-pthread'
     ],
     'include_dirs': [
       'deps/uWebSockets.js/uWebSockets/uSockets/src',
+      'deps/uWebSockets.js/uWebSockets/uSockets/lsquic/include',
+      'deps/uWebSockets.js/uWebSockets/uSockets/boringssl/include',
       'deps/uWebSockets.js/uWebSockets/src',
+      'deps/uWebSockets.js/uWebSockets/libdeflate'
     ],
     'defines': [
+      'LIBUS_USE_QUIC',
       'UWS_WITH_PROXY',
+      'UWS_USE_LIBDEFLATE',
       'LIBUS_USE_LIBUV',
       'LIBUS_USE_OPENSSL',
       'OPENSSL_API_COMPAT=0x10100001L',
@@ -43,12 +54,14 @@
           'OTHER_CFLAGS': [
             '-flto',
             '-O3',
+            '-pthread',
           ],
           'OTHER_CPLUSPLUSFLAGS': [
             '-std=c++17',
             '-stdlib=libc++',
             '-flto',
             '-O3',
+            '-pthread',
           ],
         },
       }],
@@ -117,19 +130,19 @@
           ]
         },
       ]
-    }]
+    }],
   ],
   'targets': [
     {
       'target_name': 'uWS',
       'sources': [
-        '<!@(ls -1 deps/uWebSockets.js/uWebSockets/uSockets/src/*.c)',
-        '<!@(ls -1 deps/uWebSockets.js/uWebSockets/uSockets/src/eventing/*.c)',
-        '<!@(ls -1 deps/uWebSockets.js/uWebSockets/uSockets/src/crypto/*.c)',
+        '<!@(node find_files.js deps/uWebSockets.js/uWebSockets/uSockets/src/ .c)',
+        '<!@(node find_files.js deps/uWebSockets.js/uWebSockets/uSockets/src/eventing/ .c)',
+        '<!@(node find_files.js deps/uWebSockets.js/uWebSockets/uSockets/src/crypto/ .c)',
         'deps/uWebSockets.js/src/addon.cpp',
         'deps/uWebSockets.js/uWebSockets/uSockets/src/crypto/sni_tree.cpp',
       ],
-      'dependencies': [],
+      'dependencies': [ 'deflate', 'boringssl', 'lsquic' ],
       'conditions': [
         ['OS=="linux"', {
           'cflags_c+': [ '-std=c++17' ],
@@ -139,6 +152,40 @@
           'dependencies': [ 'z' ]
         }]
       ],
-    }
+    },
+    {
+      'target_name': 'boringssl',
+      'product_prefix': 'lib',
+      'type': 'static_library',
+      'sources': [
+        '<!@(node find_files.js deps/uWebSockets.js/uWebSockets/uSockets/boringssl/ssl/ .cc test)',
+        '<!@(node find_files.js deps/uWebSockets.js/uWebSockets/uSockets/boringssl/crypto/ .c test)',
+      ]
+    },
+    {
+      'target_name': 'deflate',
+      'product_prefix': 'lib',
+      'type': 'static_library',
+      'sources': [
+        '<!@(node find_files.js deps/uWebSockets.js/uWebSockets/libdeflate/lib/ .c test)',
+      ]
+    },
+    {
+      'target_name': 'lsquic',
+      'product_prefix': 'lib',
+      'type': 'static_library',
+      'dependencies': [ 'boringssl' ],
+      'defines': [
+        'XXH_HEADER_NAME="xxhash.h"',
+      ],
+      'include_dirs': [
+        'deps/uWebSockets.js/uWebSockets/uSockets/lsquic/src/lshpack/deps/xxhash',
+      ],
+      'sources': [
+        '<!@(node find_files.js deps/uWebSockets.js/uWebSockets/uSockets/lsquic/src/liblsquic/ .cc test)',
+        '<!@(node find_files.js deps/uWebSockets.js/uWebSockets/uSockets/lsquic/src/lshpack/deps/ .cc test)',
+        'deps/uWebSockets.js/uWebSockets/uSockets/lsquic/src/lshpack/lshpack.c',
+      ]
+    },
   ]
 }
