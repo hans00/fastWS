@@ -15,7 +15,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '14'
+        node-version: '16'
     - name: Install
       run: yarn install --frozen-lockfile
     - name: Lint check
@@ -35,8 +35,7 @@ jobs:
         submodules: recursive
     - uses: actions/setup-node@v2
       with:
-        node-version: '14'
-        cache: 'npm'
+        node-version: '16'
         registry-url: https://registry.npmjs.org/
     - name: Login and publish
       run: |
