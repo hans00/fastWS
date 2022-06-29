@@ -50,7 +50,7 @@ module.exports = function (app) {
     res.json(req.query)
   })
 
-  app.post('/qvalue', async (req, res) => {
+  app.post('/header-value', async (req, res) => {
     const data = await req.body
     res.setHeader('Test', data).end()
   })
