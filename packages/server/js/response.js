@@ -187,13 +187,15 @@ class Response extends Writable {
       return
     }
     this.writeHead()
+    if (body.length === 0) callback()
     const data = !encoding && typeof body === 'string'
       ? body
       : toArrayBuffer(Buffer.from(body, encoding))
     const ok = this.connection.writeBody(data, this._totalSize)
+    this.connection.writeOffset = this.connection.getWriteOffset()
     if (!ok) {
       this.connection.onWritable((offset) => {
-        this.write(data.slice(offset - this.connection.getWriteOffset()), encoding, callback)
+        this.write(data.slice(offset - this.connection.writeOffset), encoding, callback)
         this.emit('drain')
       })
     } else {
