@@ -30,4 +30,28 @@ exports.toFraindlyIP = (rawIpAddress) => {
   }
 }
 
+const buildHeaderValue = (params, delimiter = ', ') => {
+  switch (typeof params) {
+    case 'string':
+    case 'number':
+      return params.toString()
+    case 'object':
+      return Array.isArray(params)
+        ? params
+          .filter(Boolean)
+          .map((p) => buildHeaderValue(p, ';'))
+          .join(delimiter)
+        : Object.entries(params)
+          .map(([key, val]) =>
+            val
+              ? ((typeof val === 'boolean') ? key : `${key}=${val}`)
+              : null)
+          .filter(x => x)
+          .join(delimiter)
+    default: return undefined
+  }
+}
+
+exports.buildHeaderValue = buildHeaderValue
+
 exports.trust = () => ([])

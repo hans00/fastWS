@@ -1,8 +1,11 @@
 const ServerError = require('./errors')
+const { buildHeaderValue } = require('./utils')
 const fs = require('fs')
 const path = require('path')
 const mime = require('mime-types')
 const { Writable } = require('stream')
+
+const staticPath = path.resolve(process.cwd(), 'static')
 
 const noop = () => {}
 
@@ -92,23 +95,10 @@ class Response extends Writable {
     if (filePath.endsWith('/')) {
       filePath += 'index.html'
     }
-    const fullPath = path.resolve(path.join('static', filePath))
-    const isInStatic = fullPath.startsWith(path.resolve('static'))
+    const fullPath = path.join(staticPath, filePath)
+    const isSecurePath = fullPath.startsWith(staticPath)
     const checkModifyTime = this.connection.headers['if-modified-since']
-    if (isInStatic && fs.existsSync(fullPath) && !fullPath.match(/\/\./)) {
-      // cache control
-      let cacheControl
-      if (typeof cache === 'string') {
-        cacheControl = cache
-      } else if (typeof cache === 'object') {
-        cacheControl = Object.entries(cache)
-          .map(([key, val]) =>
-            val
-              ? ((typeof val === 'boolean') ? key : `${key}=${val}`)
-              : null)
-          .filter(x => x)
-          .join(', ')
-      }
+    if (isSecurePath && !fullPath.match(/\/\./)) {
       // if cache found file, send file in cache
       if (this.connection.cacheProvider.has(fullPath)) {
         const file = this.connection.cacheProvider.get(fullPath)
@@ -116,7 +106,7 @@ class Response extends Writable {
           return this.status(304).end()
         } else {
           this.setHeader('Last-Modified', file.mtime)
-            .setHeader('Cache-Control', cacheControl)
+            .setHeader('Cache-Control', cache)
             .end(file.content, file.contentType)
         }
       } else {
@@ -128,7 +118,7 @@ class Response extends Writable {
           return this.status(304).end()
         } else {
           this.setHeader('Last-Modified', mtime)
-            .setHeader('Cache-Control', cacheControl)
+            .setHeader('Cache-Control', cache)
             .end(content, contentType)
         }
       }
@@ -309,7 +299,7 @@ class Response extends Writable {
   }
 
   setHeader (key, value) {
-    this._headers[key.toLowerCase()] = value
+    this._headers[key.toLowerCase()] = buildHeaderValue(value)
     return this
   }
 
