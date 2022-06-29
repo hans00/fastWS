@@ -87,6 +87,18 @@ module.exports = function (app) {
     })
   })
 
+  async function * gen () {
+    for (let i = 0; i < 100; i++) {
+      yield 'A'
+      await new Promise(r => setTimeout(r, 2))
+    }
+  }
+
+  app.get('/stream/', (req, res) => {
+    res.connection.onAborted(() => console.log('Client aborted'))
+    Stream.Readable.from(gen()).pipe(res)
+  })
+
   app.get('/stream/error', (req, res) => {
     const stream = new Stream.Readable({
       read: () => '',
