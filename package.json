@@ -20,12 +20,8 @@
   },
   "homepage": "https://github.com/hans00/fastWS#readme",
   "scripts": {
-    "build": "lerna run build --no-sort",
     "bump-version": "lerna version",
     "publish-all": "lerna publish from-package --no-sort --yes",
-    "pre-build": "lerna run pre-build --",
-    "pre-build-arm-docker": "./build-arm.sh",
-    "pre-build-arm": "lerna run pre-build-arm --",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "test": "node test",

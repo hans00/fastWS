@@ -1,6 +1,0 @@
-[submodule "packages/server/deps/uWebSockets.js"]
-	path = packages/server/deps/uWebSockets.js
-	url = https://github.com/uNetworking/uWebSockets.js.git
-[submodule "packages/server/deps/zlib"]
-	path = packages/server/deps/zlib
-	url = https://github.com/madler/zlib.git

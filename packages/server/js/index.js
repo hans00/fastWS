@@ -1,4 +1,4 @@
-const uWS = require('../binding')
+const uWS = require('uWebSockets.js')
 const bytes = require('bytes')
 const ServerError = require('./errors')
 const Routes = require('./routes')
