@@ -21,12 +21,12 @@
       'deps/uWebSockets.js/uWebSockets/uSockets/lsquic/include',
       'deps/uWebSockets.js/uWebSockets/uSockets/boringssl/include',
       'deps/uWebSockets.js/uWebSockets/src',
-      'deps/uWebSockets.js/uWebSockets/libdeflate'
+      # 'deps/uWebSockets.js/uWebSockets/libdeflate',
     ],
     'defines': [
       'LIBUS_USE_QUIC',
       'UWS_WITH_PROXY',
-      'UWS_USE_LIBDEFLATE',
+      # 'UWS_USE_LIBDEFLATE',
       'LIBUS_USE_LIBUV',
       'LIBUS_USE_OPENSSL',
       'OPENSSL_API_COMPAT=0x10100001L',
@@ -142,7 +142,11 @@
         'deps/uWebSockets.js/src/addon.cpp',
         'deps/uWebSockets.js/uWebSockets/uSockets/src/crypto/sni_tree.cpp',
       ],
-      'dependencies': [ 'deflate', 'boringssl', 'lsquic' ],
+      'dependencies': [
+        # 'deflate',
+        'boringssl',
+        'lsquic',
+      ],
       'conditions': [
         ['OS=="linux"', {
           'cflags_c+': [ '-std=c++17' ],
@@ -162,14 +166,14 @@
         '<!@(node find_files.js deps/uWebSockets.js/uWebSockets/uSockets/boringssl/crypto/ .c test)',
       ]
     },
-    {
-      'target_name': 'deflate',
-      'product_prefix': 'lib',
-      'type': 'static_library',
-      'sources': [
-        '<!@(node find_files.js deps/uWebSockets.js/uWebSockets/libdeflate/lib/ .c test)',
-      ]
-    },
+    # {
+    #   'target_name': 'deflate',
+    #   'product_prefix': 'lib',
+    #   'type': 'static_library',
+    #   'sources': [
+    #     '<!@(node find_files.js deps/uWebSockets.js/uWebSockets/libdeflate/lib/ .c test)',
+    #   ]
+    # },
     {
       'target_name': 'lsquic',
       'product_prefix': 'lib',
