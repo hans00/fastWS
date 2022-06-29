@@ -4,7 +4,6 @@
   },
   'target_defaults': {
     'cflags': [
-      '-std=c11',
       '-flto',
       '-O3',
       '-pthread'
@@ -47,6 +46,7 @@
         },
       }],
       ['OS=="linux"', {
+        'cflags_c+': [ '-std=gnu11' ],
         'cflags_cc+': [ '-std=c++17' ],
       }],
       ['OS=="mac"', {
@@ -55,6 +55,7 @@
             '-flto',
             '-O3',
             '-pthread',
+            '-std=c11',
           ],
           'OTHER_CPLUSPLUSFLAGS': [
             '-std=c++17',
