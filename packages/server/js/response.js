@@ -192,6 +192,7 @@ class Response extends Writable {
       ? body
       : toArrayBuffer(Buffer.from(body, encoding))
     const ok = this.connection.writeBody(data, this._totalSize)
+    if (this.connection.aborted) return callback()
     this.connection.writeOffset = this.connection.getWriteOffset()
     if (!ok) {
       this.connection.onWritable((offset) => {
