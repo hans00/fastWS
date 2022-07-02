@@ -21,9 +21,6 @@ jobs:
     - name: Coverage
       run: yarn coverage
     - name: Report code coverage
-      uses: zgosalvez/github-actions-report-lcov@v1
+      uses: romeovs/lcov-reporter-action@v0.3.1
       with:
-        coverage-files: coverage/lcov.*.info
-        artifact-name: code-coverage-report
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-
+        lcov-info: ./coverage/lcov.info
