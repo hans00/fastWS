@@ -3,6 +3,4 @@
 
 yarn lint
 
-echo "$@"
-
 npx --no -- commitlint --edit "${1}"
