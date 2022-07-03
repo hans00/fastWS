@@ -53,6 +53,19 @@ cache_control = false // Turn off Cache-Control
 
 > Redirect, default 302
 
+## `writeHead([status_code = 200, headers = {}])`
+
+> Start write header.
+> Default value is internal status
+
+```js
+res.status(404).setHeader('TEST', 'CONTENT').writeHead()
+```
+
+## `write(data[, callback])`
+
+> Write body data. For (SSE)[https://developer.mozilla.org/docs/Web/API/Server-sent_events/Using_server-sent_events] or stream write.
+
 ## `end([data = '', content_type = null])`
 
 > End response, content type default `null`.

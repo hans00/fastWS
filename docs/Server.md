@@ -6,6 +6,8 @@
 const fastWS = require('fast-ws-server')
 const app = new fastWS({...options})
 
+app.setParam()
+
 app.any('/*', (req, res) => {
   res.end('')
 })
@@ -101,6 +103,27 @@ app.get('/*', (req, res) => {
   res.end(req.url)
 })
 ```
+
+## App params
+
+- `setParam(key, value)`
+- `getParam(key)`
+
+> Some options will store in params
+
+```js
+const { maxBodySize } = require('fast-ws-server/constants')
+
+app.setParam(maxBodySize, 1024) // int number in bytes
+```
+
+### Defined Consts
+
+- `maxBodySize`
+- `cache`
+- `templateEngine`
+- `trustProxy`
+  - Default: `loopback`
 
 ## Serve static file
 
