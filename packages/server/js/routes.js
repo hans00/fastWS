@@ -58,7 +58,7 @@ class Routes {
         try {
           await callbacks(req, res, params)
         } catch (e) {
-          console.error(e.toString())
+          this.log.error('Server Internal Error', e)
           if (!res._writableState.destroyed) {
             if (e instanceof ServerError && e.httpCode) {
               res.status(e.httpCode).end(e.message)

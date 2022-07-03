@@ -4,6 +4,7 @@ const contentType = require('content-type')
 const multipart = require('multipart-formdata')
 const ServerError = require('./errors')
 const utils = require('./utils')
+const { cache, templateEngine, maxBodySize } = require('./constants')
 
 const methodsWithBody = ['POST', 'PUT', 'PATCH', 'OPTIONS']
 
@@ -21,6 +22,7 @@ class Connection {
       }
     })
     this.rawQuery = this.request.getQuery()
+    this._req_info = {}
     this._method = null
     this._body = null
     this._reject_data = null
@@ -102,28 +104,35 @@ class Connection {
   }
 
   get cacheProvider () {
-    return this.app._options.cache
+    return this.app.getParam(cache)
   }
 
   get renderer () {
-    return this.app._options.templateRender
+    return this.app.getParam(templateEngine)
   }
 
   get bodyLimit () {
-    return this.app._options.bodySize
+    return this.app.getParam(maxBodySize)
   }
 
   get remoteAddress () {
-    return utils.toFraindlyIP(Buffer.from(this.response.getRemoteAddressAsText()).toString())
+    return this.getInfo(
+      'remoteAddress',
+      () => utils.toFraindlyIP(Buffer.from(this.response.getRemoteAddressAsText()).toString())
+    )
   }
 
   get url () {
-    return this.request.getUrl()
+    return this.getInfo('url', () => this.request.getUrl())
   }
 
   get method () {
-    if (!this._method) { this._method = this.request.getMethod().toUpperCase() }
-    return this._method
+    return this.getInfo('method', () => this.request.getMethod().toUpperCase())
+  }
+
+  getInfo (name, valueFn) {
+    if (!this._req_info[name]) this._req_info[name] = valueFn()
+    return this._req_info[name]
   }
 
   onWritable (callback) {

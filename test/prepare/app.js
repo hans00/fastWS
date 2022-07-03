@@ -3,6 +3,8 @@ const fs = require('fs')
 const http = require('http')
 const Stream = require('stream')
 
+const delay = (ms) => new Promise(r => setTimeout(r, ms))
+
 module.exports = function (app) {
 
   app.ws('/fast-ws', ws => {
@@ -87,10 +89,19 @@ module.exports = function (app) {
     })
   })
 
+  app.get('/sse', async (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream')
+    res.writeHead()
+    for (let i=0; i < 10; i++) {
+      res.write(`${i}`)
+    }
+    res.end()
+  })
+
   async function * gen () {
     for (let i = 0; i < 100; i++) {
       yield 'A'
-      await new Promise(r => setTimeout(r, 2))
+      await delay(2)
     }
   }
 
@@ -112,7 +123,11 @@ module.exports = function (app) {
   })
 
   app.get('/address', (req, res) => {
-    res.end(req.ip)
+    res.json({
+      client: req.ip,
+      realIp: req.realIp,
+      ips: req.ips,
+    })
   })
 
   app.get('/empty', (req, res) => {

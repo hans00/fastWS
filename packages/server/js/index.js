@@ -3,6 +3,9 @@ const bytes = require('bytes')
 const ServerError = require('./errors')
 const Routes = require('./routes')
 const render = require('./render')
+const constants = require('./constants')
+const Logger = require('./logger')
+const utils = require('./utils')
 
 class fastWS extends Routes {
   constructor (options) {
@@ -13,8 +16,15 @@ class fastWS extends Routes {
       cache = false,
       templateRender = render,
       bodySize = '4mb',
-      forceStopTimeout = 5000
+      forceStopTimeout = 5000,
+      logLevel = 'info'
     } = options || {}
+    if (!['error', 'warn', 'info', 'verbose'].includes(logLevel)) {
+      throw new ServerError({
+        code: 'SERVER_INVALID_OPTIONS',
+        message: 'The option `logLevel` must be in ["error", "warn", "info", "verbose"].'
+      })
+    }
     try {
       bodySize = bytes.parse(bodySize)
     } catch (e) {
@@ -37,7 +47,6 @@ class fastWS extends Routes {
           message: 'The option `cache` is invalid.'
         })
       }
-      this._cache = cache
     } else if (cache === false) {
       // disable cache
       cache = {
@@ -50,17 +59,18 @@ class fastWS extends Routes {
         message: 'The option `cache` is invalid.'
       })
     }
-    this._options = {
-      ssl,
-      verbose,
-      bodySize,
-      templateRender,
-      cache,
-      forceStopTimeout
-    }
+    this._createTime = Date.now()
+    this.ssl = ssl
+    this.forceStopTimeout = forceStopTimeout
     this._server = null
     this._socket = null
-    this.params = {}
+    this.log = new Logger(verbose ? 'verbose' : logLevel)
+    this.params = {
+      [constants.maxBodySize]: bodySize,
+      [constants.templateEngine]: templateRender,
+      [constants.cache]: cache,
+      [constants.trustProxy]: utils.createCidrMatcher(['loopback'])
+    }
     process.on('SIGINT', () => this.gracefulStop(true))
     process.on('SIGTERM', () => this.gracefulStop(true))
     process.on('SIGHUP', () => this.reload())
@@ -88,7 +98,7 @@ class fastWS extends Routes {
       this._listenTo = [host, port]
     }
     // init app
-    this._server = this._options.ssl ? uWS.SSLApp(this._options.ssl) : uWS.App()
+    this._server = this.ssl ? uWS.SSLApp(this.ssl) : uWS.App()
     super.build()
       .forEach(([method, path, callback]) => {
         this._server[method](path, callback)
@@ -97,9 +107,9 @@ class fastWS extends Routes {
     const listenCallback = (listenSocket) => {
       this._socket = listenSocket
       if (listenSocket) {
-        this._options.verbose && console.log('Started')
+        this.log.verbose(`Started in ${Date.now() - this._createTime} ms`)
       } else {
-        this._options.verbose && console.log('Failed')
+        this.log.error('Bind failed!')
       }
       if (callback) {
         callback(listenSocket)
@@ -116,10 +126,10 @@ class fastWS extends Routes {
   gracefulStop (canForceExit = true) {
     if (this._socket) {
       const forceStop = canForceExit && setTimeout(() => {
-        this._options.verbose && console.log('Force stop')
+        this.log.verbose('Force stop')
         process.exit(0)
-      }, this._options.forceStopTimeout)
-      this._options.verbose && console.log('Shutting down...')
+      }, this.forceStopTimeout)
+      this.log.verbose('Shutting down...')
       uWS.us_listen_socket_close(this._socket)
       clearTimeout(forceStop)
       this._socket = null
@@ -128,7 +138,7 @@ class fastWS extends Routes {
 
   reload () {
     if (this._server) {
-      this._options.verbose && console.log('Reloading...')
+      this.log.verbose('Reloading...')
       this.listen()
     }
   }
@@ -138,7 +148,11 @@ class fastWS extends Routes {
   }
 
   setParam (key, value) {
-    this.params[key] = value
+    if (key === constants.trustProxy) {
+      this.params[key] = utils.createCidrMatcher(value)
+    } else {
+      this.params[key] = value
+    }
   }
 }
 

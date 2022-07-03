@@ -1,3 +1,5 @@
+const CIDRMatcher = require('cidr-matcher')
+
 const V4Prefix = Buffer.from([0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff, 0xff])
 
 exports.ntop = (buf) => {
@@ -54,4 +56,15 @@ const buildHeaderValue = (params, delimiter = ', ') => {
 
 exports.buildHeaderValue = buildHeaderValue
 
-exports.trust = () => ([])
+const namedCidrs = {
+  loopback: ['127.0.0.1/8', '::1/128'],
+  linklocal: ['169.254.0.0/16', 'fe80::/10'],
+  uniquelocal: ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', 'fc00::/7']
+}
+
+exports.createCidrMatcher = (CIDRs) =>
+  new CIDRMatcher(
+    CIDRs
+      .map((rangeOrName) => namedCidrs[rangeOrName] || rangeOrName)
+      .flat()
+  )

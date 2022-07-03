@@ -2,7 +2,7 @@ const os = require('os')
 const qs = require('qs')
 const accepts = require('accepts')
 const parseRange = require('range-parser')
-const utils = require('./utils')
+const { trustProxy } = require('./constants')
 
 class Request {
   constructor (connection) {
@@ -39,11 +39,34 @@ class Request {
     return this.connection.remoteAddress
   }
 
+  get realIp () {
+    const app = this.connection.app
+    const trustMatcher = app.getParam(trustProxy)
+    const headers = this.connection.headers
+    const realIp = headers['x-real-ip']
+    if (realIp && trustMatcher.contains(this.ip)) {
+      return realIp
+    }
+    return this.ip
+  }
+
   get ips () {
     const app = this.connection.app
-    const headers = this.connection.headers
-    const forwardIps = utils.trust(app.getParam('trust proxy'), headers['x-forwarded-for'])
-    return [this.ip].concat(forwardIps)
+    const matcher = app.getParam(trustProxy)
+    const xff = (this.connection.headers['x-forwarded-for'] || '').split(/, */g)
+      .filter(Boolean)
+    const trusted = [this.ip]
+    if (xff.length > 0 && matcher.contains(this.ip)) {
+      for (const ip of xff) {
+        if (matcher.contains(ip)) {
+          trusted.push(ip)
+        } else {
+          break
+        }
+      }
+      trusted.push(xff[trusted.length - 1])
+    }
+    return trusted
   }
 
   get method () {
