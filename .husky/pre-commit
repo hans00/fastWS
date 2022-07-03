@@ -2,3 +2,7 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 yarn lint
+
+echo "$@"
+
+npx --no -- commitlint --edit "${1}"

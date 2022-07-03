@@ -84,3 +84,14 @@ client.on('event name', async () => {
   await client.emit('wait for remote', 'message', true)
 })
 ```
+
+Contributing
+---
+
+Follows [conventional commits](https://www.conventionalcommits.org/).
+
+For example:
+
+- `feat(Server): something` for server feature.
+
+- `fix(Client): something` for client bug fix.

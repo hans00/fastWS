@@ -25,9 +25,15 @@
     "coverage": "yarn run coverage:test && yarn run coverage:report",
     "coverage:test": "nyc yarn run test",
     "coverage:report": "nyc report --reporter=lcov --reporter=text-summary",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "make-changelog": "changelog -x ci,test,chore",
+    "release:major": "yarn make-changelog -M && git add CHANGELOG.md && git commit -m 'docs(changelog): update CHANGELOG' && lerna version --major",
+    "release:minor": "yarn make-changelog -m && git add CHANGELOG.md && git commit -m 'docs(changelog): update CHANGELOG' && lerna version --minor",
+    "release:patch": "yarn make-changelog -p && git add CHANGELOG.md && git commit -m 'docs(changelog): update CHANGELOG' && lerna version --patch"
   },
   "devDependencies": {
+    "@commitlint/cli": "^17.0.3",
+    "@commitlint/config-conventional": "^17.0.3",
     "ansi-colors": "^4.1.3",
     "axios": "^0.27.2",
     "eslint": "^8.18.0",
@@ -38,6 +44,7 @@
     "eslint-plugin-perf-standard": "^1.0.3",
     "eslint-plugin-promise": "^6.0.0",
     "form-data": "^4.0.0",
+    "generate-changelog": "^1.8.0",
     "husky": "^8.0.0",
     "lerna": "^5.1.6",
     "lru-cache": "^7.10.1",
