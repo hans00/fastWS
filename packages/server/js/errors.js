@@ -18,7 +18,7 @@ module.exports = class ServerError extends Error {
     if (this.originError) {
       return this.originError.toString()
     } else {
-      return 'ServerError: ' + this.code + ': ' + this.message
+      return `ServerError: ${this.code}: ${this.message}`
     }
   }
 }
