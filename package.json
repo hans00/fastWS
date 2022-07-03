@@ -6,9 +6,6 @@
       "packages/*"
     ]
   },
-  "pre-commit": [
-    "lint:fix"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hans00/fastWS.git"
@@ -27,7 +24,8 @@
     "test": "node test",
     "coverage": "yarn run coverage:test && yarn run coverage:report",
     "coverage:test": "nyc yarn run test",
-    "coverage:report": "nyc report --reporter=lcov --reporter=text-summary"
+    "coverage:report": "nyc report --reporter=lcov --reporter=text-summary",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "ansi-colors": "^4.1.3",
@@ -46,7 +44,8 @@
     "nyc": "^15.1.0",
     "pre-commit": "^1.2.2",
     "tmp": "^0.2.1",
-    "ws": "^8.6.0"
+    "ws": "^8.6.0",
+    "husky": "^8.0.0"
   },
   "resolutions": {
     "tar": "^6.1.11",
