@@ -27,7 +27,7 @@
     "coverage:report": "nyc report --reporter=lcov --reporter=text-summary",
     "prepare": "husky install",
     "make-changelog": "changelog -x ci,test,chore",
-    "postmake-changelog": "git add CHANGELOG.md && git commit -m 'chroe(changelog): update CHANGELOG.md'",
+    "postmake-changelog": "git add CHANGELOG.md && git commit -m 'chore(changelog): update CHANGELOG.md'",
     "release:major": "yarn make-changelog -M && lerna version --major",
     "release:minor": "yarn make-changelog -m && lerna version --minor",
     "release:patch": "yarn make-changelog -p && lerna version --patch"
