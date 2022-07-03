@@ -71,7 +71,7 @@ class Response extends Writable {
     this._status = 200
     this._headers = {}
     this.headersSent = false
-    this.on('pipe', (src) => this.pipeFrom(src))
+    this.on('pipe', (src) => this._pipeFrom(src))
     this.corkPipe = false
     this.connection.onAborted(() => {
       this.destroy()
@@ -157,32 +157,32 @@ class Response extends Writable {
     }
   }
 
-  writeHead () {
+  writeHead (status = this._status, headers = this._headers) {
     if (this._writableState.destroyed) {
       return
     }
     if (!this.headersSent) {
       this.headersSent = true
-      if (this._status !== 200) {
-        if (httpStatusCode[this._status]) {
-          this.connection.writeStatus(this._status + ' ' + httpStatusCode[this._status])
+      if (status !== 200) {
+        if (httpStatusCode[status]) {
+          this.connection.writeStatus(`${status} ${httpStatusCode[status]}`)
         } else {
-          this.connection.writeStatus(this._status.toString())
+          this.connection.writeStatus(status.toString())
         }
       }
-      Object.keys(this._headers).forEach(key => {
-        if (this._headers[key] instanceof Array) {
-          this._headers[key].forEach(data => {
+      Object.keys(headers).forEach(key => {
+        if (headers[key] instanceof Array) {
+          headers[key].forEach(data => {
             this.connection.writeHeader(key, data)
           })
         } else {
-          this.connection.writeHeader(key, this._headers[key])
+          this.connection.writeHeader(key, headers[key])
         }
       })
     }
   }
 
-  write (body, encoding, callback = noop) {
+  _write (body, encoding, callback = noop) {
     if (this._writableState.destroyed) {
       return
     }
@@ -196,7 +196,7 @@ class Response extends Writable {
     this.connection.writeOffset = this.connection.getWriteOffset()
     if (!ok) {
       this.connection.onWritable((offset) => {
-        this.write(data.slice(offset - this.connection.writeOffset), encoding, callback)
+        this._write(body.slice(offset - this.connection.writeOffset), encoding, callback)
         this.emit('drain')
       })
     } else {
@@ -210,11 +210,11 @@ class Response extends Writable {
   }
 
   _pipeEnd () {
-    this.connection.end('')
+    this.connection.end()
     super.end()
   }
 
-  pipeFrom (readable, contentType) {
+  _pipeFrom (readable, contentType) {
     if (this._writableState.destroyed) {
       return
     }
