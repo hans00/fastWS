@@ -27,12 +27,15 @@ class Connection {
     this._body = null
     this._reject_data = null
     this._on_aborted = []
+    this._on_writable = null
     this.aborted = false
     this.upgraded = false
     this.response.onAborted(() => {
       this._on_aborted.forEach(call => call())
       this.aborted = true
     })
+    this.response.onWritable((offset) =>
+      this._on_writable ? this._on_writable(offset) : true)
     this.wsContext = wsContext
     this._remote_address = null
   }
@@ -136,10 +139,7 @@ class Connection {
   }
 
   onWritable (callback) {
-    if (this.aborted) {
-      throw new ServerError({ code: 'CONNECTION_ABORTED' })
-    }
-    return this.response.onWritable(callback)
+    this._on_writable = callback
   }
 
   onAborted (callback) {

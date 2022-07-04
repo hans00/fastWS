@@ -7,8 +7,6 @@ const { Writable } = require('stream')
 
 const staticPath = path.resolve(process.cwd(), 'static')
 
-const noop = () => {}
-
 function toArrayBuffer (buffer) {
   if (typeof buffer === 'object' && buffer.constructor.name === 'Buffer') {
     return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
@@ -182,36 +180,43 @@ class Response extends Writable {
     }
   }
 
-  _write (body, encoding, callback = noop) {
-    if (this._writableState.destroyed) {
-      return
-    }
-    this.writeHead()
-    if (body.length === 0) callback()
-    const data = !encoding && typeof body === 'string'
-      ? body
-      : toArrayBuffer(Buffer.from(body, encoding))
-    const ok = this.connection.writeBody(data, this._totalSize)
-    if (this.connection.aborted) return callback()
-    this.connection.writeOffset = this.connection.getWriteOffset()
-    if (!ok) {
-      this.connection.onWritable((offset) => {
-        this._write(body.slice(offset - this.connection.writeOffset), encoding, callback)
-        this.emit('drain')
-      })
-    } else {
-      callback()
+  _write (chunk, encoding, callback) {
+    try {
+      this.writeHead()
+      if (!chunk || chunk.length === 0 || chunk.byteLength === 0) {
+        process.nextTick(callback)
+      }
+      const data = encoding === 'buffer' ? toArrayBuffer(chunk) : chunk
+      const initOffset = this.connection.getWriteOffset()
+      const ok = this.connection.writeBody(data, this._totalSize)
+      if (!ok) {
+        this.connection.onWritable((offset) => {
+          try {
+            const ok = this.connection.writeBody(data.slice(offset - initOffset), this._totalSize)
+            if (ok) {
+              process.nextTick(callback)
+            }
+            return ok
+          } catch (e) {
+            console.log(e)
+            callback(e)
+            return true
+          }
+        })
+      } else {
+        process.nextTick(callback)
+      }
+      return true
+    } catch (e) {
+      callback(e)
+      super.destroy()
+      return false
     }
   }
 
   _pipeError (error) {
     this.corkPipe = false
     this.emit('error', error)
-  }
-
-  _pipeEnd () {
-    this.connection.end()
-    super.end()
   }
 
   _pipeFrom (readable, contentType) {
@@ -234,7 +239,6 @@ class Response extends Writable {
       this.setHeader('Content-Type', contentType)
     }
     readable.on('error', this._pipeError.bind(this))
-    readable.on('end', this._pipeEnd.bind(this))
     // In RFC these status code must not have body
     if (this._status < 200 || this._status === 204 || this._status === 304) {
       throw new ServerError({
@@ -265,10 +269,10 @@ class Response extends Writable {
       this.cork(() => {
         this.writeHead()
         this.connection.end(data)
-        super.end()
+        super.destroy()
       })
     } else {
-      super.end()
+      super.destroy()
     }
   }
 

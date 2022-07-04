@@ -94,6 +94,7 @@ module.exports = function (app) {
     res.writeHead()
     for (let i=0; i < 10; i++) {
       res.write(`${i}`)
+      await delay(1)
     }
     res.end()
   })
