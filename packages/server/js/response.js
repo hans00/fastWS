@@ -198,7 +198,6 @@ class Response extends Writable {
             }
             return ok
           } catch (e) {
-            console.log(e)
             callback(e)
             return true
           }
