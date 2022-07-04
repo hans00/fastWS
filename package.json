@@ -26,11 +26,9 @@
     "coverage:test": "nyc yarn run test",
     "coverage:report": "nyc report --reporter=lcov --reporter=text-summary",
     "prepare": "husky install",
-    "make-changelog": "npx conventional-changelog -p conventionalcommits -i CHANGELOG.md -s",
-    "postmake-changelog": "git add CHANGELOG.md && git commit -m 'chore(changelog): update CHANGELOG.md'",
-    "release:major": "yarn make-changelog && lerna version major",
-    "release:minor": "yarn make-changelog && lerna version minor",
-    "release:patch": "yarn make-changelog && lerna version patch"
+    "release:major": "lerna version major",
+    "release:minor": "lerna version minor",
+    "release:patch": "lerna version patch"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.0.3",
