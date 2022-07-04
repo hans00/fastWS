@@ -269,11 +269,9 @@ class Response extends Writable {
       this.cork(() => {
         this.writeHead()
         this.connection.end(data)
-        super.destroy()
       })
-    } else {
-      super.destroy()
     }
+    super.destroy()
   }
 
   send (data) {
