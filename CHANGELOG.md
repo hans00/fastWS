@@ -1,3 +1,11 @@
+## [](https://github.com/hans00/fastWS/compare/v2.5.0...v) (2022-07-04)
+
+
+### Bug Fixes
+
+* **Server:** correct writable stream implement ([225bd13](https://github.com/hans00/fastWS/commit/225bd1365df83414ad84c9d0003b97295824d1c2))
+* **Server:** fix `perf-standard/check-function-inline` ([a2520a2](https://github.com/hans00/fastWS/commit/a2520a24004faaa18391034f28fe0e14783f19f5))
+
 ## [](https://github.com/hans00/fastWS/compare/v2.5.0...v) (2022-07-03)
 
 ## [2.5.0](https://github.com/hans00/fastWS/compare/v2.4.2...v2.5.0) (2022-07-03)
