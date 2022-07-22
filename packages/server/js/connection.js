@@ -2,11 +2,14 @@ const qs = require('qs')
 const iconv = require('iconv-lite')
 const contentType = require('content-type')
 const multipart = require('multipart-formdata')
+const { Readable } = require('stream')
 const ServerError = require('./errors')
 const utils = require('./utils')
 const { cache, templateEngine, maxBodySize } = require('./constants')
 
 const methodsWithBody = ['POST', 'PUT', 'PATCH', 'OPTIONS']
+
+const emptyBuffer = Buffer.alloc(0)
 
 class Connection {
   constructor (app, request, response, wsContext) {
@@ -25,6 +28,7 @@ class Connection {
     this._req_info = {}
     this._method = null
     this._body = null
+    this._body_stream = null
     this._reject_data = null
     this._on_aborted = []
     this._on_writable = null
@@ -44,62 +48,118 @@ class Connection {
     return new Connection(app, request, response, wsContext)
   }
 
-  bodyData () {
+  bodyDataStream () {
     if (!this.response) {
-      return null
+      throw new ServerError({ code: 'SERVER_INVALID_CONNECTION' })
     }
     if (!methodsWithBody.includes(this.method)) {
-      return null
+      throw new ServerError({
+        code: 'SERVER_INVALID_OPERATE',
+        message: `The method "${this.method}" should not have body.`
+      })
     }
+    if (this._body_stream !== null) {
+      return this._body_stream
+    }
+    const contentLength = this.headers['content-length']
+    // Verify Content-Length
+    if (!contentLength) {
+      throw new ServerError({ code: 'CLIENT_NO_LENGTH', message: '', httpCode: 411 })
+    } else if (!/^[1-9]\d*$/.test(contentLength)) {
+      throw new ServerError({ code: 'CLIENT_LENGTH_INVALID', message: '', httpCode: 400 })
+    } else if (this.bodyLimit && Number(contentLength) > this.bodyLimit) {
+      throw new ServerError({ code: 'CLIENT_LENGTH_TOO_LARGE', message: '', httpCode: 413 })
+    }
+    const length = Number(contentLength || 0)
+    const chunks = []
+    let received = 0
+    let isEnd = false
+    let error = null
+    let callback = null
+    this._body_stream = new Readable({
+      read (size) {
+        if (error) {
+          this.destroy(error)
+        } else {
+          if (!chunks.length && !isEnd) {
+            callback = () => {
+              if (error) {
+                this.destroy(error)
+              } else {
+                const chunk = chunks.shift()
+                this.push(chunk)
+              }
+            }
+          } else {
+            const chunk = chunks.shift()
+            if (!chunk && isEnd) this.push(null)
+            else this.push(chunk || emptyBuffer)
+          }
+        }
+      }
+    })
+    this._body_stream.bodyLength = length
+    this.onAborted(() => {
+      isEnd = true
+      error = new ServerError({ code: 'CONNECTION_ABORTED' })
+      if (callback) {
+        callback()
+      }
+    })
+    this.response.onData((chunk, isLast) => {
+      if (isEnd) return
+      received += chunk.byteLength
+      if (length && received > length) {
+        isEnd = true
+        error = new ServerError({ code: 'CLIENT_BAD_REQUEST', httpCode: 400 })
+      } else if (length && isLast && received < length) {
+        isEnd = true
+        error = new ServerError({ code: 'CLIENT_BAD_REQUEST', httpCode: 400 })
+      } else {
+        chunks.push(Buffer.from(chunk))
+        isEnd = isLast
+      }
+      if (callback) {
+        callback()
+      }
+    })
+    return this._body_stream
+  }
+
+  bodyData () {
     if (this._body !== null) {
       return this._body
     }
-    const _contentType = this.headers['content-type']
-    const _contentLength = this.headers['content-length']
-    // exit if no Content-Type
-    if (!_contentType) {
-      return null
-    }
-    // Verify Content-Length
-    if (!_contentLength) {
-      throw new ServerError({ code: 'CLIENT_NO_LENGTH', message: '', httpCode: 411 })
-    } else if (!/^[1-9]\d*$/.test(_contentLength)) {
-      throw new ServerError({ code: 'CLIENT_LENGTH_INVALID', message: '', httpCode: 400 })
-    } else if (this.bodyLimit && Number(_contentLength) > this.bodyLimit) {
-      throw new ServerError({ code: 'CLIENT_LENGTH_TOO_LARGE', message: '', httpCode: 413 })
-    }
+    const type = this.headers['content-type']
+    if (!type) return null
+    const stream = this.bodyDataStream()
     this._body = new Promise((resolve, reject) => {
-      this.onAborted(() => reject(new ServerError({ code: 'CONNECTION_ABORTED' })))
-      const contentLength = Number(_contentLength)
-      let data = null; let bodyLength = 0
-      this.response.onData((chunk, isLast) => {
-        data = data !== null ? Buffer.concat([data, Buffer.from(chunk)]) : Buffer.concat([Buffer.from(chunk)])
-        bodyLength += chunk.byteLength
-        if (bodyLength >= contentLength) {
-          try {
-            const contentData = data.slice(0, contentLength)
-            const content = contentType.parse(_contentType)
-            // In RFC, charset default is ISO-8859-1, and it equal to latin1
-            const charset = content.parameters.charset || 'latin1'
-            if (content.type.startsWith('text/')) {
-              resolve(iconv.decode(contentData, charset))
-            } else if (content.type === 'application/json') {
-              resolve(JSON.parse(iconv.decode(contentData, charset)))
-            } else if (content.type === 'application/x-www-form-urlencoded') {
-              resolve(qs.parse(iconv.decode(contentData, charset)))
-            } else if (content.type === 'multipart/form-data') {
-              if (!content.parameters.boundary) {
-                throw new Error('NO_BOUNDARY')
-              }
-              resolve(multipart.parse(contentData, content.parameters.boundary))
-            } else {
-              resolve(contentData)
+      let data = null
+      stream.on('error', reject)
+      stream.on('data', (chunk) => {
+        data = data !== null ? Buffer.concat([data, chunk]) : chunk
+      })
+      stream.on('end', () => {
+        try {
+          const content = contentType.parse(type)
+          // In RFC, charset default is ISO-8859-1, and it equal to latin1
+          const charset = content.parameters.charset || 'latin1'
+          if (content.type.startsWith('text/')) {
+            resolve(iconv.decode(data, charset))
+          } else if (content.type === 'application/json') {
+            resolve(JSON.parse(iconv.decode(data, charset)))
+          } else if (content.type === 'application/x-www-form-urlencoded') {
+            resolve(qs.parse(iconv.decode(data, charset)))
+          } else if (content.type === 'multipart/form-data') {
+            if (!content.parameters.boundary) {
+              throw new Error('NO_BOUNDARY')
             }
-          } catch (e) {
-            reject(new ServerError({ code: 'SERVER_BODY_PARSE', originError: e, httpCode: 400 }))
+            resolve(multipart.parse(data, content.parameters.boundary))
+          } else {
+            resolve(data)
           }
-        } else if (isLast) {
-          reject(new ServerError({ code: 'SERVER_BODY_LENGTH', httpCode: 400 }))
+        } catch (e) {
+          reject(new ServerError({ code: 'SERVER_BODY_PARSE', originError: e, httpCode: 400 }))
         }
       })
     })

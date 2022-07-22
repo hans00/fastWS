@@ -19,6 +19,10 @@ class Request {
     return this.connection.bodyData()
   }
 
+  get bodyStream () {
+    return this.connection.bodyDataStream()
+  }
+
   get hostname () {
     const headers = this.connection.headers
     return headers.host || headers['x-forwarded-host'] || os.hostname()

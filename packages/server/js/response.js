@@ -230,6 +230,8 @@ class Response extends Writable {
       if (!contentType) {
         contentType = mime.lookup(readable.path) || 'application/octet-stream'
       }
+    } else if (readable.bodyLength) { // Known size body
+      this._totalSize = readable.bodyLength
     }
     if (!this.getHeader('content-type') && contentType) {
       this.setHeader('Content-Type', contentType)

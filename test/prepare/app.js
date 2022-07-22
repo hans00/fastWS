@@ -110,6 +110,10 @@ module.exports = function (app) {
     Stream.Readable.from(gen()).pipe(res)
   })
 
+  app.post('/stream/body', (req, res) => {
+    req.bodyStream.pipe(res)
+  })
+
   app.get('/stream/error', (req, res) => {
     const stream = new Stream.Readable({
       read: () => '',

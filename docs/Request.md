@@ -18,9 +18,14 @@
 
 ## `body`
 
-> Get body, return Promised.
+> Get body, return `Promise<any>`.
 > Only `POST`, `PUT`, `PATCH` can receive body.
 > Will auto parse data.
+
+## `bodyStream`
+
+> Get body stream, return `Readable<Buffer>`.
+> Only `POST`, `PUT`, `PATCH` can receive body.
 
 ## `url`
 
