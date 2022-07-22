@@ -60,5 +60,6 @@
     "node-gyp": "^9.0.0",
     "trim-newlines": "^3.0.1",
     "debug": "^2.6.9"
-  }
+  },
+  "version": "0.1.0"
 }
