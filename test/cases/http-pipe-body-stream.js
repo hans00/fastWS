@@ -1,7 +1,7 @@
 const axios = require('axios')
 
 module.exports = async function ({ HTTP_PORT }) {
-  const body = '__TEST__STRING__'.repeat(4096)
+  const body = '__TEST__STRING__'.repeat(512)
 
   const res = await axios.post(`http://localhost:${HTTP_PORT}/stream/body`, body)
   if (res.status !== 200) {

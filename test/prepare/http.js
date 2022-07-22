@@ -6,7 +6,7 @@ module.exports = function (port) {
   return new Promise((resolve, reject) => {
     try {
       app(new fastWS({
-        bodySize: '1mb',
+        bodySize: '10kb',
         logLevel: 'verbose',
         cache: new LRUCache({
           ttl: 1000 * 60 * 5,

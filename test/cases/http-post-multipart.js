@@ -2,7 +2,7 @@ const axios = require('axios')
 const FormData = require('form-data')
 
 module.exports = async function ({ HTTP_PORT }) {
-  const fileSize = 10240
+  const fileSize = 512
   const form = new FormData()
   form.append('file', Buffer.alloc(fileSize).fill(0))
   const res = await axios({
