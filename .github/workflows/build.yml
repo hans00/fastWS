@@ -4,6 +4,7 @@ on: push
 
 jobs:
   build:
+    if: "!startsWith(github.event.head_commit.message, 'ci')"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -41,8 +42,9 @@ jobs:
       id: changelog
       uses: TriPSs/conventional-changelog-action@v3
       with:
+        git-message: 'ci(release): {version}'
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        output-file: "false"
+        create-summary: true
         preset: conventionalcommits
     - name: Create Release
       uses: actions/create-release@v1
