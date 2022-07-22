@@ -70,6 +70,7 @@ class Response extends Writable {
     this._headers = {}
     this.headersSent = false
     this.on('pipe', (src) => this._pipeFrom(src))
+    this.on('finish', () => this._end())
     this.corkPipe = false
     this.connection.onAborted(() => {
       this.destroy()
@@ -78,10 +79,6 @@ class Response extends Writable {
 
   static create (connection) {
     return new Response(connection)
-  }
-
-  cork (callback) {
-    this.connection.cork(callback)
   }
 
   status (code) {
@@ -105,19 +102,19 @@ class Response extends Writable {
         } else {
           this.setHeader('Last-Modified', file.mtime)
             .setHeader('Cache-Control', cache)
-            .end(file.content, file.contentType)
+            .send(file.content, file.contentType)
         }
       } else {
         const contentType = mime.lookup(fullPath)
         const mtime = new Date(fs.statSync(fullPath).mtime).toGMTString()
-        const content = toArrayBuffer(fs.readFileSync(fullPath))
+        const content = fs.readFileSync(fullPath)
         this.connection.cacheProvider.set(fullPath, { content, contentType, mtime })
         if (checkModifyTime && checkModifyTime === mtime) {
           return this.status(304).end()
         } else {
           this.setHeader('Last-Modified', mtime)
             .setHeader('Cache-Control', cache)
-            .end(content, contentType)
+            .send(content, contentType)
         }
       }
     } else {
@@ -135,12 +132,12 @@ class Response extends Writable {
       // if cache found file, send file in cache
       if (this.connection.cacheProvider.has(fullPath)) {
         const file = this.connection.cacheProvider.get(fullPath)
-        this.end(this.connection.renderer(file.content, data), file.contentType)
+        this.send(this.connection.renderer(file.content, data), file.contentType)
       } else {
         const contentType = mime.lookup(fullPath)
         const content = fs.readFileSync(fullPath).toString()
         this.connection.cacheProvider.set(fullPath, { content, contentType })
-        this.end(this.connection.renderer(content, data), contentType)
+        this.send(this.connection.renderer(content, data), contentType)
       }
     } else {
       throw new ServerError({ code: 'SERVER_NOT_FOUND', message: 'The template file not found.', httpCode: 404 })
@@ -250,39 +247,33 @@ class Response extends Writable {
     return this
   }
 
-  end (data = '', contentType = null) {
-    if (this._writableState.destroyed) {
-      return
-    }
-    if (!data && this._status === 200) {
-      this._status = 204
-    }
-    // In RFC these status code must not have body
-    if (this._status < 200 || this._status === 204 || this._status === 304) {
-      data = ''
-    }
-    if (!this.corkPipe) {
-      if (typeof contentType === 'string') {
-        this._headers['content-type'] = contentType
+  _end () {
+    if (!this.headersSent) {
+      if (!this._totalSize && this._status === 200) {
+        this._status = 204
       }
-      this.cork(() => {
+      this.connection.cork(() => {
         this.writeHead()
-        this.connection.end(data)
+        this.connection.end()
       })
+    } else if (!this._totalSize) {
+      this.connection.end()
     }
-    super.destroy()
   }
 
-  send (data) {
-    if (data.includes('<html>')) {
-      this.end(data.toString(), 'text/html')
-    } else {
-      this.end(data.toString(), 'text/plain')
+  send (data, contentType = null) {
+    if (!contentType && !this._headers['content-type']) {
+      this._headers['content-type'] = data.includes('<html>') ? 'text/html' : 'text/plain'
+    } else if (contentType) {
+      this._headers['content-type'] = contentType
     }
+    this._totalSize = data.length
+    this.write(data)
+    this.end()
   }
 
   json (data) {
-    this.end(JSON.stringify(data), 'application/json')
+    this.send(JSON.stringify(data), 'application/json')
   }
 
   flushHeaders () {

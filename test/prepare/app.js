@@ -89,12 +89,11 @@ module.exports = function (app) {
     })
   })
 
-  app.get('/sse', async (req, res) => {
+  app.get('/sse', (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream')
     res.writeHead()
     for (let i=0; i < 10; i++) {
       res.write(`${i}`)
-      await delay(1)
     }
     res.end()
   })
