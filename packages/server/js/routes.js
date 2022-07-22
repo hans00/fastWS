@@ -56,6 +56,7 @@ class Routes {
         const req = Request.create(conn)
         const res = Response.create(conn)
         try {
+          conn.processBodyData()
           await callbacks(req, res, params)
         } catch (e) {
           this.log.error('Server Internal Error', e)

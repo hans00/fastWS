@@ -42,7 +42,6 @@ class Connection {
       this._on_writable ? this._on_writable(offset) : true)
     this.wsContext = wsContext
     this._remote_address = null
-    this.processBodyData()
   }
 
   static create (app, request, response, wsContext = null) {
