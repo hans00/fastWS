@@ -12,7 +12,8 @@
     "./request": "./js/request.js",
     "./response": "./js/response.js",
     "./error": "./js/errors.js",
-    "./ws-base": "./js/ws-protocol/basic.js"
+    "./ws-base": "./js/ws-protocol/basic.js",
+    "./ws/": "./js/ws-protocol/"
   },
   "repository": {
     "type": "git",

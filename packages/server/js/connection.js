@@ -9,8 +9,6 @@ const { cache, templateEngine, maxBodySize } = require('./constants')
 
 const methodsWithBody = ['POST', 'PUT', 'PATCH', 'OPTIONS']
 
-const emptyBuffer = Buffer.alloc(0)
-
 class Connection {
   constructor (app, request, response, wsContext) {
     this.app = app
@@ -24,11 +22,13 @@ class Connection {
         this.headers[k] = v
       }
     })
+    this.url = this.request.getUrl()
+    this.method = this.request.getMethod().toUpperCase()
     this.rawQuery = this.request.getQuery()
     this._req_info = {}
     this._method = null
     this._body = null
-    this._body_stream = null
+    this._bodyStream = null
     this._reject_data = null
     this._on_aborted = []
     this._on_writable = null
@@ -42,10 +42,56 @@ class Connection {
       this._on_writable ? this._on_writable(offset) : true)
     this.wsContext = wsContext
     this._remote_address = null
+    this.processBodyData()
   }
 
   static create (app, request, response, wsContext = null) {
     return new Connection(app, request, response, wsContext)
+  }
+
+  processBodyData () {
+    if (!this.response) return
+    if (!methodsWithBody.includes(this.method)) return
+    const contentLength = this.headers['content-length']
+    // Verify Content-Length
+    if (!contentLength) {
+      throw new ServerError({ code: 'CLIENT_NO_LENGTH', message: '', httpCode: 411 })
+    } else if (!/^[1-9]\d*$/.test(contentLength)) {
+      throw new ServerError({ code: 'CLIENT_LENGTH_INVALID', message: '', httpCode: 400 })
+    } else if (this.bodyLimit && Number(contentLength) > this.bodyLimit) {
+      throw new ServerError({ code: 'CLIENT_LENGTH_TOO_LARGE', message: '', httpCode: 413 })
+    }
+    this.bodyLength = Number(contentLength || 0)
+    this._buffer = []
+    this._dataEnd = false
+    this._received = 0
+    this._onData = null
+    this._dataError = null
+    this.onAborted(() => {
+      this._dataEnd = true
+      this._dataError = new ServerError({ code: 'CONNECTION_ABORTED' })
+      if (this._onData) {
+        this._onData()
+      }
+    })
+    this.response.onData((chunk, isLast) => {
+      if (this._dataEnd) return
+      this._received += chunk.byteLength
+      if (this.bodyLength && this._received > this.bodyLength) {
+        this._dataEnd = true
+        this._dataError = new ServerError({ code: 'CLIENT_BAD_REQUEST', httpCode: 400 })
+      } else if (this.bodyLength && isLast && this._received < this.bodyLength) {
+        this._dataEnd = true
+        this._dataError = new ServerError({ code: 'CLIENT_BAD_REQUEST', httpCode: 400 })
+      } else {
+        // Copy buffer to avoid memory release
+        this._buffer.push(Buffer.from(Buffer.from(chunk)))
+        this._dataEnd = isLast
+      }
+      if (this._onData) {
+        this._onData()
+      }
+    })
   }
 
   bodyDataStream () {
@@ -58,80 +104,40 @@ class Connection {
         message: `The method "${this.method}" should not have body.`
       })
     }
-    if (this._body_stream !== null) {
-      return this._body_stream
+    if (this._bodyStream !== null) {
+      return this._bodyStream
     }
-    const contentLength = this.headers['content-length']
-    // Verify Content-Length
-    if (!contentLength) {
-      throw new ServerError({ code: 'CLIENT_NO_LENGTH', message: '', httpCode: 411 })
-    } else if (!/^[1-9]\d*$/.test(contentLength)) {
-      throw new ServerError({ code: 'CLIENT_LENGTH_INVALID', message: '', httpCode: 400 })
-    } else if (this.bodyLimit && Number(contentLength) > this.bodyLimit) {
-      throw new ServerError({ code: 'CLIENT_LENGTH_TOO_LARGE', message: '', httpCode: 413 })
-    }
-    const length = Number(contentLength || 0)
-    const chunks = []
-    let received = 0
-    let isEnd = false
-    let error = null
-    let callback = null
-    this._body_stream = new Readable({
-      read (size) {
-        if (error) {
-          this.destroy(error)
+    const readData = (callback) => {
+      if (this._dataError) {
+        callback(this._dataError)
+      } else {
+        if (!this._buffer.length && !this._dataEnd) {
+          this._onData = () => readData(callback)
         } else {
-          if (!chunks.length && !isEnd) {
-            callback = () => {
-              if (error) {
-                this.destroy(error)
-              } else {
-                const chunk = chunks.shift()
-                this.push(chunk)
-              }
-            }
-          } else {
-            const chunk = chunks.shift()
-            if (!chunk && isEnd) this.push(null)
-            else this.push(chunk || emptyBuffer)
-          }
+          this._onData = null
+          const chunk = this._buffer.shift()
+          if (!chunk && this._dataEnd) callback(null, null)
+          else callback(null, Buffer.from(chunk))
         }
       }
-    })
-    this._body_stream.bodyLength = length
-    this.onAborted(() => {
-      isEnd = true
-      error = new ServerError({ code: 'CONNECTION_ABORTED' })
-      if (callback) {
-        callback()
+    }
+    this._bodyStream = new Readable({
+      read () {
+        readData((err, chunk) => {
+          if (err) this.destroy(err)
+          else this.push(chunk)
+        })
       }
     })
-    this.response.onData((chunk, isLast) => {
-      if (isEnd) return
-      received += chunk.byteLength
-      if (length && received > length) {
-        isEnd = true
-        error = new ServerError({ code: 'CLIENT_BAD_REQUEST', httpCode: 400 })
-      } else if (length && isLast && received < length) {
-        isEnd = true
-        error = new ServerError({ code: 'CLIENT_BAD_REQUEST', httpCode: 400 })
-      } else {
-        chunks.push(Buffer.from(chunk))
-        isEnd = isLast
-      }
-      if (callback) {
-        callback()
-      }
-    })
-    return this._body_stream
+    this._bodyStream.bodyLength = this.bodyLength
+    return this._bodyStream
   }
 
   bodyData () {
     if (this._body !== null) {
       return this._body
     }
-    const type = this.headers['content-type']
-    if (!type) return null
+    const type = this.headers['content-type'] || 'application/octet-stream'
     const stream = this.bodyDataStream()
     this._body = new Promise((resolve, reject) => {
       let data = null
@@ -183,14 +189,6 @@ class Connection {
       'remoteAddress',
       () => utils.toFraindlyIP(Buffer.from(this.response.getRemoteAddressAsText()).toString())
     )
-  }
-
-  get url () {
-    return this.getInfo('url', () => this.request.getUrl())
-  }
-
-  get method () {
-    return this.getInfo('method', () => this.request.getMethod().toUpperCase())
   }
 
   getInfo (name, valueFn) {

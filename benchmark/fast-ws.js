@@ -27,6 +27,14 @@ app.get('/stream', (req, res) => {
   stream.pipe(res)
 })
 
+app.post('/stream', (req, res) => {
+  req.bodyStream.pipe(res)
+})
+
+app.post('/stream/send', async (req, res) => {
+  res.send(await req.body)
+})
+
 app.serve('/')
 
 console.time('STARTUP')

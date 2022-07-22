@@ -264,7 +264,7 @@ class Response extends Writable {
   }
 
   send (data, contentType = null) {
-    if (!contentType && !this._headers['content-type']) {
+    if (!contentType && !this._headers['content-type'] && typeof data === 'string') {
       this._headers['content-type'] = data.includes('<html>') ? 'text/html' : 'text/plain'
     } else if (contentType) {
       this._headers['content-type'] = contentType

@@ -1,6 +1,6 @@
 const nanoexpress = require('nanoexpress')
 const staticServe = require('@nanoexpress/middleware-static-serve/cjs')
-const Protocol = require('fast-ws-server/js/ws-protocol/fast-ws')
+const Protocol = require('fast-ws-server/ws/fast-ws')
 
 const app = nanoexpress()
 
@@ -29,6 +29,10 @@ app.ws('/fws', async (req, res) => {
 app.get('/hello/:name', async (req, res) => {
   const { name } = req.params
   res.end(`Hello ${name}`)
+})
+
+app.post('/stream', (req, res) => {
+  res.send(req.body)
 })
 
 app.use('/', staticServe('./static'))

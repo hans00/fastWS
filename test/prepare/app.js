@@ -114,6 +114,15 @@ module.exports = function (app) {
     req.bodyStream.pipe(res)
   })
 
+  app.post('/stream/body-later-1', (req, res) => {
+    setTimeout(() => req.bodyStream.pipe(res), 100)
+  })
+
+  app.post('/stream/body-later-2', (req, res) => {
+    const stream = req.bodyStream
+    setTimeout(() => stream.pipe(res), 100)
+  })
+
   app.get('/stream/error', (req, res) => {
     const stream = new Stream.Readable({
       read: () => '',
