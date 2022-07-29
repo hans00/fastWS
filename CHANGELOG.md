@@ -1,4 +1,9 @@
-## [0.2.0](https://github.com/hans00/fastWS/compare/v0.1.0...v0.2.0) (2022-07-29)
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## [2.5.6](https://github.com/hans00/fastWS/compare/v0.1.0...v2.6.0) (2022-07-29)
 
 
 ### Features
@@ -7,13 +12,6 @@
 * **Server:** pretty custom error inspect ([ad7357e](https://github.com/hans00/fastWS/commit/ad7357e139ed1a8a8e4f868d12ff82feca5c4a8b))
 * **Server:** should send `Content-Range` if not full body ([7d5a5f5](https://github.com/hans00/fastWS/commit/7d5a5f51590345987913eb07e2be4055d79517bc))
 * **Server:** support for stream range ([01303cf](https://github.com/hans00/fastWS/commit/01303cfef9ba524b00a77008a20c5de58822abc6))
-
-## [0.1.0](https://github.com/hans00/fastWS/compare/v2.5.3...v0.1.0) (2022-07-22)
-
-
-### Bug Fixes
-
-* **Server:** fix body limit process ([be38816](https://github.com/hans00/fastWS/commit/be38816b58e40980fdcc9a5304ee4752d6c7bd40))
 
 ### [2.5.3](https://github.com/hans00/fastWS/compare/v2.5.2...v2.5.3) (2022-07-22)
 
@@ -42,3 +40,13 @@
 * **Server:** correct writable stream implement ([225bd13](https://github.com/hans00/fastWS/commit/225bd1365df83414ad84c9d0003b97295824d1c2))
 * **Server:** fix `perf-standard/check-function-inline` ([a2520a2](https://github.com/hans00/fastWS/commit/a2520a24004faaa18391034f28fe0e14783f19f5))
 
+## [2.5.0](https://github.com/hans00/fastWS/compare/v2.4.2...v2.5.0) (2022-07-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **Server:** setup exports
+
+### Features
+
+* **Server:** setup exports ([b8d9298](https://github.com/hans00/fastWS/commit/b8d929855d2b06698ecb7bd09a4a1b2127f04788))
