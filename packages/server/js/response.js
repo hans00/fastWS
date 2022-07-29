@@ -258,12 +258,12 @@ class Response extends Writable {
     stream.on('error', this._pipeError.bind(this))
   }
 
-  pipeFrom (stream) {
+  pipeFrom (stream, allowRange = true) {
     if (this._writableState.destroyed) {
       return
     }
     this._setupStreamMeta(stream)
-    const ranges = this._status === 200 &&
+    const ranges = allowRange && this._status === 200 &&
       parseRange(this._totalSize, this.connection.headers.range || '', { combine: true })
     // TODO: Support for multipart/byteranges
     if (Array.isArray(ranges) && ranges.length === 1 && ranges.type === 'bytes') {
