@@ -110,8 +110,8 @@ class Request {
     return this._accepts.languages()
   }
 
-  range (size, options) {
-    return parseRange(size, this.connection.headers.range, options)
+  range (size) {
+    return parseRange(size, this.connection.headers.range || '', { combine: true })
   }
 }
 

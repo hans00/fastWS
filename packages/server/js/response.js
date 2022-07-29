@@ -4,6 +4,8 @@ const fs = require('fs')
 const path = require('path')
 const mime = require('mime-types')
 const { Writable } = require('stream')
+const parseRange = require('range-parser')
+const rangeStream = require('ranges-stream')
 
 const staticPath = path.resolve(process.cwd(), 'static')
 
@@ -69,7 +71,7 @@ class Response extends Writable {
     this._status = 200
     this._headers = {}
     this.headersSent = false
-    this.on('pipe', (src) => this._pipeFrom(src))
+    this.on('pipe', (src) => this._pipe(src))
     this.on('finish', () => this._end())
     this.corkPipe = false
     this.connection.onAborted(() => {
@@ -215,28 +217,34 @@ class Response extends Writable {
     this.emit('error', error)
   }
 
-  _pipeFrom (readable, contentType) {
-    if (this._writableState.destroyed) {
-      return
-    }
-    if (readable.headers) { // HTTP
-      this._totalSize = Number(readable.headers['content-length'])
-      if (!contentType && readable.headers['content-type']) {
-        contentType = readable.headers['content-type']
+  _setupStreamMeta (stream) {
+    if (this._streamMeta) return
+    this._streamMeta = true
+    let contentType = this._headers['content-type']
+    if (stream.headers) { // HTTP
+      if (!this._totalSize) {
+        this._totalSize = Number(stream.headers['content-length'])
       }
-    } else if (readable.path) { // FS
-      const { size } = fs.statSync(readable.path)
-      this._totalSize = size
+      if (!contentType && stream.headers['content-type']) {
+        contentType = stream.headers['content-type']
+      }
+    } else if (stream.path) { // FS
+      if (!this._totalSize) {
+        const { size } = fs.statSync(stream.path)
+        this._totalSize = size
+      }
       if (!contentType) {
-        contentType = mime.lookup(readable.path) || 'application/octet-stream'
+        contentType = mime.lookup(stream.path) || 'application/octet-stream'
       }
-    } else if (readable.bodyLength) { // Known size body
-      this._totalSize = readable.bodyLength
+    } else if (stream.bodyLength) { // Known size body
+      this._totalSize = stream.bodyLength
     }
-    if (!this.getHeader('content-type') && contentType) {
+    if (contentType) {
       this.setHeader('Content-Type', contentType)
     }
-    readable.on('error', this._pipeError.bind(this))
+  }
+
+  _pipe (stream) {
     // In RFC these status code must not have body
     if (this._status < 200 || this._status === 204 || this._status === 304) {
       throw new ServerError({
@@ -245,8 +253,27 @@ class Response extends Writable {
         httpCode: 500
       })
     }
+    this._setupStreamMeta(stream)
     this.corkPipe = true
-    return this
+    stream.on('error', this._pipeError.bind(this))
+  }
+
+  pipeFrom (stream) {
+    if (this._writableState.destroyed) {
+      return
+    }
+    this._setupStreamMeta(stream)
+    const ranges = parseRange(this._totalSize, this.connection.headers.range || '', { combine: true })
+    // TODO: Support for multipart/byteranges
+    if (Array.isArray(ranges) && ranges.length === 1 && ranges.type === 'bytes') {
+      const [{ start, end }] = ranges
+      if (this._totalSize && end <= this._totalSize) {
+        this._totalSize = end - start
+        this._status = 206
+        return stream.pipe(rangeStream(ranges)).pipe(this)
+      }
+    }
+    return stream.pipe(this)
   }
 
   _end () {

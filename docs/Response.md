@@ -84,4 +84,8 @@ res.status(404).setHeader('TEST', 'CONTENT').writeHead()
 
 ```js
 fs.createReadStream('/path/to/file').pipe(res)
+
+// OR
+
+res.pipeFrom(fs.createReadStream('/path/to/file')) // It's support Range
 ```

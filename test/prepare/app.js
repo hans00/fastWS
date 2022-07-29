@@ -80,7 +80,8 @@ module.exports = function (app) {
   })
 
   app.get('/stream/file', (req, res) => {
-    fs.createReadStream(path.resolve('static/index.html')).pipe(res)
+    const file = path.resolve('static/index.html')
+    res.pipeFrom(fs.createReadStream(file))
   })
 
   app.get('/stream/http', (req, res) => {
