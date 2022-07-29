@@ -1,3 +1,5 @@
+const util = require('util')
+
 module.exports = class ServerError extends Error {
   constructor (options = {}) {
     super()
@@ -20,5 +22,9 @@ module.exports = class ServerError extends Error {
     } else {
       return `ServerError: ${this.code}: ${this.message}`
     }
+  }
+
+  [util.inspect.custom] () {
+    return `[${this.code}] ${this.message || (this.originError && this.originError.message) || 'Unknown Error'}`
   }
 }
