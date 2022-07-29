@@ -29,7 +29,7 @@ jobs:
 
   release:
     needs: build
-    if: "startsWith(github.event.head_commit.message, 'v')"
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     env:
       NPM_TOKEN: ${{secrets.npm_token}}
@@ -41,16 +41,11 @@ jobs:
       with:
         node-version: '16'
         registry-url: https://registry.npmjs.org/
-    - name: Conventional Changelog Action
+    - name: Read changelog
       id: changelog
-      uses: TriPSs/conventional-changelog-action@v3
-      with:
-        git-message: 'ci(release): {version}'
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        create-summary: true
-        preset: conventionalcommits
-        version-file: ./lerna.json
-        skip-version-file: true
+      run: |
+        awk '/^## \[[^\]]/ {s++} s == 1 {print}' CHANGELOG.md > release_notes.md
+        echo "::set-output name=path::release_notes.md"
     - name: Create Release
       uses: actions/create-release@v1
       if: ${{ steps.changelog.outputs.skipped == 'false' }}
@@ -59,7 +54,7 @@ jobs:
       with:
         tag_name: ${{ steps.changelog.outputs.tag }}
         release_name: ${{ steps.changelog.outputs.tag }}
-        body: ${{ steps.changelog.outputs.clean_changelog }}
+        body_path: ${{ steps.changelog.outputs.path }}
     - name: Publish to npm
       run: |
         echo '//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}' > .npmrc

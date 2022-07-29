@@ -17,8 +17,7 @@
   },
   "homepage": "https://github.com/hans00/fastWS#readme",
   "scripts": {
-    "bump-version": "lerna version --no-git-tag-version",
-    "postbump-version": "git commit -a -m v$(node -e 'console.log(require(\"./lerna.json\").version)')",
+    "bump-version": "lerna version --conventional-commits",
     "publish-all": "lerna publish from-package --no-sort --yes",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
@@ -27,9 +26,9 @@
     "coverage:test": "nyc yarn run test",
     "coverage:report": "nyc report --reporter=lcov --reporter=text-summary",
     "prepare": "husky install",
-    "release:major": "lerna version major --no-git-tag-version",
-    "release:minor": "lerna version minor --no-git-tag-version",
-    "release:patch": "lerna version patch --no-git-tag-version"
+    "release:major": "yarn bump-version major",
+    "release:minor": "yarn bump-version minor",
+    "release:patch": "yarn bump-version patch"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.0.3",
@@ -60,5 +59,6 @@
     "node-gyp": "^9.0.0",
     "trim-newlines": "^3.0.1",
     "debug": "^2.6.9"
-  }
+  },
+  "dependencies": {}
 }
