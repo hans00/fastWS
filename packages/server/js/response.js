@@ -263,13 +263,15 @@ class Response extends Writable {
       return
     }
     this._setupStreamMeta(stream)
-    const ranges = parseRange(this._totalSize, this.connection.headers.range || '', { combine: true })
+    const ranges = this._status === 200 &&
+      parseRange(this._totalSize, this.connection.headers.range || '', { combine: true })
     // TODO: Support for multipart/byteranges
     if (Array.isArray(ranges) && ranges.length === 1 && ranges.type === 'bytes') {
       const [{ start, end }] = ranges
       if (this._totalSize && end <= this._totalSize) {
         this._totalSize = end - start
-        this._status = 206
+        this.status(206)
+          .setHeader('Content-Range', `bytes ${start}-${end}/${this._totalSize}`)
         return stream.pipe(rangeStream(ranges)).pipe(this)
       }
     }
