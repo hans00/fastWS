@@ -269,9 +269,9 @@ class Response extends Writable {
     if (Array.isArray(ranges) && ranges.length === 1 && ranges.type === 'bytes') {
       const [{ start, end }] = ranges
       if (this._totalSize && end <= this._totalSize) {
-        this._totalSize = end - start
         this.status(206)
           .setHeader('Content-Range', `bytes ${start}-${end}/${this._totalSize}`)
+        this._totalSize = end - start
         return stream.pipe(rangeStream(ranges)).pipe(this)
       }
     }
