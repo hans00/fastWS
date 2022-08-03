@@ -279,9 +279,6 @@ class Response extends Writable {
 
   _end () {
     if (!this.headersSent) {
-      if (!this._totalSize && this._status === 200) {
-        this._status = 204
-      }
       this.connection.cork(() => {
         this.writeHead()
         this.connection.end()

@@ -144,10 +144,6 @@ module.exports = function (app) {
     })
   })
 
-  app.get('/empty', (req, res) => {
-    res.end()
-  })
-
   app.serve('/*')
 
   return app
