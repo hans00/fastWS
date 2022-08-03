@@ -1,4 +1,5 @@
 const CIDRMatcher = require('cidr-matcher')
+const through = require('through2')
 
 const V4Prefix = Buffer.from([0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff, 0xff])
 
@@ -68,3 +69,29 @@ exports.createCidrMatcher = (CIDRs) =>
       .map((rangeOrName) => namedCidrs[rangeOrName] || rangeOrName)
       .flat()
   )
+
+// Ref: https://github.com/finnp/ranges-stream
+exports.rangeStream = (ranges) => {
+  let pos = 0
+  let currentRange = ranges.shift()
+  return through(function processChunk (chunk, enc, cb) {
+    if (!(currentRange)) return cb()
+
+    if (pos + chunk.length > currentRange.start) {
+      const bufStart = Math.max(currentRange.start - pos, 0)
+      const bufEnd = currentRange.end - pos + 1
+      if (currentRange.end <= pos + chunk.length) {
+        this.push(chunk.slice(bufStart, bufEnd))
+        currentRange = ranges.shift() // next Range
+        pos += bufEnd
+        return processChunk.bind(this)(chunk.slice(bufEnd), enc, cb)
+      } else {
+        // the range continues to the next chunk
+        this.push(bufStart > 0 ? chunk.slice(bufStart) : chunk)
+      }
+    }
+
+    pos += chunk.length
+    cb()
+  })
+}

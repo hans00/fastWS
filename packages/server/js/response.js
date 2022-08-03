@@ -1,11 +1,10 @@
 const ServerError = require('./errors')
-const { buildHeaderValue } = require('./utils')
+const { buildHeaderValue, rangeStream } = require('./utils')
 const fs = require('fs')
 const path = require('path')
 const mime = require('mime-types')
 const { Writable } = require('stream')
 const parseRange = require('range-parser')
-const rangeStream = require('ranges-stream')
 
 const staticPath = path.resolve(process.cwd(), 'static')
 
@@ -271,7 +270,7 @@ class Response extends Writable {
       if (this._totalSize && end <= this._totalSize) {
         this.status(206)
           .setHeader('Content-Range', `bytes ${start}-${end}/${this._totalSize}`)
-        this._totalSize = end - start
+        this._totalSize = end - start + 1
         return stream.pipe(rangeStream(ranges)).pipe(this)
       }
     }
@@ -335,6 +334,17 @@ class Response extends Writable {
 
   setHeader (key, value) {
     this._headers[key.toLowerCase()] = buildHeaderValue(value)
+    return this
+  }
+
+  set (keyOrMap, value) {
+    if (typeof keyOrMap === 'object') {
+      for (const [key, val] of Object.entries(keyOrMap)) {
+        this.setHeader(key, val)
+      }
+    } else {
+      this.setHeader(keyOrMap, value)
+    }
     return this
   }
 

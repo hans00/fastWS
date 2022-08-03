@@ -44,8 +44,8 @@
     "multipart-formdata": "^1.1.0",
     "qs": "^6.10.3",
     "range-parser": "^1.2.1",
-    "ranges-stream": "^1.0.0",
     "replicator": "^1.0.5",
+    "through2": "^4.0.2",
     "uWebSockets.js": "https://github.com/uNetworking/uWebSockets.js#binaries"
   },
   "gitHead": "e939a8cb4e569fc3155c95c942470ab279e9d77d"
