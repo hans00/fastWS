@@ -6314,7 +6314,8 @@ typescript@^4.6.4:
 
 "uWebSockets.js@https://github.com/uNetworking/uWebSockets.js#binaries":
   version "20.10.0"
-  resolved "https://github.com/uNetworking/uWebSockets.js#b5050782314a2959684ada0f05c6e690f78ee762"
+  uid "2ce29b1ec02268feaef12653ec61fa65f05d026f"
+  resolved "https://github.com/uNetworking/uWebSockets.js#2ce29b1ec02268feaef12653ec61fa65f05d026f"
 
 "uWebSockets.js@https://github.com/uNetworking/uWebSockets.js/archive/v20.6.0.tar.gz":
   version "20.6.0"
