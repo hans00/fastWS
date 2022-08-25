@@ -5,6 +5,7 @@ const path = require('path')
 const mime = require('mime-types')
 const { Writable } = require('stream')
 const parseRange = require('range-parser')
+const { keepHeaderCase } = require('./constants')
 
 const staticPath = path.resolve(process.cwd(), 'static')
 
@@ -15,6 +16,11 @@ function toArrayBuffer (buffer) {
     return buffer
   }
 }
+
+const hContentType = 'Content-Type'
+const hContentRange = 'Content-Range'
+const hLastModified = 'Last-Modified'
+const hCacheControl = 'Cache-Control'
 
 const httpStatusCode = {
   // Informational
@@ -69,6 +75,8 @@ class Response extends Writable {
     this._totalSize = 0
     this._status = 200
     this._headers = {}
+    this.headerCaseSensitive =
+      this.connection.app.getParam(keepHeaderCase)
     this.headersSent = false
     this.on('pipe', (src) => this._pipe(src))
     this.on('finish', () => this._end())
@@ -101,8 +109,8 @@ class Response extends Writable {
         if (checkModifyTime && checkModifyTime === file.mtime) {
           return this.status(304).end()
         } else {
-          this.setHeader('Last-Modified', file.mtime)
-            .setHeader('Cache-Control', cache)
+          this.setHeader(hLastModified, file.mtime)
+            .setHeader(hCacheControl, cache)
             .send(file.content, file.contentType)
         }
       } else {
@@ -113,8 +121,8 @@ class Response extends Writable {
         if (checkModifyTime && checkModifyTime === mtime) {
           return this.status(304).end()
         } else {
-          this.setHeader('Last-Modified', mtime)
-            .setHeader('Cache-Control', cache)
+          this.setHeader(hLastModified, mtime)
+            .setHeader(hCacheControl, cache)
             .send(content, contentType)
         }
       }
@@ -159,21 +167,23 @@ class Response extends Writable {
     }
     if (!this.headersSent) {
       this.headersSent = true
-      if (status !== 200) {
-        if (httpStatusCode[status]) {
-          this.connection.writeStatus(`${status} ${httpStatusCode[status]}`)
-        } else {
-          this.connection.writeStatus(status.toString())
+      this.connection.cork(() => {
+        if (status !== 200) {
+          if (httpStatusCode[status]) {
+            this.connection.writeStatus(`${status} ${httpStatusCode[status]}`)
+          } else {
+            this.connection.writeStatus(status.toString())
+          }
         }
-      }
-      Object.keys(headers).forEach(key => {
-        if (headers[key] instanceof Array) {
-          headers[key].forEach(data => {
-            this.connection.writeHeader(key, data)
-          })
-        } else {
-          this.connection.writeHeader(key, headers[key])
-        }
+        Object.keys(headers).forEach(key => {
+          if (headers[key] instanceof Array) {
+            headers[key].forEach(data => {
+              this.connection.writeHeader(key, data)
+            })
+          } else {
+            this.connection.writeHeader(key, headers[key])
+          }
+        })
       })
     }
   }
@@ -219,27 +229,24 @@ class Response extends Writable {
   _setupStreamMeta (stream) {
     if (this._streamMeta) return
     this._streamMeta = true
-    let contentType = this._headers['content-type']
+    const hasType = this.has(hContentType)
     if (stream.headers) { // HTTP
       if (!this._totalSize) {
         this._totalSize = Number(stream.headers['content-length'])
       }
-      if (!contentType && stream.headers['content-type']) {
-        contentType = stream.headers['content-type']
+      if (!hasType && stream.headers['content-type']) {
+        this.set(hContentType, stream.headers['content-type'])
       }
     } else if (stream.path) { // FS
       if (!this._totalSize) {
         const { size } = fs.statSync(stream.path)
         this._totalSize = size
       }
-      if (!contentType) {
-        contentType = mime.lookup(stream.path) || 'application/octet-stream'
+      if (!hasType) {
+        this.set(hContentType, mime.lookup(stream.path) || 'application/octet-stream')
       }
     } else if (stream.bodyLength) { // Known size body
       this._totalSize = stream.bodyLength
-    }
-    if (contentType) {
-      this.setHeader('Content-Type', contentType)
     }
   }
 
@@ -269,7 +276,7 @@ class Response extends Writable {
       const [{ start, end }] = ranges
       if (this._totalSize && end <= this._totalSize) {
         this.status(206)
-          .setHeader('Content-Range', `bytes ${start}-${end}/${this._totalSize}`)
+          .setHeader(hContentRange, `bytes ${start}-${end}/${this._totalSize}`)
         this._totalSize = end - start + 1
         return stream.pipe(rangeStream(ranges)).pipe(this)
       }
@@ -279,20 +286,18 @@ class Response extends Writable {
 
   _end () {
     if (!this.headersSent) {
-      this.connection.cork(() => {
-        this.writeHead()
-        this.connection.end()
-      })
+      this.writeHead()
+      this.connection.end()
     } else if (!this._totalSize) {
       this.connection.end()
     }
   }
 
   send (data, contentType = null) {
-    if (!contentType && !this._headers['content-type'] && typeof data === 'string') {
-      this._headers['content-type'] = data.includes('<html>') ? 'text/html' : 'text/plain'
+    if (!contentType && !this.has('Content-Type') && typeof data === 'string') {
+      this.set(hContentType, data.includes('<html>') ? 'text/html' : 'text/plain')
     } else if (contentType) {
-      this._headers['content-type'] = contentType
+      this.set(hContentType, contentType)
     }
     this._totalSize = data.length
     this.write(data)
@@ -308,8 +313,12 @@ class Response extends Writable {
     return this
   }
 
+  _headerKey (key) {
+    return this.headerCaseSensitive ? key : key.toLowerCase()
+  }
+
   getHeader (key) {
-    return this._headers[key.toLowerCase()]
+    return this._headers[this._headerKey(key)]
   }
 
   getHeaderNames () {
@@ -321,17 +330,25 @@ class Response extends Writable {
   }
 
   hasHeader (key) {
-    return key.toLowerCase() in this._headers
+    return this._headerKey(key) in this._headers
   }
 
   removeHeader (key) {
-    delete this._headers[key.toLowerCase()]
+    delete this._headers[this._headerKey(key)]
     return this
   }
 
   setHeader (key, value) {
-    this._headers[key.toLowerCase()] = buildHeaderValue(value)
+    this._headers[this._headerKey(key)] = buildHeaderValue(value)
     return this
+  }
+
+  has (key) {
+    return this.hasHeader(key)
+  }
+
+  get (key) {
+    return this.getHeader(key)
   }
 
   set (keyOrMap, value) {

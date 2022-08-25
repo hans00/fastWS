@@ -17,8 +17,15 @@ class fastWS extends Routes {
       templateRender = render,
       bodySize = '4mb',
       forceStopTimeout = 5000,
+      keepHeaderCase = false,
       logLevel = 'info'
     } = options || {}
+    if (typeof keepHeaderCase !== 'boolean') {
+      throw new ServerError({
+        code: 'SERVER_INVALID_OPTIONS',
+        message: 'The option `keepHeaderCase` is invalid.'
+      })
+    }
     if (!['error', 'warn', 'info', 'verbose'].includes(logLevel)) {
       throw new ServerError({
         code: 'SERVER_INVALID_OPTIONS',
@@ -66,6 +73,7 @@ class fastWS extends Routes {
     this._socket = null
     this.log = new Logger(verbose ? 'verbose' : logLevel)
     this.params = {
+      [constants.keepHeaderCase]: keepHeaderCase,
       [constants.maxBodySize]: bodySize,
       [constants.templateEngine]: templateRender,
       [constants.cache]: cache,

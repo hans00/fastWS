@@ -27,6 +27,7 @@ module.exports = function (port) {
     fs.writeFileSync(cert_file_name, cert.cert)
     try {
       app(new fastWS({
+        keepHeaderCase: true,
         bodySize: '10kb',
         logLevel: 'verbose',
         ssl: {

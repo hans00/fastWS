@@ -144,6 +144,10 @@ module.exports = function (app) {
     })
   })
 
+  app.head('/head', (req, res) => {
+    res.set('Test', 'A').end()
+  })
+
   app.serve('/*')
 
   return app
