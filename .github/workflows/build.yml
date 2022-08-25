@@ -50,9 +50,10 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.changelog.outputs.tag }}
-        release_name: ${{ steps.changelog.outputs.tag }}
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
         body_path: ${{ steps.changelog.outputs.path }}
+        prerelease: ${{ contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
     - name: Publish to npm
       run: |
         echo '//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}' > .npmrc
