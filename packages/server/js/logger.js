@@ -1,21 +1,14 @@
+const logLevelNum = {
+  error: 3,
+  warn: 2,
+  info: 1,
+  verbose: 0,
+  default: 1
+}
+
 module.exports = class Logger {
   constructor (logLevel) {
-    switch (logLevel) {
-      case 'error':
-        this.logLevel = 3
-        break
-      case 'warn':
-        this.logLevel = 2
-        break
-      case 'info':
-        this.logLevel = 1
-        break
-      case 'verbose':
-        this.logLevel = 0
-        break
-      default:
-        this.logLevel = 1
-    }
+    this.logLevel = logLevelNum[logLevel] || logLevelNum.default
   }
 
   verbose () {
