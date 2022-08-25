@@ -2,6 +2,7 @@ fastWS
 =====
 
 [![GitHub Action](https://github.com/hans00/fastWS/workflows/build/badge.svg)](https://github.com/hans00/fastWS)
+[![codecov](https://codecov.io/gh/hans00/fastWS/branch/master/graph/badge.svg?token=5P1YR45NCD)](https://codecov.io/gh/hans00/fastWS)
 
 It's very fast Web Server Node.js server based on uWebSockets.
 
