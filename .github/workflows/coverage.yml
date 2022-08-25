@@ -1,0 +1,26 @@
+name: Coverage
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  coverage:
+    if:
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+    - name: Install
+      run: yarn install --frozen-lockfile
+    - name: Lint check
+      run: yarn lint
+    - name: Test & Coverage
+      run: yarn coverage
+    - name: Codecov
+      uses: codecov/codecov-action@v3
