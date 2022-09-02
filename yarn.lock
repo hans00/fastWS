@@ -2414,12 +2414,12 @@ cookie-signature@1.0.6:
   resolved "https://registry.yarnpkg.com/cookie-signature/-/cookie-signature-1.0.6.tgz#e303a882b342cc3ee8ca513a79999734dab3ae2c"
   integrity sha512-QADzlaHc8icV8I7vbaJXJwod9HWYp8uCqf1xa4OfNu1T7JVxQIrUgOWtHdNDtPiywmFbiS12VjotIXLrKM3orQ==
 
-cookie@0.5.0:
+cookie@0.5.0, cookie@^0.5.0:
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.5.0.tgz#d1f5d71adec6558c58f389987c366aa47e994f8b"
   integrity sha512-YZ3GUyn/o8gfKJlnlX7g7xq4gyO6OSuhGPKaaGssGB2qgDUS0gPgtTvoyZLTt9Ab6dC4hfc9dV5arkvc/OCmrw==
 
-cookie@^0.4.2, cookie@~0.4.1:
+cookie@~0.4.1:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.4.2.tgz#0e41f24de5ecf317947c82fc789e06a884824432"
   integrity sha512-aSWTXFzaKWkvHO1Ny/s+ePFpvKsPnjc551iI41v3ny/ow6tBG5Vd+FuqGNhh1LxOmVzOlGUriIlOaokOvhaStA==
@@ -4682,15 +4682,15 @@ mute-stream@0.0.8, mute-stream@~0.0.4:
   integrity sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA==
 
 nanoexpress@^5.2.4:
-  version "5.2.4"
-  resolved "https://registry.yarnpkg.com/nanoexpress/-/nanoexpress-5.2.4.tgz#8df3725d316e94b4ca6e76c94d203043e70a1479"
-  integrity sha512-zwvKntlzxkUVcKJAE0tz5Tg8xA1yaoy+JVEU4kp+/b7xbBcI6w90pqdVPa8JKoNgZ51+iIQerffd42zMFoXDJg==
+  version "5.3.1"
+  resolved "https://registry.yarnpkg.com/nanoexpress/-/nanoexpress-5.3.1.tgz#7e57de81298ceb3ec1d6d9ab1b82152030d9d9e6"
+  integrity sha512-1b04y6k852GvRV1VWWY38kAz+2aYr4Eths9WRG7Fd9KdJ/+fy3mMatSJXgRe2g6Nnelq3ZUJsUpxF3mqUqeJpw==
   dependencies:
     "@dalisoft/events" "^0.2.0"
     ajv "^8.11.0"
-    cookie "^0.4.2"
+    cookie "^0.5.0"
     fast-query-parse "^2.0.3"
-    uWebSockets.js "https://github.com/uNetworking/uWebSockets.js/archive/v20.6.0.tar.gz"
+    uWebSockets.js "https://github.com/uNetworking/uWebSockets.js/archive/v20.10.0.tar.gz"
 
 natural-compare@^1.4.0:
   version "1.4.0"
@@ -6317,9 +6317,10 @@ typescript@^4.6.4:
   uid "2ce29b1ec02268feaef12653ec61fa65f05d026f"
   resolved "https://github.com/uNetworking/uWebSockets.js#2ce29b1ec02268feaef12653ec61fa65f05d026f"
 
-"uWebSockets.js@https://github.com/uNetworking/uWebSockets.js/archive/v20.6.0.tar.gz":
-  version "20.6.0"
-  resolved "https://github.com/uNetworking/uWebSockets.js/archive/v20.6.0.tar.gz#9bd623eef840734761995cd78c8c6e0eee0d71f1"
+"uWebSockets.js@https://github.com/uNetworking/uWebSockets.js/archive/v20.10.0.tar.gz":
+  version "20.10.0"
+  uid "29ee941bec48a84d2f13e372b59138b06afeb0c3"
+  resolved "https://github.com/uNetworking/uWebSockets.js/archive/v20.10.0.tar.gz#29ee941bec48a84d2f13e372b59138b06afeb0c3"
 
 uglify-js@^3.1.4:
   version "3.16.1"
