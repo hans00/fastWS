@@ -6,8 +6,6 @@ const bodyParser = require('body-parser')
 const app = express()
 require('express-ws')(app)
 
-app.use(bodyParser.text({ type: 'text/*' }))
-
 app.ws('/echo', (ws, req) => {
   ws.on('message', data => {
     ws.send(data)
@@ -42,7 +40,7 @@ app.post('/stream', (req, res) => {
   req.pipe(res)
 })
 
-app.post('/stream/send', (req, res) => {
+app.post('/stream/send', bodyParser.text({ type: 'text/*', limit: '10MB' }), (req, res) => {
   res.send(req.body)
 })
 
