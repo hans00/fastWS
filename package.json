@@ -60,5 +60,8 @@
     "trim-newlines": "^3.0.1",
     "debug": "^2.6.9"
   },
-  "dependencies": {}
+  "dependencies": {
+    "node-gyp": "^9.0.0",
+    "tar": "^6.1.11"
+  }
 }
