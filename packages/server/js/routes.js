@@ -5,6 +5,31 @@ const WebSocketResponse = require('./websocket')
 const Connection = require('./connection')
 const ServerError = require('./errors')
 
+async function handler (params, callbacks, response, request) {
+  const paramsMap = {}
+  if (params) {
+    params.forEach((key, index) => {
+      paramsMap[key] = decodeURIComponent(request.getParameter(index))
+    })
+  }
+  const conn = Connection.create(this, request, response)
+  const req = Request.create(conn)
+  const res = Response.create(conn)
+  try {
+    conn.processBodyData()
+    await callbacks(req, res, paramsMap)
+  } catch (e) {
+    this.log.error('Server Internal Error', e)
+    if (!res._writableState.destroyed) {
+      if (e instanceof ServerError && e.httpCode) {
+        res.status(e.httpCode).end(e.message)
+      } else {
+        res.status(500).end('Server Internal Error')
+      }
+    }
+  }
+}
+
 class Routes {
   constructor () {
     this._routes = {}
@@ -24,51 +49,25 @@ class Routes {
 
   route (method, path, callbacks) {
     if (this.lock) {
-      throw new ServerError({
-        code: 'SERVER_ALREADY_STARTED',
-        message: 'Cannot add route after sterver started.'
-      })
+      throw new Error('The server is started, should not add route.')
+    }
+    if (typeof path !== 'string' && !path.startsWith('/')) {
+      throw new TypeError('Route path whould starts with "/".')
     }
     if (!this._routes[path]) {
       this._routes[path] = {}
     }
     if (this._routes[path][method]) {
-      throw new ServerError({
-        code: 'INVALID_DUPLICATE_ROUTER',
-        message: 'Invalid, duplicated router.'
-      })
+      throw new Error(`${method.toUpperCase()} "${path}" is exists.`)
     }
     if (method === 'ws') {
       this._routes[path][method] = callbacks
     } else {
-      let URLParams = path.match(/:\w+/g)
-      if (URLParams) {
-        URLParams = URLParams.map(key => key.slice(1))
+      let params = path.match(/:\w+/g)
+      if (params) {
+        params = params.map(key => key.slice(1))
       }
-      this._routes[path][method] = async (response, request) => {
-        const params = {}
-        if (URLParams) {
-          URLParams.forEach((key, index) => {
-            params[key] = decodeURIComponent(request.getParameter(index))
-          })
-        }
-        const conn = Connection.create(this, request, response)
-        const req = Request.create(conn)
-        const res = Response.create(conn)
-        try {
-          conn.processBodyData()
-          await callbacks(req, res, params)
-        } catch (e) {
-          this.log.error('Server Internal Error', e)
-          if (!res._writableState.destroyed) {
-            if (e instanceof ServerError && e.httpCode) {
-              res.status(e.httpCode).end(e.message)
-            } else {
-              res.status(500).end('Server Internal Error')
-            }
-          }
-        }
-      }
+      this._routes[path][method] = handler.bind(this, params, callbacks)
     }
   }
 
