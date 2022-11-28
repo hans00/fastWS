@@ -1,9 +1,12 @@
 const express = require('express')
 const Protocol = require('fast-ws-server/ws/fast-ws')
 const { Readable } = require('stream')
+const bodyParser = require('body-parser')
 
 const app = express()
 require('express-ws')(app)
+
+app.use(bodyParser.text({ type: 'text/*' }))
 
 app.ws('/echo', (ws, req) => {
   ws.on('message', data => {
@@ -37,6 +40,10 @@ app.get('/stream', (req, res) => {
 
 app.post('/stream', (req, res) => {
   req.pipe(res)
+})
+
+app.post('/stream/send', (req, res) => {
+  res.send(req.body)
 })
 
 app.use('/', express.static('static'))
