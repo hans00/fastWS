@@ -31,10 +31,10 @@ app.get('/hello/:name', async (req, res) => {
   res.end(`Hello ${name}`)
 })
 
-app.post('/stream', (req, res) => {
+app.post('/stream/send', (req, res) => {
   res.send(req.body)
 })
 
-app.use('/', staticServe('./static'))
+app.use('/', staticServe('./static', { mode: 'live' }))
 
 app.listen(3000)
