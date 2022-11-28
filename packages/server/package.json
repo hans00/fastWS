@@ -13,7 +13,7 @@
     "./response": "./js/response.js",
     "./error": "./js/errors.js",
     "./ws-base": "./js/ws-protocol/basic.js",
-    "./ws/": "./js/ws-protocol/"
+    "./ws/*": "./js/ws-protocol/*.js"
   },
   "repository": {
     "type": "git",
