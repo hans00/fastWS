@@ -1642,7 +1642,7 @@ ajv@^6.10.0, ajv@^6.12.4:
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-ajv@^8.11.0:
+ajv@^8.11.0, ajv@^8.11.2:
   version "8.11.2"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.11.2.tgz#aecb20b50607acf2569b6382167b65a96008bb78"
   integrity sha512-E4bfmKAhGiSTvMfL1Myyycaub+cUEU2/IvpylXkUu7CHBkBj1f/ikdzbD7YQ6FKUbixDxeYvB/xY4fvyroDlQg==
@@ -4789,16 +4789,16 @@ mute-stream@0.0.8, mute-stream@~0.0.4:
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.8.tgz#1630c42b2251ff81e2a283de96a5497ea92e5e0d"
   integrity sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA==
 
-nanoexpress@^5.2.4:
-  version "5.3.1"
-  resolved "https://registry.yarnpkg.com/nanoexpress/-/nanoexpress-5.3.1.tgz#7e57de81298ceb3ec1d6d9ab1b82152030d9d9e6"
-  integrity sha512-1b04y6k852GvRV1VWWY38kAz+2aYr4Eths9WRG7Fd9KdJ/+fy3mMatSJXgRe2g6Nnelq3ZUJsUpxF3mqUqeJpw==
+nanoexpress@^6.0.3:
+  version "6.0.3"
+  resolved "https://registry.yarnpkg.com/nanoexpress/-/nanoexpress-6.0.3.tgz#ae4d18d27bff79c33d81b58579e11b21ede60045"
+  integrity sha512-zLQ+exXZ/E6LLutbbwyNRE4AB4K1GLBBNdDmKZ1S/S9OG8w0xbMfw24sjl5v86Y8UaFTJTCKsC8EHOgG126q4g==
   dependencies:
     "@dalisoft/events" "^0.2.0"
-    ajv "^8.11.0"
+    ajv "^8.11.2"
     cookie "^0.5.0"
     fast-query-parse "^2.0.3"
-    uWebSockets.js "https://github.com/uNetworking/uWebSockets.js/archive/v20.10.0.tar.gz"
+    uWebSockets.js "https://github.com/uNetworking/uWebSockets.js/archive/v20.15.0.tar.gz"
 
 natural-compare@^1.4.0:
   version "1.4.0"
@@ -6415,9 +6415,10 @@ typedarray@^0.0.6:
   version "20.15.0"
   resolved "https://github.com/uNetworking/uWebSockets.js#cebdfe3d6c5d9cece5608e26f1801fa6ab754b6f"
 
-"uWebSockets.js@https://github.com/uNetworking/uWebSockets.js/archive/v20.10.0.tar.gz":
-  version "20.10.0"
-  resolved "https://github.com/uNetworking/uWebSockets.js/archive/v20.10.0.tar.gz#29ee941bec48a84d2f13e372b59138b06afeb0c3"
+"uWebSockets.js@https://github.com/uNetworking/uWebSockets.js/archive/v20.15.0.tar.gz":
+  version "20.15.0"
+  uid aa08caacb308b54820728afbb76a02bd5a7c8d95
+  resolved "https://github.com/uNetworking/uWebSockets.js/archive/v20.15.0.tar.gz#aa08caacb308b54820728afbb76a02bd5a7c8d95"
 
 uglify-js@^3.1.4:
   version "3.17.4"
